@@ -1,0 +1,78 @@
+rules_version = '2';
+
+// MUHURTO Firestore security rules.
+// All writes to bookings, payments, assignments and other sensitive data go
+// through server-side API routes (Firebase Admin SDK bypasses these rules).
+// Client SDK access is therefore read-only and tightly scoped.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function uid() { return request.auth.uid; }
+    function role() {
+      return signedIn() && exists(/databases/$(database)/documents/users/$(uid()))
+        ? get(/databases/$(database)/documents/users/$(uid())).data.role
+        : 'guest';
+    }
+    function isAdmin() { return role() == 'admin'; }
+
+    // Public catalogue (read-only for everyone; admins write via the server).
+    match /categories/{id}    { allow read: if true; allow write: if false; }
+    match /subcategories/{id} { allow read: if true; allow write: if false; }
+    match /services/{id}      { allow read: if resource.data.active != false || isAdmin(); allow write: if false; }
+    match /vendors/{id}       { allow read: if true; allow write: if false; }
+    match /reviews/{id}       { allow read: if resource.data.hidden != true || isAdmin(); allow write: if false; }
+
+    // Users can read their own profile; role changes are server-only.
+    match /users/{userId} {
+      allow read: if signedIn() && (uid() == userId || isAdmin());
+      allow write: if false;
+    }
+
+    match /bookings/{id} {
+      allow read: if signedIn() && (resource.data.customerId == uid() || isAdmin() || resource.data.monitoring.agentId == uid());
+      allow write: if false;
+    }
+
+    match /payments/{id} {
+      allow read: if signedIn() && (resource.data.customerId == uid() || isAdmin());
+      allow write: if false;
+    }
+
+    match /customizationRequests/{id} {
+      allow read: if signedIn() && (resource.data.customerId == uid() || isAdmin());
+      allow write: if false;
+    }
+
+    match /monitoringAgents/{id} {
+      allow read: if signedIn() && (uid() == id || isAdmin());
+      allow write: if false;
+    }
+
+    match /monitoringAssignments/{id} {
+      allow read: if signedIn() && (resource.data.customerId == uid() || resource.data.agentId == uid() || isAdmin());
+      allow write: if false;
+    }
+
+    match /eventUpdates/{id} {
+      allow read: if signedIn() && (isAdmin()
+        || (resource.data.visibility == 'customer'
+            && get(/databases/$(database)/documents/bookings/$(resource.data.bookingId)).data.customerId == uid())
+        || get(/databases/$(database)/documents/bookings/$(resource.data.bookingId)).data.monitoring.agentId == uid());
+      allow write: if false;
+    }
+
+    match /notifications/{id} {
+      allow read: if signedIn() && (resource.data.userId == uid() || (resource.data.userId == 'admins' && isAdmin()));
+      allow write: if false;
+    }
+
+    match /supportRequests/{id} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
+    // Deny everything else.
+    match /{document=**} { allow read, write: if false; }
+  }
+}

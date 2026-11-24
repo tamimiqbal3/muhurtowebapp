@@ -1,0 +1,11 @@
+{
+  "indexes": [
+    { "collectionGroup": "bookings", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "customerId", "order": "ASCENDING" }, { "fieldPath": "createdAt", "order": "DESCENDING" }] },
+    { "collectionGroup": "bookings", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "status", "order": "ASCENDING" }, { "fieldPath": "createdAt", "order": "DESCENDING" }] },
+    { "collectionGroup": "customizationRequests", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "customerId", "order": "ASCENDING" }, { "fieldPath": "createdAt", "order": "DESCENDING" }] },
+    { "collectionGroup": "eventUpdates", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "bookingId", "order": "ASCENDING" }, { "fieldPath": "createdAt", "order": "DESCENDING" }] },
+    { "collectionGroup": "notifications", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "userId", "order": "ASCENDING" }, { "fieldPath": "createdAt", "order": "DESCENDING" }] },
+    { "collectionGroup": "monitoringAssignments", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "agentId", "order": "ASCENDING" }, { "fieldPath": "eventDate", "order": "ASCENDING" }] }
+  ],
+  "fieldOverrides": []
+}

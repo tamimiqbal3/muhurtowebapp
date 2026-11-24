@@ -1,0 +1,15 @@
+rules_version = '2';
+
+// Images are uploaded by admins through the server (/api/admin/upload) using
+// the Admin SDK. Public read is allowed so listing images render on the site.
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /services/{file} {
+      allow read: if true;
+      allow write: if false;
+    }
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
