@@ -41,6 +41,7 @@
   --animate-kenburns: kenburns 22s ease-in-out infinite alternate;
   --animate-twinkle: twinkle 2.6s ease-in-out infinite;
   --animate-petal: petal 11s linear infinite;
+  --animate-grain: grain 0.9s steps(6) infinite;
 
   @keyframes float {
     0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
@@ -60,6 +61,14 @@
     50% { transform: translate3d(6vw, 50vh, 0) rotate(220deg) rotateY(180deg); }
     92% { opacity: 1; }
     100% { transform: translate3d(-3vw, 112vh, 0) rotate(420deg) rotateY(360deg); opacity: 0; }
+  }
+  @keyframes grain {
+    0% { transform: translate3d(0, 0, 0); }
+    20% { transform: translate3d(-4%, 3%, 0); }
+    40% { transform: translate3d(3%, -5%, 0); }
+    60% { transform: translate3d(-2%, 4%, 0); }
+    80% { transform: translate3d(5%, 1%, 0); }
+    100% { transform: translate3d(0, 0, 0); }
   }
   @keyframes shimmer {
     from { background-position: -200% 0; }

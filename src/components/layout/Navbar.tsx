@@ -33,6 +33,8 @@ export function Navbar() {
   const plan = usePlan();
   const t = useT();
   const overHero = pathname === "/" && !scrolled && !open;
+  // The bar is a dark glass strip everywhere (cinematic title cards sit under it); only the open mobile menu is light.
+  const lightText = !open;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -54,10 +56,10 @@ export function Navbar() {
   const isActive = (href: string) => (href === "/" ? pathname === "/" : pathname.startsWith(href));
 
   return (
-    <header className={cn("fixed inset-x-0 top-0 z-50 transition-all duration-500", overHero ? "bg-transparent" : "border-b border-line/80 bg-ivory/85 backdrop-blur-xl")}>
+    <header className={cn("fixed inset-x-0 top-0 z-50 transition-all duration-500", open ? "border-b border-line/80 bg-ivory" : overHero ? "bg-transparent" : "border-b border-white/10 bg-[#050b1c]/80 shadow-[0_10px_30px_-20px_rgb(0_0_0/.8)] backdrop-blur-xl")}>
       <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:rounded-full focus:bg-ink focus:px-4 focus:py-2 focus:text-paper">{t("Skip to content")}</a>
       <nav className="container-x flex h-[72px] items-center justify-between gap-4" aria-label="Main">
-        <Logo light={overHero} />
+        <Logo light={lightText} />
         <ul className="hidden items-center gap-0 min-[1320px]:flex">
           {NAV_LINKS.map((l) => (
             <li key={l.href}>
@@ -65,21 +67,21 @@ export function Navbar() {
                 href={l.href}
                 className={cn(
                   "relative rounded-full px-2.5 py-2 text-[0.78rem] font-medium transition-colors",
-                  overHero ? "text-paper/85 hover:text-paper" : "text-ink-soft hover:text-ink",
-                  isActive(l.href) && (overHero ? "text-paper" : "text-ink"),
+                  lightText ? "text-paper/85 hover:text-paper" : "text-ink-soft hover:text-ink",
+                  isActive(l.href) && (lightText ? "text-paper" : "text-ink"),
                 )}
               >
                 {t(l.label)}
-                {isActive(l.href) && <motion.span layoutId="nav-dot" className={cn("absolute inset-x-3 -bottom-0.5 h-px", overHero ? "bg-paper" : "bg-sindoor")} />}
+                {isActive(l.href) && <motion.span layoutId="nav-dot" className={cn("absolute inset-x-3 -bottom-0.5 h-px", lightText ? "bg-paper" : "bg-sindoor")} />}
               </Link>
             </li>
           ))}
         </ul>
         <div className="flex items-center gap-2">
-          <LanguageToggle compact light={overHero} className="hidden sm:inline-flex" />
+          <LanguageToggle compact light={lightText} className="hidden sm:inline-flex" />
           <button
             onClick={() => plan.setDrawerOpen(true)}
-            className={cn("relative grid h-10 w-10 place-items-center rounded-full transition", overHero ? "text-paper hover:bg-paper/10" : "text-ink hover:bg-sand")}
+            className={cn("relative grid h-10 w-10 place-items-center rounded-full transition", lightText ? "text-paper hover:bg-paper/10" : "text-ink hover:bg-sand")}
             aria-label={t("Open event plan ({n} services)", { n: plan.items.length })}
           >
             <ShoppingBag className="h-5 w-5" />
@@ -90,7 +92,7 @@ export function Navbar() {
           <div className="relative hidden sm:block">
             {user ? (
               <>
-                <button onClick={() => setMenu((m) => !m)} aria-expanded={menu} className={cn("flex h-10 items-center gap-2 rounded-full pl-1.5 pr-3 text-sm font-medium transition", overHero ? "text-paper hover:bg-paper/10" : "hover:bg-sand")}>
+                <button onClick={() => setMenu((m) => !m)} aria-expanded={menu} className={cn("flex h-10 items-center gap-2 rounded-full pl-1.5 pr-3 text-sm font-medium transition", lightText ? "text-paper hover:bg-paper/10" : "hover:bg-sand")}>
                   <span className="grid h-7 w-7 place-items-center rounded-full bg-gold text-xs font-bold text-paper">{user.name.slice(0, 1).toUpperCase()}</span>
                   <span className="max-w-24 truncate">{user.name.split(" ")[0]}</span>
                   <ChevronDown className="h-3.5 w-3.5" />
@@ -111,15 +113,15 @@ export function Navbar() {
                 </AnimatePresence>
               </>
             ) : (
-              <Link href="/login" className={cn("rounded-full px-3 py-2 text-sm font-medium transition", overHero ? "text-paper hover:bg-paper/10" : "text-ink hover:bg-sand", loading && "opacity-0")}>
+              <Link href="/login" className={cn("rounded-full px-3 py-2 text-sm font-medium transition", lightText ? "text-paper hover:bg-paper/10" : "text-ink hover:bg-sand", loading && "opacity-0")}>
                 {t("Login")}
               </Link>
             )}
           </div>
-          <ButtonLink href="/event-planner" variant={overHero ? "light" : "accent"} size="sm" className="hidden md:inline-flex">
+          <ButtonLink href="/event-planner" variant="accent" size="sm" className="hidden md:inline-flex">
             {t("Plan Your Event")}
           </ButtonLink>
-          <button className={cn("grid h-10 w-10 place-items-center rounded-full min-[1320px]:hidden", overHero ? "text-paper" : "text-ink")} onClick={() => setOpen((o) => !o)} aria-label={open ? t("Close menu") : t("Open menu")} aria-expanded={open}>
+          <button className={cn("grid h-10 w-10 place-items-center rounded-full min-[1320px]:hidden", lightText ? "text-paper" : "text-ink")} onClick={() => setOpen((o) => !o)} aria-label={open ? t("Close menu") : t("Open menu")} aria-expanded={open}>
             {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
         </div>

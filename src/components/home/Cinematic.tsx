@@ -8,19 +8,19 @@ import { formatBDT } from "@/lib/format";
 import { RollingNumber } from "../motion/RollingNumber";
 import { CATEGORIES } from "@/data/categories";
 import { IMG } from "@/data/images";
-import { FOUNDER } from "@/data/site";
 import { localizeCategory } from "@/data/i18n-data";
 import { SafeImage } from "../ui/SafeImage";
 import { ButtonLink } from "../ui/Button";
 import { JamdaniRule } from "../ui/misc";
 import { Reveal, SplitWords } from "../motion/Reveal";
 import { useLang } from "../i18n/LanguageProvider";
+import { FilmGrain } from "../motion/Cinema";
 import { cn } from "@/lib/utils";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
 /* ═════════ About: an invitation that opens, categories dealt like cards ═════════ */
-export function FounderAbout() {
+export function AboutInvitation() {
   const { t, lang } = useLang();
   const reduce = useReducedMotion();
   const ref = useRef<HTMLDivElement>(null);
@@ -43,10 +43,9 @@ export function FounderAbout() {
             <div className="jamdani absolute inset-2 rounded-xl opacity-40" aria-hidden />
             <div className="relative">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/brand/muhurto-logo-192.png" alt={t("MUHURTO")} className="mx-auto mb-3 h-16 w-16" />
-              <p className="eyebrow">{t("Founded by")}</p>
-              <p className="mt-3 font-display text-4xl italic leading-tight text-sindoor">{lang === "bn" ? FOUNDER.nameBn : FOUNDER.name}</p>
-              <p className="mt-2 text-sm text-ink-soft">{lang === "bn" ? FOUNDER.roleBn : FOUNDER.role}</p>
+              <img src="/brand/muhurto-logo-192.png" alt={t("MUHURTO")} className="mx-auto mb-4 h-20 w-20" />
+              <p className="font-display text-3xl tracking-[0.2em] text-ink">MUHURTO</p>
+              <p className="mt-1 text-sm text-ink-soft">{t("Every moment deserves to be extraordinary.")}</p>
               <JamdaniRule className="mx-auto my-5 w-40" />
               <p className="text-sm leading-relaxed text-ink-soft">{t("“Families should remember the moment — not the phone calls it took to make it happen.”")}</p>
             </div>
@@ -76,7 +75,7 @@ export function FounderAbout() {
           <Reveal variant="rise"><p className="eyebrow">{t("About")}</p></Reveal>
           <h2 className="mt-3 text-4xl leading-[1.08] sm:text-5xl"><SplitWords text={t("Moments, managed with heart.")} /></h2>
           <Reveal variant="focus" delay={0.15}>
-            <p className="mt-5 max-w-xl text-ink-soft">{t("MUHURTO is a Bangladeshi event marketplace built by {name}. One place to explore trusted vendors, plan everything on one page, book securely — and hand the running of the day to a dedicated Monitoring Agent.", { name: lang === "bn" ? FOUNDER.nameBn : FOUNDER.name })}</p>
+            <p className="mt-5 max-w-xl text-ink-soft">{t("MUHURTO is a Bangladeshi event marketplace. One place to explore trusted vendors, plan everything on one page, book securely — and hand the running of the day to a dedicated Monitoring Agent.")}</p>
           </Reveal>
           <p className="mt-10 text-xs font-semibold tracking-[0.2em] text-muted uppercase">{t("What we plan")}</p>
           <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -103,44 +102,56 @@ export function FounderAbout() {
 /* ═════════ Intro: polaroids tossed onto a table ═════════ */
 export function Polaroids() {
   const { t } = useLang();
-  const reduce = useReducedMotion();
   const items = [
-    { img: IMG.wStageVibrant, rot: -6, title: t("Discover"), body: t("Hand-picked decorators, caterers, photographers and sound teams across Bangladesh — with starting prices upfront.") },
-    { img: IMG.fuSpicy, rot: 3, title: t("Design"), body: t("Mix and match services, quantities, themes and add-ons. Ask our team for anything we don't list.") },
-    { img: IMG.fGarland, rot: -2, title: t("Relax"), body: t("After payment a Monitoring Agent runs vendor coordination while you follow progress live.") },
+    { img: IMG.wStageVibrant, title: t("Discover"), body: t("Hand-picked decorators, caterers, photographers and sound teams across Bangladesh — with starting prices upfront.") },
+    { img: IMG.fuSpicy, title: t("Design"), body: t("Mix and match services, quantities, themes and add-ons. Ask our team for anything we don't list.") },
+    { img: IMG.fGarland, title: t("Relax"), body: t("After payment a Monitoring Agent runs vendor coordination while you follow progress live.") },
   ];
   return (
-    <section className="relative mt-32 overflow-hidden bg-sand/60 py-28">
-      <div className="jamdani absolute inset-0 opacity-30" aria-hidden />
+    <section className="relative mt-32 overflow-hidden bg-[#050b1c] py-28 text-paper">
+      <FilmGrain strength={0.06} />
       <div className="container-x relative">
         <div className="mx-auto max-w-2xl text-center">
-          <Reveal><p className="eyebrow">{t("What MUHURTO does")}</p></Reveal>
-          <h2 className="mt-3 text-4xl sm:text-5xl"><SplitWords text={t("From first idea to last guest.")} /></h2>
+          <Reveal><p className="eyebrow text-sky">{t("What MUHURTO does")}</p></Reveal>
+          <h2 className="mt-3 text-4xl text-paper sm:text-5xl"><SplitWords text={t("From first idea to last guest.")} /></h2>
         </div>
-        <div className="mt-16 grid gap-12 md:grid-cols-3 md:gap-8">
-          {items.map((it, i) => (
-            <motion.figure
-              key={it.title}
-              initial={reduce ? false : { y: -220, rotate: it.rot - 24, opacity: 0, scale: 1.1 }}
-              whileInView={{ y: 0, rotate: it.rot, opacity: 1, scale: 1 }}
-              viewport={{ once: true, amount: 0.35 }}
-              transition={{ type: "spring", stiffness: 110, damping: 13, mass: 1.1, delay: i * 0.18 }}
-              whileHover={{ rotate: 0, y: -8, scale: 1.03 }}
-              className="relative mx-auto w-full max-w-[320px] bg-[#fffdf8] p-3 pb-5 shadow-[0_20px_40px_-18px_rgb(10_22_51/.55),0_2px_4px_rgb(10_22_51/.1)]"
-            >
-              <span aria-hidden className="absolute -top-3 left-1/2 h-6 w-20 -translate-x-1/2 rotate-[-3deg] bg-[#efe3c6]/80 shadow-sm" />
-              <div className="relative aspect-square overflow-hidden bg-sand">
-                <SafeImage src={it.img.src} alt={it.img.alt} fill sizes="320px" className="object-cover" />
-              </div>
-              <figcaption className="px-1 pt-4">
-                <p className="font-display text-3xl italic text-sindoor">{it.title}</p>
-                <p className="mt-1 text-sm leading-relaxed text-ink-soft">{it.body}</p>
-              </figcaption>
-            </motion.figure>
-          ))}
+        <div className="mt-16 grid gap-6 md:grid-cols-3">
+          {items.map((it, i) => <Chapter key={it.title} i={i} {...it} />)}
         </div>
       </div>
     </section>
+  );
+}
+
+/** A tall frame whose footage is revealed by a wipe, with the image drifting against the scroll. */
+function Chapter({ i, img, title, body }: { i: number; img: { src: string; alt: string }; title: string; body: string }) {
+  const reduce = useReducedMotion();
+  const ref = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
+  const drift = useTransform(scrollYProgress, [0, 1], reduce ? ["0%", "0%"] : ["-12%", "12%"]);
+  return (
+    <div ref={ref} className="group">
+      <motion.div
+        className="relative aspect-[3/4] overflow-hidden rounded-[6px] bg-[#0b1530]"
+        initial={reduce ? false : { clipPath: "inset(100% 0 0 0)" }}
+        whileInView={{ clipPath: "inset(0% 0 0 0)" }}
+        viewport={{ once: true, amount: 0.35 }}
+        transition={{ duration: 1.3, delay: i * 0.15, ease: [0.76, 0, 0.24, 1] }}
+      >
+        <motion.div style={{ y: drift }} className="absolute -inset-y-[14%] inset-x-0">
+          <motion.div className="absolute inset-0" initial={reduce ? false : { scale: 1.3 }} whileInView={{ scale: 1.02 }} viewport={{ once: true }} transition={{ duration: 2.2, delay: i * 0.15, ease: [0.22, 1, 0.36, 1] }}>
+            <SafeImage src={img.src} alt={img.alt} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover transition-transform duration-[1.4s] group-hover:scale-105" />
+          </motion.div>
+        </motion.div>
+        <div className="absolute inset-0 bg-gradient-to-t from-[#050b1c] via-[#050b1c]/30 to-transparent" />
+        <span className="absolute left-5 top-4 font-lcd text-sm tracking-[0.3em] text-paper/70">{String(i + 1).padStart(2, "0")} / 03</span>
+        <div className="absolute inset-x-5 bottom-5">
+          <motion.p className="font-display text-4xl text-paper" initial={reduce ? false : { opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.9, delay: 0.6 + i * 0.15 }}>{title}</motion.p>
+          <motion.span className="mt-3 block h-px bg-sky" initial={reduce ? false : { width: 0 }} whileInView={{ width: 48 }} viewport={{ once: true }} transition={{ duration: 0.9, delay: 0.8 + i * 0.15 }} />
+          <motion.p className="mt-3 text-sm leading-relaxed text-paper/75" initial={reduce ? false : { opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ duration: 0.9, delay: 0.9 + i * 0.15 }}>{body}</motion.p>
+        </div>
+      </motion.div>
+    </div>
   );
 }
 
@@ -165,7 +176,7 @@ function FlapChar({ char, delay }: { char: string; delay: number }) {
     return () => clearTimeout(start);
   }, [inView, char, delay, reduce]);
   return (
-    <span ref={ref} className="relative inline-grid h-16 w-11 place-items-center overflow-hidden rounded-md bg-[linear-gradient(180deg,#2b2621_50%,#221e1a_50%)] font-lcd text-4xl text-[#f3e6c8] shadow-[inset_0_-2px_0_rgb(0_0_0/.5),0_2px_4px_rgb(0_0_0/.4)] sm:h-20 sm:w-14 sm:text-5xl [perspective:300px]">
+    <span ref={ref} className="relative inline-grid h-16 w-11 place-items-center overflow-hidden rounded-md bg-[linear-gradient(180deg,#0f1d40_50%,#0a1633_50%)] font-lcd text-4xl text-paper shadow-[inset_0_-2px_0_rgb(0_0_0/.5),0_2px_4px_rgb(0_0_0/.4)] sm:h-20 sm:w-14 sm:text-5xl [perspective:300px]">
       <motion.span key={flip} initial={reduce ? false : { rotateX: -90 }} animate={{ rotateX: 0 }} transition={{ duration: 0.07 }} style={{ transformOrigin: "50% 50%" }}>{shown}</motion.span>
       <span aria-hidden className="absolute inset-x-0 top-1/2 h-px bg-black/60" />
     </span>
@@ -176,9 +187,9 @@ export function SplitFlapStats() {
   const { t } = useLang();
   const stats: Array<[string, string]> = [["60+", t("Services")], ["5", t("Categories")], ["30", t("Sections")], ["2%", t("Platform fee")], ["1", t("Agent per event")]];
   return (
-    <section className="bg-ink py-20 text-paper">
+    <section className="bg-[#050b1c] py-20 text-paper">
       <div className="container-x">
-        <Reveal variant="focus"><p className="text-center text-[0.7rem] font-semibold tracking-[0.3em] text-paper/50 uppercase">{t("MUHURTO · Departures")}</p></Reveal>
+        <Reveal variant="focus"><p className="text-center text-[0.7rem] font-semibold tracking-[0.3em] text-paper/50 uppercase">{t("MUHURTO in numbers")}</p></Reveal>
         <dl className="mt-10 grid grid-cols-2 gap-10 sm:grid-cols-3 lg:grid-cols-5">
           {stats.map(([v, label], i) => (
             <div key={label} className="text-center">
@@ -186,7 +197,7 @@ export function SplitFlapStats() {
               <dd aria-label={`${v} ${label}`} className="flex justify-center gap-1" >
                 {v.split("").map((ch, j) => <FlapChar key={j} char={ch} delay={i * 0.15 + j * 0.08} />)}
               </dd>
-              <p aria-hidden className="mt-4 text-xs font-semibold tracking-[0.2em] text-gold-soft/80 uppercase">{label}</p>
+              <p aria-hidden className="mt-4 text-xs font-semibold tracking-[0.2em] text-sky/80 uppercase">{label}</p>
             </div>
           ))}
         </dl>
@@ -275,43 +286,67 @@ export function WeddingDoors() {
   const reduce = useReducedMotion();
   const ref = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end end"] });
-  const p = useSpring(scrollYProgress, { stiffness: 70, damping: 20 });
-  const left = useTransform(p, [0.05, 0.55], [reduce ? -110 : 0, -110]);
-  const right = useTransform(p, [0.05, 0.55], [reduce ? 110 : 0, 110]);
-  const reveal = useTransform(p, [0.3, 0.65], [reduce ? 1 : 0, 1]);
-  const imgScale = useTransform(p, [0, 1], [1.25, 1]);
+  const p = useSpring(scrollYProgress, { stiffness: 70, damping: 22 });
+  // Closed → swing open → hold on the wedding → swing shut again as the scene ends.
+  const KEYS = [0.06, 0.32, 0.68, 0.94];
+  const left = useTransform(p, KEYS, reduce ? [-105, -105, -105, -105] : [0, -105, -105, 0]);
+  const right = useTransform(p, KEYS, reduce ? [105, 105, 105, 105] : [0, 105, 105, 0]);
+  const reveal = useTransform(p, [0.22, 0.36, 0.6, 0.72], reduce ? [1, 1, 1, 1] : [0, 1, 1, 0]);
+  const contentY = useTransform(p, [0.22, 0.36, 0.6, 0.72], reduce ? [0, 0, 0, 0] : [60, 0, 0, -40]);
+  const imgScale = useTransform(p, [0, 0.5, 1], [1.3, 1.08, 1.18]);
+  const beam = useTransform(p, [0.04, 0.14, 0.3, 0.7, 0.86, 0.96], [0, 1, 0, 0, 1, 0]);
+  const push = useTransform(p, [0, 0.32, 0.68, 1], reduce ? [1, 1, 1, 1] : [0.94, 1.04, 1.04, 0.94]);
+  const closedTitle = useTransform(p, [0, 0.08, 0.9, 1], reduce ? [0, 0, 0, 0] : [1, 0, 0, 1]);
   const wedding = localizeCategory(CATEGORIES[0], lang);
   const door = (side: "l" | "r") => (
-    <div className={cn("relative h-full w-full border-[10px] border-[#5a3a17] bg-[linear-gradient(180deg,#7b2a18,#5c1d10)] shadow-[inset_0_0_40px_rgb(0_0_0/.55)]", side === "l" ? "rounded-l-[160px_40px]" : "rounded-r-[160px_40px]")}>
-      <div className="jamdani absolute inset-4 border border-[#c9a24f]/50 opacity-70" />
-      <div className="absolute inset-x-8 top-10 h-1/3 rounded-t-full border-2 border-[#c9a24f]/60" />
-      <div className="absolute inset-x-8 bottom-10 h-1/3 border-2 border-[#c9a24f]/50" />
-      <span className={cn("absolute top-1/2 h-16 w-4 -translate-y-1/2 rounded-full bg-[linear-gradient(90deg,#8a6a2b,#e2c27c,#8a6a2b)] shadow-md", side === "l" ? "right-5" : "left-5")} />
+    <div className={cn("relative h-full w-full overflow-hidden border-[#b9913f] bg-[linear-gradient(180deg,#0b1d4a,#061233)] shadow-[inset_0_0_60px_rgb(0_0_0/.6)]", side === "l" ? "border-r-[3px]" : "border-l-[3px]")}>
+      <div className="absolute inset-0 opacity-[.07] [background:repeating-linear-gradient(90deg,#fff_0_1px,transparent_1px_9px)]" />
+      <div className="absolute inset-x-[12%] top-[8%] h-[38%] rounded-t-[999px] border border-[#d9b45e]/70 shadow-[inset_0_0_30px_rgb(217_180_94/.15)]">
+        <div className="absolute inset-3 rounded-t-[999px] border border-[#d9b45e]/35" />
+      </div>
+      <div className="absolute inset-x-[12%] bottom-[8%] h-[38%] border border-[#d9b45e]/60">
+        <div className="absolute inset-3 border border-[#d9b45e]/30" />
+        <div className="absolute left-1/2 top-1/2 h-10 w-10 -translate-x-1/2 -translate-y-1/2 rotate-45 border border-[#d9b45e]/60" />
+      </div>
+      <span className={cn("absolute top-1/2 h-24 w-3 -translate-y-1/2 rounded-full bg-[linear-gradient(90deg,#8a6a2b,#f3dc9b,#8a6a2b)] shadow-[0_6px_14px_rgb(0_0_0/.5)]", side === "l" ? "right-6" : "left-6")} />
+      <div className="absolute inset-0 bg-[linear-gradient(105deg,transparent_30%,rgb(255_255_255/.06)_45%,transparent_60%)]" />
     </div>
   );
   return (
-    <section ref={ref} className="relative mt-32 h-[220vh]">
-      <div className="sticky top-0 flex h-screen items-center overflow-hidden">
-        <motion.div style={{ scale: imgScale }} className="absolute inset-0 -z-20">
-          <SafeImage src={IMG.wStageCouple.src} alt={IMG.wStageCouple.alt} fill sizes="100vw" className="object-cover" />
+    <section ref={ref} className="relative mt-32 h-[320vh]">
+      <div className="sticky top-0 h-screen overflow-hidden bg-[#03081a]">
+        <motion.div style={{ scale: push }} className="absolute inset-0">
+          <motion.div style={{ scale: imgScale }} className="absolute inset-0">
+            <SafeImage src={IMG.wStageCouple.src} alt={IMG.wStageCouple.alt} fill sizes="100vw" className="object-cover" />
+          </motion.div>
+          <div className="absolute inset-0 bg-[linear-gradient(90deg,rgb(5_11_28/.9),rgb(5_11_28/.5)_60%,rgb(5_11_28/.25))]" />
+          <FilmGrain strength={0.07} />
+          <motion.div style={{ opacity: reveal, y: contentY }} className="container-x relative flex h-full flex-col justify-center text-paper">
+            <p className="eyebrow text-paper/70">{wedding.name}</p>
+            <h2 className="mt-3 max-w-2xl text-5xl leading-[1.05] text-paper sm:text-6xl">{t("Weddings, the Bangladeshi way.")}</h2>
+            <p className="mt-5 max-w-xl text-paper/80">{t("Gaye holud marigolds, akdh, reception stages and bou bhat — décor, seating, lighting, photography, photo booths and sound, planned as one story and run by one agent.")}</p>
+            <ul className="mt-6 flex max-w-xl flex-wrap gap-2">
+              {wedding.subcategories.map((s) => <li key={s.slug} className="rounded-full border border-paper/25 bg-paper/10 px-3 py-1 text-xs backdrop-blur">{s.name}</li>)}
+            </ul>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <ButtonLink href="/wedding" variant="light" size="lg">{t("Explore weddings")}</ButtonLink>
+              <ButtonLink href="/customize?category=wedding" variant="accent" size="lg">{t("Plan a wedding")}</ButtonLink>
+            </div>
+          </motion.div>
         </motion.div>
-        <div className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgb(10_22_51/.85),rgb(10_22_51/.45)_60%,rgb(10_22_51/.2))]" />
-        <motion.div style={{ opacity: reveal }} className="container-x text-paper">
-          <p className="eyebrow text-paper/70">{wedding.name}</p>
-          <h2 className="mt-3 max-w-2xl text-5xl leading-[1.05] text-paper sm:text-6xl">{t("Weddings, the Bangladeshi way.")}</h2>
-          <p className="mt-5 max-w-xl text-paper/80">{t("Gaye holud marigolds, akdh, reception stages and bou bhat — décor, seating, lighting, photography, photo booths and sound, planned as one story and run by one agent.")}</p>
-          <ul className="mt-6 flex max-w-xl flex-wrap gap-2">
-            {wedding.subcategories.map((s) => <li key={s.slug} className="rounded-full border border-paper/25 bg-paper/10 px-3 py-1 text-xs backdrop-blur">{s.name}</li>)}
-          </ul>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <ButtonLink href="/wedding" variant="light" size="lg">{t("Explore weddings")}</ButtonLink>
-            <ButtonLink href="/customize?category=wedding" variant="accent" size="lg">{t("Plan a wedding")}</ButtonLink>
-          </div>
-        </motion.div>
-        {/* the doors */}
-        <div aria-hidden className="pointer-events-none absolute inset-0 flex [perspective:1800px]">
-          <motion.div style={{ rotateY: left, transformOrigin: "0% 50%" }} className="h-full w-1/2">{door("l")}</motion.div>
-          <motion.div style={{ rotateY: right, transformOrigin: "100% 50%" }} className="h-full w-1/2">{door("r")}</motion.div>
+
+        {/* the palace doors */}
+        <div aria-hidden className="pointer-events-none absolute inset-0 flex [perspective:2000px]">
+          <motion.div style={{ rotateY: left, transformOrigin: "0% 50%" }} className="h-full w-1/2 [backface-visibility:hidden]">{door("l")}</motion.div>
+          <motion.div style={{ rotateY: right, transformOrigin: "100% 50%" }} className="h-full w-1/2 [backface-visibility:hidden]">{door("r")}</motion.div>
+          {/* light spilling through the gap as the doors part and meet */}
+          <motion.div style={{ opacity: beam }} className="absolute inset-y-0 left-1/2 w-40 -translate-x-1/2 bg-[radial-gradient(50%_60%_at_50%_50%,rgb(255_236_190/.9),rgb(0_190_254/.25)_45%,transparent_70%)] mix-blend-screen" />
+          <motion.div style={{ opacity: closedTitle }} className="absolute inset-0 grid place-items-center">
+            <div className="text-center">
+              <p className="text-[0.7rem] tracking-[0.5em] text-[#e9cf8f]/80 uppercase">{t("MUHURTO presents")}</p>
+              <p className="mt-3 font-display text-5xl text-[#f3dc9b] sm:text-7xl">{wedding.name}</p>
+            </div>
+          </motion.div>
         </div>
       </div>
     </section>

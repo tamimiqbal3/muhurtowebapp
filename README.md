@@ -2,7 +2,7 @@
 
 Premium event management & planning marketplace for Bangladesh — weddings, birthdays, corporate events, family events and food & culinary services, with an AI event planner, customisation requests, SSLCommerz payments (2% platform fee) and a Monitoring Agent for every paid event.
 
-**Stack:** Next.js 16 (App Router) · TypeScript · Tailwind CSS v4 · Motion · Lenis smooth scroll · React Three Fiber · Lucide · Firebase Auth / Firestore / Storage · Gemini API · SSLCommerz · Vercel
+**Stack:** Next.js 16 (App Router) · TypeScript · Tailwind CSS v4 · Motion · Lenis smooth scroll · Lucide · Firebase Auth / Firestore / Storage · Gemini API · SSLCommerz · Vercel
 
 ---
 
@@ -164,9 +164,36 @@ English is the default. The toggle in the navbar (and the mobile menu) sets the 
 
 ## Animations
 
+The site is edited like a motion-graphics film:
+
+- **Title sequence** (once per visit): the mark resolves out of blur with a light sweep, the wordmark tracks in, and the frame splits open onto the homepage. Click to skip.
+- **Hero**: full-bleed footage with wipe cuts between shots, a slow dolly on each shot, colour grade, vignette, film grain and an anamorphic light streak on every cut; a chapter timeline fills like a video scrubber. On scroll the frame pulls back into a rounded screen while the titles drift up and blur.
+- **Scenes**: homepage sections push in from a tilted, smaller frame and settle back as they leave, so sections cut together like shots. Chapters are revealed by wipes with image drift against the scroll.
+- **Wedding**: palace doors swing open onto the wedding scene, light spills through the gap, and the doors close again at the end of the scene.
+- **Page transitions**: a brand-blue wipe with the mark between routes; every page opens on a graded title card with grain and a light streak.
+- Lenis smooth scrolling on desktop; everything respects `prefers-reduced-motion`.
+
+## Food counter
+
+The Food & Culinary page (and the planner's food step) shows dishes like a shop counter: a striped awning, a chalkboard sign, glass shelves for platters, fuchka counters and the cha/coffee bar, a plate and a hanging price tag for each item. Tap a dish to put it in your tray; the tray scales quantities to your guest count and totals as you pick.
+
+## Brand
+
+Colours: primary `#015fff`, secondary `#00befe` (Tailwind tokens `brand`, `sky`, with `bg-brand-gradient`). The logo lives in `public/brand/` (`muhurto-logo.png` with a transparent background, the 192px version used in the header, and the original upload); `src/app/icon.png` and `apple-icon.png` are generated from it.
+
+## Languages (English / বাংলা)
+
+English is the default. The toggle in the navbar (and the mobile menu) sets the `muhurto_lang` cookie and refreshes, so server-rendered and client pages switch together, including `<html lang>`, metadata, dates (`bn-BD`) and digits in translated strings.
+
+- Strings: English text is the key; Bangla lives in `src/lib/i18n/bn.ts`. Use `const { t } = await getT()` in server components and `useT()` / `useLang()` in client components. Missing keys fall back to English.
+- Catalogue: category / subsection / city / theme names and all 60 listings are translated in `src/data/i18n-data.ts` and `src/data/services.bn.ts`; data stays canonical English internally (pricing, search and booking snapshots), and is localised only for display. Search matches both languages.
+- With Gemini enabled, planner notes and reasons are written in the selected language.
+- Not translated yet: the admin and agent workspaces' inner tables and forms (their navigation and headings are), and vendor-entered content.
+
+## Animations
+
 Each homepage section uses its own motion idea: a velvet curtain and Ken Burns slideshow with mouse parallax in the hero, an envelope that opens on an invitation card (founder / About), polaroids that drop and settle, a split-flap board for stats, a calculator that rises from the desk for the planner intro, palace doors that open on scroll for weddings, and a fanned hand of cards for other services. Lenis provides smooth scrolling on desktop. Everything respects `prefers-reduced-motion` (and Lenis is disabled on touch devices).
 
-The founder's name and role on the homepage come from `src/data/site.ts` (`FOUNDER`).
 
 ## Project structure
 

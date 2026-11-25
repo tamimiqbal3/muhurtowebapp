@@ -6,7 +6,6 @@ import { ButtonLink } from "@/components/ui/Button";
 import { Reveal } from "@/components/motion/Reveal";
 import { Gallery, HowItWorks, Testimonials, WhyChoose } from "@/components/home/Sections";
 import { IMG } from "@/data/images";
-import { FOUNDER } from "@/data/site";
 import { getT } from "@/lib/i18n/server";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -15,7 +14,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function AboutPage() {
-  const { t, lang } = await getT();
+  const { t } = await getT();
   const values = [
     { t: t("Rooted in Bangladesh"), b: t("From gaye holud marigolds to mezban and tong-er cha, we design around the rituals and flavours families actually celebrate.") },
     { t: t("Transparent by default"), b: t("Starting prices on every listing, a clear 2% platform fee at checkout, and no hidden charges.") },
@@ -30,7 +29,6 @@ export default async function AboutPage() {
           <div className="mt-6 space-y-4 text-ink-soft">
             <p>{t("Anyone who has organised a Bangladeshi wedding knows the reality: a dozen vendors, a hundred phone calls and a family WhatsApp group that never sleeps. Hosts spend the big day chasing decorators and caterers instead of being with their guests.")}</p>
             <p>{t("MUHURTO brings décor, seating, lighting, photography, photo booths, sound and food into one marketplace — then assigns a Monitoring Agent after payment to oversee every vendor until the last guest leaves.")}</p>
-            <p className="font-display text-2xl italic text-sindoor">— {lang === "bn" ? FOUNDER.nameBn : FOUNDER.name}, {lang === "bn" ? FOUNDER.roleBn : FOUNDER.role}</p>
           </div>
         </Reveal>
         <Reveal variant="swing" className="relative h-[420px] overflow-hidden rounded-[var(--radius-card)]">
