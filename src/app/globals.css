@@ -157,14 +157,6 @@
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-}
 
 @utility bg-brand-gradient {
   background-image: linear-gradient(120deg, #015fff 0%, #00befe 100%);
@@ -227,6 +219,3 @@
 @keyframes truck-beam { 0%, 100% { opacity: .25; } 50% { opacity: .5; } }
 @keyframes truck-puff { 0% { opacity: .8; transform: translate(0, 0) scale(.6); } 100% { opacity: 0; transform: translate(-22px, -10px) scale(1.8); } }
 @keyframes truck-dots { 0% { content: ""; } 25% { content: "."; } 50% { content: ".."; } 75% { content: "..."; } }
-@media (prefers-reduced-motion: reduce) {
-  .truck-skyline, .truck-trees, .truck-lane, .truck-body, .truck-wheel, .truck-beam, .truck-puff, .truck-dots::after { animation: none; }
-}

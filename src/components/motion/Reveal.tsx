@@ -1,6 +1,7 @@
 "use client";
 
-import { motion, useReducedMotion, type Variants } from "motion/react";
+import { motion, type Variants } from "motion/react";
+import { useReducedMotion } from "@/components/motion/useReducedMotion";
 import type { ReactNode } from "react";
 
 /**
@@ -34,7 +35,7 @@ const SPRINGY: Partial<Record<RevealVariant, object>> = {
   deal: { type: "spring", stiffness: 120, damping: 18 },
 };
 
-export function Reveal({ children, delay = 0, className, as = "div", variant = "rise", amount = 0.2 }: { children: ReactNode; delay?: number; className?: string; as?: "div" | "li" | "section"; variant?: RevealVariant; amount?: number; y?: number }) {
+export function Reveal({ children, delay = 0, className, as = "div", variant = "rise", amount = 0.01 }: { children: ReactNode; delay?: number; className?: string; as?: "div" | "li" | "section"; variant?: RevealVariant; amount?: number; y?: number }) {
   const reduce = useReducedMotion();
   const Comp = motion[as] as typeof motion.div;
   return (
@@ -43,7 +44,9 @@ export function Reveal({ children, delay = 0, className, as = "div", variant = "
       variants={VARIANTS[variant]}
       initial={reduce ? false : "hidden"}
       whileInView="show"
-      viewport={{ once: true, amount }}
+      // Trigger as soon as the block enters (tall blocks never reach a large visible share,
+      // which used to leave empty gaps under headings until you scrolled far past them).
+      viewport={{ once: true, amount, margin: "0px 0px -12% 0px" }}
       transition={{ duration: variant === "focus" ? 1.1 : 0.95, delay, ease: EASE, ...(SPRINGY[variant] ?? {}), ...(SPRINGY[variant] ? { delay } : {}) }}
       style={{ transformStyle: "preserve-3d" }}
     >
@@ -56,7 +59,7 @@ export function Reveal({ children, delay = 0, className, as = "div", variant = "
 export function SplitWords({ text, className, delay = 0, stagger = 0.06, inView = true }: { text: string; className?: string; delay?: number; stagger?: number; inView?: boolean }) {
   const reduce = useReducedMotion();
   const words = text.split(" ");
-  const anim = inView ? { whileInView: "show" as const, viewport: { once: true, amount: 0.4 } } : { animate: "show" as const };
+  const anim = inView ? { whileInView: "show" as const, viewport: { once: true, amount: 0.2 } } : { animate: "show" as const };
   return (
     <motion.span className={className} initial={reduce ? false : "hidden"} {...anim} transition={{ staggerChildren: stagger, delayChildren: delay }} aria-label={text}>
       {words.map((w, i) => (

@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { AnimatePresence, motion, useInView, useReducedMotion, useScroll, useSpring, useTransform } from "motion/react";
+import { AnimatePresence, motion, useInView, useScroll, useSpring, useTransform } from "motion/react";
+import { useReducedMotion } from "@/components/motion/useReducedMotion";
 import { useEffect, useRef, useState } from "react";
 import { ArrowRight, ArrowUpRight, Check } from "lucide-react";
 import { formatBDT } from "@/lib/format";
@@ -24,12 +25,12 @@ export function AboutInvitation() {
   const { t, lang } = useLang();
   const reduce = useReducedMotion();
   const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, amount: 0.45 });
+  const inView = useInView(ref, { once: true, amount: 0.25 });
   const open = inView || !!reduce;
   const cats = CATEGORIES.map((c) => localizeCategory(c, lang));
 
   return (
-    <section id="about" className="container-x scroll-mt-24 pt-32">
+    <section id="about" className="container-x scroll-mt-24 pt-24">
       <div className="grid items-center gap-16 lg:grid-cols-[0.95fr_1.05fr]">
         {/* Envelope */}
         <div ref={ref} className="relative mx-auto h-[420px] w-full max-w-[440px] [perspective:1400px]" aria-hidden={false}>
@@ -77,9 +78,9 @@ export function AboutInvitation() {
             <p className="mt-5 max-w-xl text-ink-soft">{t("MUHURTO is a Bangladeshi event marketplace. One place to explore trusted vendors, plan everything on one page, book securely — and hand the running of the day to a dedicated Monitoring Agent.")}</p>
           </Reveal>
           <p className="mt-10 text-xs font-semibold tracking-[0.2em] text-muted uppercase">{t("What we plan")}</p>
-          <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
+          <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-6">
             {cats.map((c, i) => (
-              <Reveal as="li" key={c.slug} variant="deal" delay={0.08 * i} className={cn(i === 0 && "col-span-2 sm:col-span-1")}>
+              <Reveal as="li" key={c.slug} variant="deal" delay={0.08 * i} className={cn(i === 0 && "col-span-2", i < 3 ? "sm:col-span-2" : "sm:col-span-3")}>
                 <Link href={c.route} className="group relative block h-36 overflow-hidden rounded-2xl shadow-[var(--shadow-soft)] transition-transform duration-500 hover:-translate-y-1.5 hover:rotate-[-1deg]">
                   <SafeImage src={c.card.src} alt="" fill sizes="(max-width: 640px) 50vw, 200px" className="object-cover transition-transform duration-[1.2s] group-hover:scale-110" />
                   <div className="absolute inset-0 bg-gradient-to-t from-ink/85 to-ink/5" />
@@ -107,14 +108,14 @@ export function Polaroids() {
     { img: IMG.fGarland, title: t("Relax"), body: t("After payment a Monitoring Agent runs vendor coordination while you follow progress live.") },
   ];
   return (
-    <section className="relative mt-32 overflow-hidden bg-[#050b1c] py-28 text-paper">
+    <section className="relative mt-24 overflow-hidden bg-[#050b1c] py-24 text-paper">
       <FilmGrain strength={0.06} />
       <div className="container-x relative">
         <div className="mx-auto max-w-2xl text-center">
           <Reveal><p className="eyebrow text-sky">{t("What MUHURTO does")}</p></Reveal>
           <h2 className="mt-3 text-4xl text-paper sm:text-5xl"><SplitWords text={t("From first idea to last guest.")} /></h2>
         </div>
-        <div className="mt-16 grid gap-6 md:grid-cols-3">
+        <div className="mt-10 grid gap-6 md:grid-cols-3">
           {items.map((it, i) => <Chapter key={it.title} i={i} {...it} />)}
         </div>
       </div>
@@ -134,7 +135,7 @@ function Chapter({ i, img, title, body }: { i: number; img: { src: string; alt: 
         className="relative aspect-[3/4] overflow-hidden rounded-[6px] bg-[#0b1530]"
         initial={reduce ? false : { clipPath: "inset(100% 0 0 0)" }}
         whileInView={{ clipPath: "inset(0% 0 0 0)" }}
-        viewport={{ once: true, amount: 0.35 }}
+        viewport={{ once: true, amount: 0.15 }}
         transition={{ duration: 1.3, delay: i * 0.15, ease: [0.76, 0, 0.24, 1] }}
       >
         <motion.div style={{ y: drift }} className="absolute -inset-y-[14%] inset-x-0">
@@ -309,7 +310,7 @@ export function WeddingDoors() {
     </div>
   );
   return (
-    <section ref={ref} className="relative mt-32 h-[320vh]">
+    <section ref={ref} className="relative mt-24 h-[320vh]">
       <div className="sticky top-0 h-screen overflow-hidden bg-[#03081a]">
         <motion.div style={{ scale: push }} className="absolute inset-0">
           <motion.div style={{ scale: imgScale }} className="absolute inset-0">

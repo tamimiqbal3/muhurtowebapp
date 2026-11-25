@@ -32,7 +32,7 @@ export default async function AboutPage() {
             <p>{t("MUHURTO brings décor, seating, lighting, photography, photo booths, sound and food into one marketplace — then assigns a Monitoring Agent after payment to oversee every vendor until the last guest leaves.")}</p>
           </div>
         </Reveal>
-        <Reveal variant="swing" className="relative h-[420px] overflow-hidden rounded-[var(--radius-card)]">
+        <Reveal variant="swing" className="relative h-[420px] overflow-hidden rounded-[var(--radius-card)] lg:h-auto lg:min-h-[460px] lg:self-stretch">
           <SafeImage src={IMG.fElders.src} alt={IMG.fElders.alt} fill sizes="(max-width: 1024px) 100vw, 50vw" className="animate-kenburns object-cover" />
         </Reveal>
       </section>

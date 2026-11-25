@@ -10,7 +10,6 @@ export function useFlyToTarget() {
   const [flyers, setFlyers] = useState<Flyer[]>([]);
   const launch = useCallback((src: string | undefined, fromEl: HTMLElement | null, toEl: HTMLElement | null) => {
     if (!src || !fromEl || !toEl) return;
-    if (typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const from = fromEl.getBoundingClientRect();
     const to = toEl.getBoundingClientRect();
     if (to.bottom < 0 || to.top > window.innerHeight) return; // target off-screen: skip the flight

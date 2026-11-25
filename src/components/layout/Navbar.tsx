@@ -34,7 +34,8 @@ export function Navbar() {
   const t = useT();
   const overHero = pathname === "/" && !scrolled && !open;
   // The bar is a dark glass strip everywhere (cinematic title cards sit under it); only the open mobile menu is light.
-  const lightText = !open;
+  // Dark text over the light homepage title card; light text on the dark glass bar everywhere else.
+  const lightText = !open && !overHero;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);

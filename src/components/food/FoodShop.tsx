@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { motion, useReducedMotion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
+import { useReducedMotion } from "@/components/motion/useReducedMotion";
 import { Check } from "lucide-react";
 import type { Service } from "@/lib/types";
 import { formatBDT } from "@/lib/format";

@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
+import { useReducedMotion } from "@/components/motion/useReducedMotion";
 import { ArrowRight, Check, Minus, Plus, RotateCcw, X } from "lucide-react";
 import type { CategorySlug, PlannerRequirements, PlannerResult, Service } from "@/lib/types";
 import { CATEGORIES, CITIES } from "@/data/categories";

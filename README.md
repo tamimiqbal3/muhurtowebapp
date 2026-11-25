@@ -166,13 +166,12 @@ English is the default. The toggle in the navbar (and the mobile menu) sets the 
 
 The site is edited like a motion-graphics film:
 
-- **Hero**: built like a cinema — credit line, a widescreen screen with viewfinder marks, a running timecode and scene numbers, the title below, a billing-block credit line, a ticket-shaped call to action and a minimal search line. Scrolling walks you into the screen until it fills the room.
-- **Loading**: a MUHURTO delivery truck drives along a road at dusk (pure SVG + CSS).
-- **Title sequence** (once per visit): the mark resolves out of blur with a light sweep, the wordmark tracks in, and the frame splits open onto the homepage. Click to skip.
+- **Hero**: a storyboard. A light editorial title card (headline, short intro, key figures, actions and a portrait still) is followed by a reel of occasions; on desktop, scrolling down travels sideways through the scenes like a camera dolly, with each photo drifting inside its frame. On phones the reel is swipeable.
+- **Loading**: a MUHURTO delivery truck drives along a road at dusk (pure SVG + CSS) — on the first visit while the page loads, and on route loading.
 - **Scenes**: homepage sections push in from a tilted, smaller frame and settle back as they leave, so sections cut together like shots. Chapters are revealed by wipes with image drift against the scroll.
 - **Wedding**: palace doors swing open onto the wedding scene, light spills through the gap, and the doors close again at the end of the scene.
 - **Page transitions**: a film cut — the frame shutters to black and opens on the next page; every page opens on a graded title card with grain and a light streak.
-- Lenis smooth scrolling on desktop; everything respects `prefers-reduced-motion`.
+- Lenis smooth scrolling on desktop. Motion plays for everyone by design (many Windows PCs have animation effects turned off, which froze every scene); to honour the OS reduced-motion setting again, see `src/components/motion/useReducedMotion.ts`.
 
 ## Food counter
 

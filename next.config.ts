@@ -9,6 +9,9 @@ const nextConfig: NextConfig = {
     // without spending Vercel image-optimisation quota).
     loader: "custom",
     loaderFile: "./src/lib/image-loader.ts",
+    deviceSizes: [640, 828, 1080, 1280, 1600, 1920, 2560, 3200, 3840],
+    imageSizes: [96, 160, 256, 384, 512],
+    qualities: [75, 90],
     remotePatterns: [
       { protocol: "https", hostname: "images.pexels.com" },
       { protocol: "https", hostname: "images.unsplash.com" },

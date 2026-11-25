@@ -8,11 +8,12 @@ import { PlanDrawer } from "./plan/PlanDrawer";
 import { LanguageProvider } from "./i18n/LanguageProvider";
 import { SmoothScroll } from "./motion/SmoothScroll";
 import { ScrollThread } from "./motion/ScrollThread";
+import { Preloader } from "./motion/Preloader";
 import type { Lang } from "@/lib/i18n/core";
 
 export function Providers({ children, lang }: { children: ReactNode; lang: Lang }) {
   return (
-    <MotionConfig reducedMotion="user">
+    <MotionConfig reducedMotion="never">
       <LanguageProvider initial={lang}>
         <AuthProvider>
           <PlanProvider>
@@ -20,6 +21,7 @@ export function Providers({ children, lang }: { children: ReactNode; lang: Lang 
             <ScrollThread />
             {children}
             <PlanDrawer />
+            <Preloader />
           </PlanProvider>
         </AuthProvider>
       </LanguageProvider>

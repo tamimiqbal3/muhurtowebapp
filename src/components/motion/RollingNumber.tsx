@@ -1,6 +1,7 @@
 "use client";
 
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
+import { useReducedMotion } from "@/components/motion/useReducedMotion";
 import { cn } from "@/lib/utils";
 
 const LATIN = "0123456789";

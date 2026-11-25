@@ -12,7 +12,7 @@ export async function HowItWorks() {
     <section className="relative mt-28 overflow-hidden bg-ink py-24 text-paper">
       <div className="container-x relative">
         <SectionHeading eyebrow={t("How it works")} title={<span className="text-paper">{t("From idea to celebration, in four steps")}</span>} className="[&_.eyebrow]:text-paper/60" />
-        <ol className="mt-14 grid gap-px overflow-hidden rounded-[var(--radius-card)] bg-paper/10 sm:grid-cols-2 lg:grid-cols-4 [perspective:1200px]">
+        <ol className="mt-10 grid gap-px overflow-hidden rounded-[var(--radius-card)] bg-paper/10 sm:grid-cols-2 lg:grid-cols-4 [perspective:1200px]">
           {getSteps(lang).map((s, i) => (
             <Reveal as="li" key={s.n} variant="unfold" delay={i * 0.12} className="bg-ink p-8">
               <span className="font-lcd text-sm tracking-[0.3em] text-sky">{s.n}</span>

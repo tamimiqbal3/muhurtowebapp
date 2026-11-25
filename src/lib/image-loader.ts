@@ -5,9 +5,12 @@ export default function imageLoader({ src, width, quality }: { src: string; widt
   try {
     const url = new URL(src);
     if (url.hostname === "images.pexels.com") {
-      url.searchParams.set("auto", "compress");
-      url.searchParams.set("cs", "tinysrgb");
-      url.searchParams.set("w", String(width));
+      // Full-quality sRGB (no "compress"/"tinysrgb"), and a little extra width so slow
+      // camera moves (Ken Burns, parallax, scene zooms) never upscale the photo.
+      url.searchParams.delete("auto");
+      url.searchParams.set("cs", "srgb");
+      url.searchParams.set("w", String(Math.min(Math.round(width * 1.25), 4000)));
+      url.searchParams.set("fit", "crop");
       url.searchParams.delete("h");
       url.searchParams.delete("dpr");
       return url.toString();
@@ -16,7 +19,7 @@ export default function imageLoader({ src, width, quality }: { src: string; widt
       url.searchParams.set("auto", "format");
       url.searchParams.set("fit", "crop");
       url.searchParams.set("w", String(width));
-      url.searchParams.set("q", String(quality ?? 72));
+      url.searchParams.set("q", String(quality ?? 90));
       return url.toString();
     }
     return src;

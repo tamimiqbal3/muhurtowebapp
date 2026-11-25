@@ -5,11 +5,10 @@ import { usePathname } from "next/navigation";
 
 let active: { scrollTo(t: number, o?: object): void } | null = null;
 
-/** Inertial, cinematic scrolling (Lenis). Disabled for reduced-motion and touch devices. */
+/** Inertial, cinematic scrolling (Lenis). Disabled on touch devices, which already scroll with momentum. */
 export function SmoothScroll() {
   const pathname = usePathname();
   useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     if (window.matchMedia("(pointer: coarse)").matches) return;
     let lenis: { raf(t: number): void; destroy(): void; scrollTo(t: number, o?: object): void } | null = null;
     let frame = 0;

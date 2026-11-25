@@ -1,6 +1,7 @@
 "use client";
 
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
+import { useReducedMotion } from "@/components/motion/useReducedMotion";
 import { useEffect, useState, type ReactNode } from "react";
 
 // The very first page load gets the title sequence instead of a transition.
