@@ -27,7 +27,7 @@ export function PaymentMethodPicker({ value, onChange }: { value: PaymentMethodI
                 <motion.label
                   key={m.id}
                   whileHover={{ y: -3, rotateX: 6 }}
-                  animate={{ y: on ? -6 : 0, boxShadow: on ? "0 14px 28px -12px rgb(23 19 15 / 0.35)" : "0 1px 2px rgb(23 19 15 / 0.05)" }}
+                  animate={{ y: on ? -6 : 0, boxShadow: on ? "0 14px 28px -12px rgb(1 95 255 / 0.35)" : "0 1px 2px rgb(10 22 51 / 0.05)" }}
                   transition={{ type: "spring", stiffness: 320, damping: 22 }}
                   style={{ transformPerspective: 600 }}
                   className={cn("relative flex h-20 cursor-pointer flex-col items-center justify-center gap-1.5 rounded-2xl border bg-paper p-2", on ? "border-ink" : "border-line")}

@@ -8,8 +8,8 @@ type Size = "sm" | "md" | "lg";
 const base =
   "inline-flex items-center justify-center gap-2 rounded-full font-semibold tracking-wide transition-all duration-300 select-none disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98] whitespace-nowrap";
 const variants: Record<Variant, string> = {
-  primary: "bg-ink text-paper hover:bg-ink-soft shadow-[0_6px_20px_-8px_rgb(23_19_15/0.6)]",
-  accent: "bg-sindoor text-paper hover:bg-sindoor-dark shadow-[0_6px_20px_-8px_rgb(155_34_38/0.7)]",
+  primary: "bg-ink text-paper hover:bg-ink-soft shadow-[0_6px_20px_-8px_rgb(10_22_51/0.6)]",
+  accent: "bg-brand-gradient text-paper hover:brightness-110 shadow-[0_8px_24px_-8px_rgb(1_95_255/0.6)]",
   outline: "border border-ink/20 bg-transparent text-ink hover:border-ink hover:bg-ink hover:text-paper",
   ghost: "bg-transparent text-ink hover:bg-ink/5",
   light: "bg-paper/95 text-ink hover:bg-paper backdrop-blur",

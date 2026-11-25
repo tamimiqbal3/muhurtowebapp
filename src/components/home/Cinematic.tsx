@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { motion, useInView, useReducedMotion, useScroll, useSpring, useTransform } from "motion/react";
+import { AnimatePresence, motion, useInView, useReducedMotion, useScroll, useSpring, useTransform } from "motion/react";
 import { useEffect, useRef, useState } from "react";
-import { ArrowRight, ArrowUpRight } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Check, Sparkles } from "lucide-react";
+import { formatBDT } from "@/lib/format";
+import { RollingNumber } from "../motion/RollingNumber";
 import { CATEGORIES } from "@/data/categories";
 import { IMG } from "@/data/images";
 import { FOUNDER } from "@/data/site";
@@ -40,6 +42,8 @@ export function FounderAbout() {
           >
             <div className="jamdani absolute inset-2 rounded-xl opacity-40" aria-hidden />
             <div className="relative">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/brand/muhurto-logo-192.png" alt={t("MUHURTO")} className="mx-auto mb-3 h-16 w-16" />
               <p className="eyebrow">{t("Founded by")}</p>
               <p className="mt-3 font-display text-4xl italic leading-tight text-sindoor">{lang === "bn" ? FOUNDER.nameBn : FOUNDER.name}</p>
               <p className="mt-2 text-sm text-ink-soft">{lang === "bn" ? FOUNDER.roleBn : FOUNDER.role}</p>
@@ -48,9 +52,9 @@ export function FounderAbout() {
             </div>
           </motion.div>
           {/* envelope body */}
-          <div className="absolute inset-x-0 bottom-0 z-20 h-[230px] overflow-hidden rounded-b-2xl rounded-t-md bg-[linear-gradient(180deg,#a3282d,#7a1b1f)] shadow-[0_30px_60px_-25px_rgb(23_19_15/.7)]">
+          <div className="absolute inset-x-0 bottom-0 z-20 h-[230px] overflow-hidden rounded-b-2xl rounded-t-md bg-[linear-gradient(180deg,#1f6dff,#0a45c4)] shadow-[0_30px_60px_-25px_rgb(10_22_51/.7)]">
             <div className="absolute inset-0" style={{ background: "linear-gradient(155deg, transparent 49.6%, rgb(0 0 0 / .18) 50%, transparent 50.4%), linear-gradient(-155deg, transparent 49.6%, rgb(0 0 0 / .18) 50%, transparent 50.4%)" }} />
-            <div className="absolute bottom-6 left-0 right-0 text-center font-display text-sm tracking-[0.4em] text-[#f3dfb0]/80">MUHURTO</div>
+            <div className="absolute bottom-6 left-0 right-0 text-center font-display text-sm tracking-[0.4em] text-paper/80">MUHURTO</div>
           </div>
           {/* flap */}
           <motion.div
@@ -60,10 +64,10 @@ export function FounderAbout() {
             style={{ transformOrigin: "50% 0%", transformStyle: "preserve-3d", top: 190 }}
             className={cn("absolute inset-x-0 h-[150px]", open ? "z-0" : "z-30")}
           >
-            <div className="absolute inset-0 bg-[linear-gradient(180deg,#8d2126,#a3282d)] [backface-visibility:hidden]" style={{ clipPath: "polygon(0 0, 100% 0, 50% 100%)" }} />
-            <div className="absolute inset-0 bg-[linear-gradient(180deg,#6d1418,#8d2126)] [backface-visibility:hidden] [transform:rotateX(180deg)]" style={{ clipPath: "polygon(0 0, 100% 0, 50% 100%)" }} />
+            <div className="absolute inset-0 bg-[linear-gradient(180deg,#0a45c4,#1f6dff)] [backface-visibility:hidden]" style={{ clipPath: "polygon(0 0, 100% 0, 50% 100%)" }} />
+            <div className="absolute inset-0 bg-[linear-gradient(180deg,#04205e,#0a45c4)] [backface-visibility:hidden] [transform:rotateX(180deg)]" style={{ clipPath: "polygon(0 0, 100% 0, 50% 100%)" }} />
             {/* wax seal */}
-            <motion.div animate={open ? { opacity: 0, scale: 0.6 } : { opacity: 1, scale: 1 }} transition={{ duration: 0.3 }} className="absolute left-1/2 top-[92px] grid h-14 w-14 -translate-x-1/2 place-items-center rounded-full bg-[radial-gradient(circle_at_35%_35%,#e2c27c,#b08d57_60%,#7d6234)] font-display text-xl text-[#3a2a10] shadow-[0_4px_10px_rgb(0_0_0/.4)] [backface-visibility:hidden]">ম</motion.div>
+            <motion.div animate={open ? { opacity: 0, scale: 0.6 } : { opacity: 1, scale: 1 }} transition={{ duration: 0.3 }} className="absolute left-1/2 top-[82px] grid h-[68px] w-[68px] -translate-x-1/2 place-items-center rounded-full bg-[radial-gradient(circle_at_35%_35%,#fff6c9,#ffc727_60%,#c27c0e)] p-1.5 shadow-[0_4px_10px_rgb(0_0_0/.4)] [backface-visibility:hidden]"><img src="/brand/muhurto-logo-192.png" alt="" className="h-full w-full rounded-full bg-paper object-contain p-0.5" /></motion.div>
           </motion.div>
         </div>
 
@@ -72,7 +76,7 @@ export function FounderAbout() {
           <Reveal variant="rise"><p className="eyebrow">{t("About")}</p></Reveal>
           <h2 className="mt-3 text-4xl leading-[1.08] sm:text-5xl"><SplitWords text={t("Moments, managed with heart.")} /></h2>
           <Reveal variant="focus" delay={0.15}>
-            <p className="mt-5 max-w-xl text-ink-soft">{t("MUHURTO is a Bangladeshi event marketplace built by {name}. One place to explore trusted vendors, plan with a calculator, book securely — and hand the running of the day to a dedicated Monitoring Agent.", { name: lang === "bn" ? FOUNDER.nameBn : FOUNDER.name })}</p>
+            <p className="mt-5 max-w-xl text-ink-soft">{t("MUHURTO is a Bangladeshi event marketplace built by {name}. One place to explore trusted vendors, plan everything on one page, book securely — and hand the running of the day to a dedicated Monitoring Agent.", { name: lang === "bn" ? FOUNDER.nameBn : FOUNDER.name })}</p>
           </Reveal>
           <p className="mt-10 text-xs font-semibold tracking-[0.2em] text-muted uppercase">{t("What we plan")}</p>
           <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -122,7 +126,7 @@ export function Polaroids() {
               viewport={{ once: true, amount: 0.35 }}
               transition={{ type: "spring", stiffness: 110, damping: 13, mass: 1.1, delay: i * 0.18 }}
               whileHover={{ rotate: 0, y: -8, scale: 1.03 }}
-              className="relative mx-auto w-full max-w-[320px] bg-[#fffdf8] p-3 pb-5 shadow-[0_20px_40px_-18px_rgb(23_19_15/.55),0_2px_4px_rgb(23_19_15/.1)]"
+              className="relative mx-auto w-full max-w-[320px] bg-[#fffdf8] p-3 pb-5 shadow-[0_20px_40px_-18px_rgb(10_22_51/.55),0_2px_4px_rgb(10_22_51/.1)]"
             >
               <span aria-hidden className="absolute -top-3 left-1/2 h-6 w-20 -translate-x-1/2 rotate-[-3deg] bg-[#efe3c6]/80 shadow-sm" />
               <div className="relative aspect-square overflow-hidden bg-sand">
@@ -193,7 +197,7 @@ export function SplitFlapStats() {
 
 /* ═════════ Planner teaser: a calculator lifting off the desk ═════════ */
 export function PlannerTeaser() {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const reduce = useReducedMotion();
   const ref = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "center center"] });
@@ -202,25 +206,29 @@ export function PlannerTeaser() {
   const y = useTransform(p, [0, 1], [reduce ? 0 : 140, 0]);
   const scale = useTransform(p, [0, 1], [reduce ? 1 : 0.86, 1]);
   const shadow = useTransform(p, [0, 1], [0.15, 0.55]);
-  const [screen, setScreen] = useState(0);
-  const frames = ["0", "400", "3,00,000", "2,90,700"];
-  const labels = [t("Press EVENT"), t("GUESTS"), t("BUDGET ৳"), t("TOTAL ৳")];
+  const [step, setStep] = useState(0);
+  const demo = [
+    { k: "Décor", p: 180000 },
+    { k: "Photography & Videography", p: 85000 },
+    { k: "Lighting", p: 42000 },
+    { k: "Platter", p: 118000 },
+  ];
   useEffect(() => {
-    if (reduce) { setScreen(3); return; }
-    const id = setInterval(() => setScreen((s) => (s + 1) % frames.length), 1600);
+    if (reduce) { setStep(demo.length); return; }
+    const id = setInterval(() => setStep((s) => (s + 1) % (demo.length + 2)), 1300);
     return () => clearInterval(id);
-  }, [reduce, frames.length]);
-  const keys = ["7", "8", "9", "4", "5", "6", "1", "2", "3", "C", "0", "="];
-  const pressed = screen === 1 ? "4" : screen === 2 ? "0" : screen === 3 ? "=" : "C";
+  }, [reduce, demo.length]);
+  const on = Math.min(step, demo.length);
+  const total = Math.round(demo.slice(0, on).reduce((a, d) => a + d.p, 0) * 1.02);
 
   return (
     <section ref={ref} className="container-x pt-32">
       <div className="grid items-center gap-16 lg:grid-cols-2">
         <div>
           <Reveal><p className="eyebrow">{t("Event planner")}</p></Reveal>
-          <h2 className="mt-3 text-4xl leading-[1.08] sm:text-5xl"><SplitWords text={t("Calculate your celebration.")} /></h2>
+          <h2 className="mt-3 text-4xl leading-[1.08] sm:text-5xl"><SplitWords text={t("Pick it all in one place.")} /></h2>
           <Reveal variant="focus" delay={0.1}>
-            <p className="mt-5 max-w-lg text-ink-soft">{t("Key in your guests, budget and the services you want. Press = and a receipt prints an itemised plan from real MUHURTO listings — décor, food, photography and more — with the 2% fee included.")}</p>
+            <p className="mt-5 max-w-lg text-ink-soft">{t("Choose the occasion, slide your guests and budget, then tap décor, photography, lighting and food from one page. The total adds up live like a calculator — or let us suggest the best plan for your budget.")}</p>
           </Reveal>
           <Reveal variant="rise" delay={0.2}>
             <div className="mt-8 flex flex-wrap gap-3">
@@ -229,27 +237,29 @@ export function PlannerTeaser() {
             </div>
           </Reveal>
         </div>
-        <div className="relative mx-auto w-full max-w-sm [perspective:1400px]">
-          <motion.div style={{ rotateX, y, scale, transformOrigin: "50% 100%" }} className="rounded-[28px] bg-[linear-gradient(160deg,#3a352f,#16130f)] p-5 shadow-[0_40px_70px_-30px_rgb(23_19_15/.8)]">
-            <div className="flex items-center justify-between">
-              <p className="font-display text-sm tracking-[0.3em] text-[#e7d9bd]">MUHURTO</p>
-              <span className="grid h-5 w-20 grid-cols-4 gap-[2px] rounded-sm bg-[#1d1915] p-[2px]">{[0, 1, 2, 3].map((i) => <span key={i} className="bg-[#33262b]" />)}</span>
+        <div className="relative mx-auto w-full max-w-md [perspective:1400px]">
+          <motion.div style={{ rotateX, y, scale, transformOrigin: "50% 100%" }} className="rounded-[28px] bg-paper p-5 shadow-[0_40px_70px_-30px_rgb(1_95_255/.55)] ring-1 ring-line">
+            <div className="flex items-center gap-2">
+              <span className="grid h-8 w-8 place-items-center rounded-full bg-brand-gradient text-paper"><Sparkles className="h-4 w-4" /></span>
+              <p className="font-display text-xl">{t("Your whole event, on one table")}</p>
             </div>
-            <div className="mt-4 rounded-lg border-4 border-[#14110e] bg-[linear-gradient(180deg,#c9d1b5,#b7c0a1)] px-3 py-2 text-right shadow-[inset_0_3px_8px_rgb(0_0_0/.35)]">
-              <p className="font-lcd text-[0.6rem] text-[#1c2416]/70">{labels[screen]}</p>
-              <motion.p key={screen} initial={reduce ? false : { opacity: 0.2 }} animate={{ opacity: 1 }} className="font-lcd text-4xl text-[#1c2416]">{frames[screen]}</motion.p>
-            </div>
-            <div className="mt-4 grid grid-cols-3 gap-2.5" aria-hidden>
-              {keys.map((k) => (
-                <motion.span
-                  key={k}
-                  animate={pressed === k && !reduce ? { y: [0, 3, 0] } : { y: 0 }}
-                  transition={{ duration: 0.25 }}
-                  className={cn("grid h-11 place-items-center rounded-[10px] text-lg font-semibold shadow-[0_4px_0_var(--edge),0_6px_10px_rgb(0_0_0/.35)]", k === "=" ? "bg-[linear-gradient(180deg,#b8343a,#8d1f24)] text-paper [--edge:#5b1215]" : k === "C" ? "bg-[linear-gradient(180deg,#d9772f,#b4561c)] text-paper [--edge:#7a3810]" : "bg-[linear-gradient(180deg,#f4efe6,#ddd5c7)] text-[#2a2520] [--edge:#b9ae9c]")}
-                >
-                  {k}
-                </motion.span>
-              ))}
+            <ul className="mt-4 grid grid-cols-2 gap-2.5" aria-hidden>
+              {demo.map((d, i) => {
+                const picked = i < on;
+                return (
+                  <motion.li key={d.k} animate={{ y: picked ? -3 : 0, scale: picked ? 1.02 : 1 }} transition={{ type: "spring", stiffness: 300, damping: 18 }} className={cn("relative rounded-2xl p-3 ring-2 transition-colors", picked ? "bg-brand/5 ring-brand" : "bg-sand/60 ring-transparent")}>
+                    <p className="text-xs font-semibold">{t(d.k)}</p>
+                    <p className={cn("mt-1 font-display text-lg font-semibold", picked ? "text-brand" : "text-ink-soft")}>{formatBDT(d.p)}</p>
+                    <AnimatePresence>{picked && <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} exit={{ scale: 0 }} className="absolute right-2 top-2 grid h-5 w-5 place-items-center rounded-full bg-brand text-paper"><Check className="h-3 w-3" strokeWidth={3} /></motion.span>}</AnimatePresence>
+                  </motion.li>
+                );
+              })}
+            </ul>
+            <div className="mt-4 rounded-2xl bg-[linear-gradient(160deg,#0a1633,#0b2a6f)] p-3">
+              <div className="rounded-xl bg-[linear-gradient(180deg,#dff6ff,#bfeaff)] px-3 py-2 text-right shadow-[inset_0_3px_8px_rgb(0_0_0/.25)]">
+                <p className="font-lcd text-[0.6rem] tracking-widest text-[#0b2a6f]/70 uppercase">{t("Estimated total incl. 2% fee")}</p>
+                <RollingNumber value={formatBDT(total)} bangla={lang === "bn"} className="font-lcd text-4xl text-[#04205e]" />
+              </div>
             </div>
           </motion.div>
           <motion.div aria-hidden style={{ opacity: shadow }} className="mx-auto mt-3 h-5 w-4/5 rounded-[50%] bg-ink/40 blur-lg" />
@@ -285,7 +295,7 @@ export function WeddingDoors() {
         <motion.div style={{ scale: imgScale }} className="absolute inset-0 -z-20">
           <SafeImage src={IMG.wStageCouple.src} alt={IMG.wStageCouple.alt} fill sizes="100vw" className="object-cover" />
         </motion.div>
-        <div className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgb(23_19_15/.85),rgb(23_19_15/.45)_60%,rgb(23_19_15/.2))]" />
+        <div className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgb(10_22_51/.85),rgb(10_22_51/.45)_60%,rgb(10_22_51/.2))]" />
         <motion.div style={{ opacity: reveal }} className="container-x text-paper">
           <p className="eyebrow text-paper/70">{wedding.name}</p>
           <h2 className="mt-3 max-w-2xl text-5xl leading-[1.05] text-paper sm:text-6xl">{t("Weddings, the Bangladeshi way.")}</h2>
@@ -346,7 +356,7 @@ function FanCard({ i, k, p, reduce, href, name, tagline, img, accent, explore }:
   const y = useTransform(p, [0, 1], [reduce ? Math.abs(k) * 22 : 30, Math.abs(k) * 22]);
   return (
     <motion.div style={{ rotate, x, y, zIndex: 10 - Math.round(Math.abs(k) * 2) }} className="lg:absolute lg:left-1/2 lg:top-0 lg:-ml-[130px] lg:w-[260px]" whileHover={{ y: -24, rotate: 0, scale: 1.04, zIndex: 30 }} transition={{ type: "spring", stiffness: 260, damping: 20 }}>
-      <Link href={href} className="group relative block h-[380px] overflow-hidden rounded-[22px] border-[6px] border-paper bg-paper shadow-[0_30px_50px_-24px_rgb(23_19_15/.6)]">
+      <Link href={href} className="group relative block h-[380px] overflow-hidden rounded-[22px] border-[6px] border-paper bg-paper shadow-[0_30px_50px_-24px_rgb(10_22_51/.6)]">
         <SafeImage src={img.src} alt={img.alt} fill sizes="(max-width: 1024px) 50vw, 260px" className="object-cover transition-transform duration-[1.2s] group-hover:scale-110" />
         <div className="absolute inset-0 bg-gradient-to-t from-ink/90 via-ink/20 to-transparent" />
         <span className="absolute left-4 top-4 grid h-9 w-9 place-items-center rounded-full font-display text-lg text-paper" style={{ background: accent }}>{String(i + 2).padStart(2, "0")}</span>

@@ -30,7 +30,7 @@ function Curtains() {
     return () => clearTimeout(id);
   }, [reduce]);
   const velvet = {
-    backgroundColor: "#6d1418",
+    backgroundColor: "#0a3db8",
     backgroundImage:
       "repeating-linear-gradient(90deg, rgb(0 0 0 / .32) 0 6px, rgb(255 255 255 / .05) 14px, rgb(0 0 0 / .18) 26px, rgb(255 255 255 / .07) 38px, rgb(0 0 0 / .32) 48px), linear-gradient(180deg, rgb(0 0 0 / .25), transparent 30%, rgb(0 0 0 / .35))",
   };
@@ -48,7 +48,7 @@ function Curtains() {
               transition={{ duration: 1.6, delay: 0.35, ease: [0.65, 0, 0.35, 1] }}
             >
               <div className="absolute inset-x-0 bottom-0 h-6 bg-[repeating-linear-gradient(90deg,#c9a24f_0_6px,#8a6a2b_6px_10px)] opacity-90" />
-              <div className="absolute inset-x-0 top-0 h-14 bg-[linear-gradient(180deg,#4a0d10,#6d1418)] shadow-[0_6px_14px_rgb(0_0_0/.5)]" />
+              <div className="absolute inset-x-0 top-0 h-14 bg-[linear-gradient(180deg,#04205e,#0a3db8)] shadow-[0_6px_14px_rgb(0_0_0/.5)]" />
             </motion.div>
           ))}
           <motion.p initial={{ opacity: 1 }} animate={{ opacity: 0 }} transition={{ duration: 0.4, delay: 0.3 }} className="absolute inset-0 grid place-items-center font-display text-3xl tracking-[0.5em] text-[#f3dfb0]">MUHURTO</motion.p>
@@ -151,19 +151,36 @@ export function Hero() {
           </AnimatePresence>
           </motion.div>
         </motion.div>
-        <div className="absolute inset-0 -z-10 bg-[linear-gradient(100deg,rgb(23_19_15/0.9)_0%,rgb(23_19_15/0.62)_45%,rgb(23_19_15/0.25)_100%)]" />
+        <div className="absolute inset-0 -z-10 bg-[linear-gradient(100deg,rgb(10_22_51/0.9)_0%,rgb(10_22_51/0.62)_45%,rgb(10_22_51/0.25)_100%)]" />
         <div className="absolute inset-x-0 bottom-0 -z-10 h-56 bg-gradient-to-t from-ivory to-transparent" />
         <FairyLights />
         <Petals />
         <HeroDecor />
 
+        {/* Brand emblem: the clock-and-sunflower mark swings in and floats */}
+        <motion.div
+          aria-hidden
+          style={{ opacity: fade }}
+          initial={{ opacity: 0, rotateY: -100, scale: 0.6 }}
+          animate={{ opacity: 1, rotateY: 0, scale: 1 }}
+          transition={{ type: "spring", stiffness: 60, damping: 14, delay: 1.6 }}
+          className="pointer-events-none absolute right-[6%] top-1/2 z-10 hidden -translate-y-1/2 [perspective:1000px] xl:block"
+        >
+          <motion.div animate={{ y: [0, -14, 0], rotate: [0, 3, 0] }} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }} className="relative">
+            <div className="absolute -inset-10 rounded-full bg-[radial-gradient(circle,rgb(0_190_254/.45),transparent_65%)] blur-2xl" />
+            <div className="relative grid h-[300px] w-[300px] place-items-center rounded-full bg-paper/95 p-6 shadow-[0_40px_80px_-30px_rgb(0_0_0/.7),inset_0_0_0_6px_rgb(0_190_254/.35)]">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/brand/muhurto-logo.png" alt="" className="h-full w-full object-contain" />
+            </div>
+          </motion.div>
+        </motion.div>
         <motion.div style={{ opacity: fade, filter: blur, x: fgX, y: fgY }} className="container-x relative z-20">
           <motion.p initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 1.2 }} className="mb-6 inline-flex items-center gap-2 rounded-full border border-paper/20 bg-paper/10 px-4 py-1.5 text-[0.7rem] font-semibold tracking-[0.22em] text-paper/90 uppercase backdrop-blur">
-            <Sparkles className="h-3.5 w-3.5 text-gold-soft" /> {t("Event management · Bangladesh")}
+            <Sparkles className="h-3.5 w-3.5 text-sunflower" /> {t("Event management · Bangladesh")}
           </motion.p>
           <h1 className="max-w-3xl text-[2.9rem] leading-[1.02] font-medium text-paper sm:text-6xl lg:text-[5.4rem]">
             <SplitWords text={t("Every Moment Deserves to Be")} inView={false} delay={1.3} />{" "}
-            <em className="font-display text-gold-soft italic"><SplitWords text={t("Extraordinary.")} inView={false} delay={1.75} /></em>
+            <em className="font-display text-sky italic"><SplitWords text={t("Extraordinary.")} inView={false} delay={1.75} /></em>
           </h1>
           <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, delay: 2.1 }} className="mt-6 max-w-xl text-lg text-paper/85 sm:text-xl">
             {t("We make your special moments even more memorable.")}

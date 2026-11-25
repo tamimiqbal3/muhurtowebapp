@@ -38,7 +38,7 @@ export function PageHero({ title, bn, eyebrow, description, image, crumbs, child
   return (
     <section className="relative isolate overflow-hidden pb-16 pt-36 text-paper sm:pb-20 sm:pt-44">
       <div className="absolute inset-0 -z-20 overflow-hidden"><SafeImage src={image.src} alt={image.alt} fill priority sizes="100vw" className="animate-kenburns object-cover" /></div>
-      <div className="absolute inset-0 -z-10 bg-[linear-gradient(110deg,rgb(23_19_15/0.9),rgb(23_19_15/0.55)_55%,rgb(23_19_15/0.25))]" />
+      <div className="absolute inset-0 -z-10 bg-[linear-gradient(110deg,rgb(10_22_51/0.9),rgb(10_22_51/0.55)_55%,rgb(10_22_51/0.25))]" />
       {accent && <div className="absolute inset-x-0 bottom-0 -z-10 h-1" style={{ background: accent }} />}
       <div className="container-x">
         {crumbs && <Breadcrumbs items={crumbs} light />}

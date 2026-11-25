@@ -127,9 +127,9 @@ Visa and Mastercard fall back to their Wikimedia Commons files until local copie
 
 ---
 
-## Event Planner (calculator)
+## Event Planner
 
-`/event-planner` is a calculator-style planner: an LCD, function keys (EVENT / CITY / THEME cycle; DATE, GUESTS and BUDGET switch the keypad's entry mode), service keys with indicator LEDs, a numeric keypad with `K`, `LAKH`, `00`, `⌫`, `C`, `AC` and `=`, optional key sounds (Web Audio, toggle on the device), full keyboard support, and a receipt printer that prints the itemised estimate with a count-up total and a tear-off. A free-text note (“wedding in Rajshahi, 400 guests, 3 lakh”) can be typed instead and is parsed by Gemini (server-side) with a regex fallback. Recommendations:
+`/event-planner` lays the whole event out on one page, the way people spread brochures and menus on a table: occasion cards, guest and budget sliders with quick presets, date / city / theme, every service for that occasion (one pick per row) and the food counter (pick as many as you like). A receipt on the right totals live with the 2% fee, rolls its digits like a mechanical counter, shows a budget meter, and lets each line's quantity be adjusted. Picked items fly into the receipt. **Suggest the best plan** fills the table for you; a one-line note (“wedding in Rajshahi, 400 guests, 3 lakh”) fills in the details — parsed by Gemini (server-side) with a regex fallback. Recommendations:
 
 - Gemini only sees — and may only return — IDs of listings in the catalogue; anything else is discarded.
 - Prices and totals are always computed on the server from the catalogue; results are labelled as estimates.
@@ -144,6 +144,14 @@ Visa and Mastercard fall back to their Wikimedia Commons files until local copie
 3. Deploy. Then add the domain to Firebase Auth authorized domains and set the SSLCommerz IPN URL.
 
 ---
+
+## Food counter
+
+The Food & Culinary page (and the planner's food step) shows dishes like a shop counter: a striped awning, a chalkboard sign, glass shelves for platters, fuchka counters and the cha/coffee bar, a plate and a hanging price tag for each item. Tap a dish to put it in your tray; the tray scales quantities to your guest count and totals as you pick.
+
+## Brand
+
+Colours: primary `#015fff`, secondary `#00befe` (Tailwind tokens `brand`, `sky`, with `bg-brand-gradient`). The logo lives in `public/brand/` (`muhurto-logo.png` with a transparent background, the 192px version used in the header, and the original upload); `src/app/icon.png` and `apple-icon.png` are generated from it.
 
 ## Languages (English / বাংলা)
 

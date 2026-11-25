@@ -37,7 +37,7 @@ function Scene() {
     <>
       <ambientLight intensity={0.55} />
       <directionalLight position={[3, 4, 5]} intensity={1.6} color="#fff3dc" />
-      <pointLight position={[-4, -2, 3]} intensity={12} color="#c9822b" />
+      <pointLight position={[-4, -2, 3]} intensity={12} color="#f29a1d" />
       {/* Gold rings — like bangles on a bridal tray */}
       <Floating position={[1.6, 0.9, 0]} speed={0.7}>
         <mesh rotation={[1.1, 0.2, 0]}>
@@ -48,14 +48,14 @@ function Scene() {
       <Floating position={[2.4, -0.6, -1]} speed={0.9}>
         <mesh rotation={[0.4, 0.8, 0]}>
           <torusGeometry args={[0.38, 0.04, 20, 80]} />
-          <meshStandardMaterial color="#b08d57" metalness={0.95} roughness={0.25} />
+          <meshStandardMaterial color="#ffc727" metalness={0.95} roughness={0.25} />
         </mesh>
       </Floating>
       {/* Jamdani diamond */}
       <Floating position={[0.7, -1.1, 0.6]} speed={0.8} rotate={0.5}>
         <mesh>
           <octahedronGeometry args={[0.36, 0]} />
-          <meshStandardMaterial color="#9b2226" metalness={0.3} roughness={0.35} flatShading />
+          <meshStandardMaterial color="#015fff" metalness={0.3} roughness={0.35} flatShading />
         </mesh>
       </Floating>
       {/* Marigold petals */}

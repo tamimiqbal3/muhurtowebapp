@@ -10,6 +10,7 @@ import { ServiceGrid } from "./ServiceGrid";
 import { SafeImage } from "../ui/SafeImage";
 import { Reveal } from "../motion/Reveal";
 import { formatBDT } from "@/lib/format";
+import { FoodShopSection } from "../food/FoodShopSection";
 import { getT } from "@/lib/i18n/server";
 import { localizeCategory, localizeService, localizeVendor } from "@/data/i18n-data";
 
@@ -39,6 +40,13 @@ export async function CategoryLanding({ slug }: { slug: CategorySlug }) {
         </div>
       </PageHero>
 
+      {slug === "food-culinary" ? (
+        <div className="container-x pt-14">
+          {source === "demo" && <Notice title={t("Sample listings")} className="mb-10">{t("These listings, vendors, ratings and reviews are demo data for this pre-launch build. Prices are indicative starting prices.")}</Notice>}
+          <FoodShopSection services={list} />
+        </div>
+      ) : (
+        <>
       {/* Subsection navigation */}
       <nav aria-label={t("{cat} sections", { cat: category.name })} className="sticky top-[72px] z-30 border-b border-line bg-ivory/90 backdrop-blur-xl">
         <ul className="container-x scrollbar-none flex gap-2 overflow-x-auto py-3">
@@ -66,7 +74,7 @@ export async function CategoryLanding({ slug }: { slug: CategorySlug }) {
                     <SafeImage src={img.src} alt="" fill sizes="80px" className="object-cover transition-transform duration-700 group-hover:scale-110" />
                   </div>
                   <div className="min-w-0 flex-1">
-                                        <h2 className="text-2xl leading-tight">{sub.name}</h2>
+                    <h2 className="text-2xl leading-tight">{sub.name}</h2>
                     <p className="text-xs text-muted">{t("{n} services", { n: items.length })}{min != null && ` · ${t("from {price}", { price: formatBDT(min) })}`}</p>
                   </div>
                   <ArrowUpRight className="h-5 w-5 text-muted transition group-hover:text-sindoor" />
@@ -97,6 +105,8 @@ export async function CategoryLanding({ slug }: { slug: CategorySlug }) {
           </section>
         );
       })}
+        </>
+      )}
     </>
   );
 }
