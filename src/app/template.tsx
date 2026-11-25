@@ -7,8 +7,8 @@ import { useEffect, useState, type ReactNode } from "react";
 let firstMount = true;
 
 /**
- * Route changes cut like an edit: a brand-blue panel wipes across with the mark,
- * then slides away to reveal the next page. Only opacity is used on the page itself,
+ * Route changes cut like an edit: the frame shutters to black for a beat,
+ * then opens onto the next page. Only opacity is used on the page itself,
  * so fixed-position UI inside pages (sheets, toasts) is never re-parented by a transform.
  */
 export default function Template({ children }: { children: ReactNode }) {
@@ -28,17 +28,11 @@ export default function Template({ children }: { children: ReactNode }) {
       </motion.div>
       <AnimatePresence>
         {wipe && (
-          <motion.div
-            aria-hidden
-            className="pointer-events-none fixed inset-0 z-[95] grid place-items-center bg-[linear-gradient(120deg,#015fff,#00befe)]"
-            initial={{ clipPath: "inset(0 0 0 0)" }}
-            exit={{ clipPath: "inset(0 0 0 100%)" }}
-            transition={{ duration: 0.75, ease: [0.76, 0, 0.24, 1] }}
-          >
-            <motion.span className="grid h-20 w-20 place-items-center rounded-full bg-paper p-1.5 shadow-2xl" initial={{ scale: 0.85, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 1.2, opacity: 0 }} transition={{ duration: 0.4 }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/brand/muhurto-logo-192.png" alt="" className="h-full w-full object-contain" />
-            </motion.span>
+          <motion.div key="cut" aria-hidden className="pointer-events-none fixed inset-0 z-[95]" exit={{ opacity: 1 }} transition={{ duration: 0.8 }}>
+            {/* a film cut: the frame shutters closed, then opens on the next scene */}
+            <motion.div className="absolute inset-x-0 top-0 h-1/2 bg-[#04060c]" initial={{ y: "0%" }} exit={{ y: "-100%" }} transition={{ duration: 0.8, ease: [0.76, 0, 0.24, 1] }} />
+            <motion.div className="absolute inset-x-0 bottom-0 h-1/2 bg-[#04060c]" initial={{ y: "0%" }} exit={{ y: "100%" }} transition={{ duration: 0.8, ease: [0.76, 0, 0.24, 1] }} />
+            <motion.div className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-[linear-gradient(90deg,transparent,#00befe,#fff,#00befe,transparent)]" initial={{ scaleX: 0, opacity: 1 }} animate={{ scaleX: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }} />
           </motion.div>
         )}
       </AnimatePresence>

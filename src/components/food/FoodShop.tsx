@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion, useReducedMotion, AnimatePresence } from "motion/react";
-import { Check, Coffee, Soup, UtensilsCrossed, Info } from "lucide-react";
+import { Check } from "lucide-react";
 import type { Service } from "@/lib/types";
 import { formatBDT } from "@/lib/format";
 import { unitLabel } from "@/lib/pricing";
@@ -11,7 +11,6 @@ import { useLang } from "../i18n/LanguageProvider";
 import { SafeImage } from "../ui/SafeImage";
 import { cn } from "@/lib/utils";
 
-const SHELF_ICON: Record<string, typeof Coffee> = { platter: UtensilsCrossed, fuchka: Soup, "cha-coffee": Coffee };
 const SHELF_TITLE: Record<string, string> = { platter: "Platters & set menus", fuchka: "Fuchka & street counters", "cha-coffee": "Cha & coffee bar" };
 
 /**
@@ -62,11 +61,9 @@ export function FoodShop({ services, picked, onPick, onItemEl, className }: {
 
       <div className="space-y-9 px-4 pt-8 pb-8 sm:px-8">
         {shelves.map(({ sub, items }, si) => {
-          const Icon = SHELF_ICON[sub] ?? UtensilsCrossed;
           return (
             <section key={sub} aria-label={t(SHELF_TITLE[sub] ?? SUB_LABELS[sub] ?? sub)}>
               <div className="mb-3 flex items-center gap-2">
-                <span className="grid h-8 w-8 place-items-center rounded-full bg-brand text-paper shadow"><Icon className="h-4 w-4" /></span>
                 <h3 className="font-display text-2xl text-[#4a2f14]">{t(SHELF_TITLE[sub] ?? SUB_LABELS[sub] ?? sub)}</h3>
               </div>
               {/* Glass display case */}
@@ -150,7 +147,7 @@ function Dish({ service, picked, onPick, onItemEl, index }: { service: Service; 
       <div className="mt-1.5 flex items-center gap-2 text-[0.7rem]">
         <span className={cn("rounded-full px-2 py-0.5 font-semibold", picked ? "bg-brand/10 text-brand" : "bg-[#f3e4c4] text-[#6b4a22]")}>{picked ? t("In your tray") : t("Tap to pick")}</span>
         <Link href={`/service/${service.id}`} className="inline-flex items-center gap-0.5 text-[#8a6a43] underline-offset-2 hover:text-brand hover:underline" aria-label={t("View {name}", { name: service.name })}>
-          <Info className="h-3 w-3" /> {t("Details")}
+          {t("Details")}
         </Link>
       </div>
     </motion.li>

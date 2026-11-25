@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Mail, MapPin, Phone, Clock } from "lucide-react";
 import { PageHero } from "@/components/layout/PageHero";
 import { ContactForm } from "@/components/ContactForm";
 import { Reveal } from "@/components/motion/Reveal";
@@ -13,10 +12,10 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function ContactPage() {
   const { t } = await getT();
   const rows = [
-    { icon: MapPin, t: t("Visit"), b: t("House 12, Road 7, Banani, Dhaka 1213") },
-    { icon: Phone, t: t("Call"), b: "+880 9600-000000" },
-    { icon: Mail, t: t("Email"), b: "hello@muhurto.app" },
-    { icon: Clock, t: t("Hours"), b: t("Saturday–Thursday, 10am–8pm") },
+    { t: t("Visit"), b: t("House 12, Road 7, Banani, Dhaka 1213") },
+    { t: t("Call"), b: "+880 9600-000000" },
+    { t: t("Email"), b: "hello@muhurto.app" },
+    { t: t("Hours"), b: t("Saturday–Thursday, 10am–8pm") },
   ];
   return (
     <>
@@ -24,9 +23,8 @@ export default async function ContactPage() {
       <div className="container-x grid gap-10 pt-12 lg:grid-cols-[1fr_1.4fr]">
         <div className="space-y-6">
           {rows.map((x, i) => (
-            <Reveal key={x.t} variant="slide" delay={i * 0.08} className="flex gap-4">
-              <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-sand text-sindoor"><x.icon className="h-5 w-5" /></span>
-              <div><p className="text-sm font-semibold">{x.t}</p><p className="text-sm text-ink-soft">{x.b}</p></div>
+            <Reveal key={x.t} variant="slide" delay={i * 0.08} className="border-t border-line pt-4">
+              <p className="text-[0.7rem] font-semibold tracking-[0.2em] text-muted uppercase">{x.t}</p><p className="mt-1 text-lg">{x.b}</p>
             </Reveal>
           ))}
           <p className="text-xs text-muted">{t("Address and numbers are placeholders until launch.")}</p>

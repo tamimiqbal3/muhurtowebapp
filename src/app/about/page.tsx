@@ -5,6 +5,7 @@ import { JamdaniRule, SectionHeading } from "@/components/ui/misc";
 import { ButtonLink } from "@/components/ui/Button";
 import { Reveal } from "@/components/motion/Reveal";
 import { Gallery, HowItWorks, Testimonials, WhyChoose } from "@/components/home/Sections";
+import { Scene } from "@/components/motion/Cinema";
 import { IMG } from "@/data/images";
 import { getT } from "@/lib/i18n/server";
 
@@ -47,10 +48,10 @@ export default async function AboutPage() {
           ))}
         </div>
       </section>
-      <HowItWorks />
-      <WhyChoose />
-      <Gallery />
-      <Testimonials />
+      <Scene><HowItWorks /></Scene>
+      <Scene><WhyChoose /></Scene>
+      <Scene><Gallery /></Scene>
+      <Scene><Testimonials /></Scene>
       <div className="container-x mt-16 flex flex-wrap justify-center gap-3">
         <ButtonLink href="/event-planner" variant="accent" size="lg">{t("Plan your event")}</ButtonLink>
         <ButtonLink href="/contact" variant="outline" size="lg">{t("Partner with us")}</ButtonLink>

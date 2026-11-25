@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Check, Plus, Trash2, Send, ArrowRight, MessageSquareHeart } from "lucide-react";
+import { Check, Plus, Trash2, Send, ArrowRight } from "lucide-react";
 import type { CategorySlug, Service, Vendor } from "@/lib/types";
 import { CATEGORIES, getCategory } from "@/data/categories";
 import { formatBDT } from "@/lib/format";
@@ -100,7 +100,6 @@ export function Customizer({ services, vendors }: { services: Service[]; vendors
   if (sent) {
     return (
       <div className="card mx-auto max-w-xl p-10 text-center">
-        <MessageSquareHeart className="mx-auto h-10 w-10 text-sindoor" />
         <h2 className="mt-4 text-4xl">{t("Request sent")}</h2>
         <p className="mt-3 text-ink-soft">{t("Our planning team will review your plan and reply with an updated proposal. You'll see it under Customisation requests in your dashboard, where you can approve it before paying.")}</p>
         <div className="mt-6 flex justify-center gap-2">

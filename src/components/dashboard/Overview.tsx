@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Bell, MessageSquareHeart, LifeBuoy, Receipt, CalendarClock } from "lucide-react";
+
 import type { AppNotification, CustomizationRequest } from "@/lib/types";
 import { getCategory } from "@/data/categories";
 import { cityName, localizeCategory } from "@/data/i18n-data";
@@ -46,7 +46,7 @@ export function Overview() {
       </div>
 
       <section aria-labelledby="upcoming">
-        <h2 id="upcoming" className="mb-4 inline-flex items-center gap-2 text-3xl"><CalendarClock className="h-6 w-6 text-gold" /> {t("Upcoming events & monitoring")}</h2>
+        <h2 id="upcoming" className="mb-4 text-3xl">{t("Upcoming events & monitoring")}</h2>
         {!bookings ? <Skeleton className="h-28" /> : upcoming.length === 0 ? (
           <EmptyState title={t("No upcoming events")} body={t("Plan something wonderful — your events and their monitoring status will appear here.")} action={<ButtonLink href="/event-planner" variant="accent">{t("Plan an event")}</ButtonLink>} />
         ) : (
@@ -73,7 +73,7 @@ export function Overview() {
       <CustomizationRequests />
 
       <section aria-labelledby="payments">
-        <h2 id="payments" className="mb-4 inline-flex items-center gap-2 text-3xl"><Receipt className="h-6 w-6 text-gold" /> {t("Payment history")}</h2>
+        <h2 id="payments" className="mb-4 text-3xl">{t("Payment history")}</h2>
         {!bookings ? <Skeleton className="h-20" /> : paid.length === 0 ? <p className="text-sm text-ink-soft">{t("No completed payments yet.")}</p> : (
           <div className="card overflow-x-auto p-2">
             <table className="w-full min-w-[520px] text-sm">
@@ -98,7 +98,7 @@ export function Overview() {
 
       <section aria-labelledby="support" className="grid gap-6 lg:grid-cols-[1fr_1.2fr]">
         <div>
-          <h2 id="support" className="inline-flex items-center gap-2 text-3xl"><LifeBuoy className="h-6 w-6 text-gold" /> {t("Support")}</h2>
+          <h2 id="support" className="text-3xl">{t("Support")}</h2>
           <p className="mt-2 text-sm text-ink-soft">{t("Questions about a booking, a vendor or a payment? Send us a message and our support team will reply by email or phone.")}</p>
         </div>
         <div className="card p-6"><ContactForm compact /></div>
@@ -156,7 +156,7 @@ function CustomizationRequests() {
   return (
     <section id="customizations" aria-labelledby="custom-h" className="scroll-mt-28">
       <div className="mb-4 flex items-center justify-between gap-3">
-        <h2 id="custom-h" className="inline-flex items-center gap-2 text-3xl"><MessageSquareHeart className="h-6 w-6 text-gold" /> {t("Customisation requests")}</h2>
+        <h2 id="custom-h" className="text-3xl">{t("Customisation requests")}</h2>
         <ButtonLink href="/customize" variant="outline" size="sm">{t("New request")}</ButtonLink>
       </div>
       {error && <Notice tone="warning" className="mb-3">{t(error)}</Notice>}
@@ -245,7 +245,7 @@ function Notifications() {
   return (
     <section aria-labelledby="notif">
       <div className="mb-4 flex items-center justify-between">
-        <h2 id="notif" className="inline-flex items-center gap-2 text-3xl"><Bell className="h-6 w-6 text-gold" /> {t("Notifications")} {unread > 0 && <Badge tone="sindoor">{t("{n} new", { n: unread })}</Badge>}</h2>
+        <h2 id="notif" className="text-3xl">{t("Notifications")} {unread > 0 && <Badge tone="sindoor">{t("{n} new", { n: unread })}</Badge>}</h2>
         {unread > 0 && <button onClick={markAll} className="text-xs font-semibold text-ink-soft hover:text-ink">{t("Mark all read")}</button>}
       </div>
       {!items ? <Skeleton className="h-20" /> : items.length === 0 ? <p className="text-sm text-ink-soft">{t("You're all caught up.")}</p> : (

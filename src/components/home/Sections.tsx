@@ -1,4 +1,3 @@
-import { ShieldCheck, Radar, SlidersHorizontal, LockKeyhole, Headphones, Quote } from "lucide-react";
 import { getGallery, getSteps, getTestimonials } from "@/data/content";
 import { IMG } from "@/data/images";
 import { SafeImage } from "../ui/SafeImage";
@@ -11,14 +10,13 @@ export async function HowItWorks() {
   const { t, lang } = await getT();
   return (
     <section className="relative mt-28 overflow-hidden bg-ink py-24 text-paper">
-      <div className="jamdani absolute inset-0 opacity-[0.07]" aria-hidden />
       <div className="container-x relative">
         <SectionHeading eyebrow={t("How it works")} title={<span className="text-paper">{t("From idea to celebration, in four steps")}</span>} className="[&_.eyebrow]:text-paper/60" />
         <ol className="mt-14 grid gap-px overflow-hidden rounded-[var(--radius-card)] bg-paper/10 sm:grid-cols-2 lg:grid-cols-4 [perspective:1200px]">
           {getSteps(lang).map((s, i) => (
             <Reveal as="li" key={s.n} variant="unfold" delay={i * 0.12} className="bg-ink p-8">
-              <span className="font-display text-6xl text-gold/80">{s.n}</span>
-              <h3 className="mt-6 text-2xl text-paper">{s.title}</h3>
+              <span className="font-lcd text-sm tracking-[0.3em] text-sky">{s.n}</span>
+              <h3 className="mt-4 text-2xl text-paper">{s.title}</h3>
               <p className="mt-3 text-sm leading-relaxed text-paper/65">{s.body}</p>
             </Reveal>
           ))}
@@ -31,11 +29,11 @@ export async function HowItWorks() {
 export async function WhyChoose() {
   const { t } = await getT();
   const why = [
-    { icon: ShieldCheck, title: t("Verified Service Providers"), body: t("Vendors are reviewed for quality, reliability and fair pricing before they are listed.") },
-    { icon: Radar, title: t("Centralized Event Monitoring"), body: t("A dedicated Monitoring Agent coordinates every vendor and updates your dashboard.") },
-    { icon: SlidersHorizontal, title: t("Customizable Packages"), body: t("Mix services, quantities and add-ons, or request a tailored plan from our team.") },
-    { icon: LockKeyhole, title: t("Secure Payments"), body: t("Pay with bKash, Nagad, Rocket, Visa or Mastercard through SSLCommerz. 2% fee, shown upfront.") },
-    { icon: Headphones, title: t("Dedicated Support"), body: t("Real people to help in Bangla or English — before, during and after your event.") },
+    { title: t("Verified Service Providers"), body: t("Vendors are reviewed for quality, reliability and fair pricing before they are listed.") },
+    { title: t("Centralized Event Monitoring"), body: t("A dedicated Monitoring Agent coordinates every vendor and updates your dashboard.") },
+    { title: t("Customizable Packages"), body: t("Mix services, quantities and add-ons, or request a tailored plan from our team.") },
+    { title: t("Secure Payments"), body: t("Pay with bKash, Nagad, Rocket, Visa or Mastercard through SSLCommerz. 2% fee, shown upfront.") },
+    { title: t("Dedicated Support"), body: t("Real people to help in Bangla or English — before, during and after your event.") },
   ];
   return (
     <section className="container-x grid items-center gap-14 pt-28 lg:grid-cols-2">
@@ -49,10 +47,9 @@ export async function WhyChoose() {
       </Reveal>
       <div className="order-1 lg:order-2">
         <SectionHeading eyebrow={t("Why choose MUHURTO")} title={t("One platform. Zero vendor-chasing.")} />
-        <ul className="mt-10 space-y-6">
+        <ul className="mt-10 space-y-5">
           {why.map((w, i) => (
-            <Reveal as="li" key={w.title} variant="slide" delay={i * 0.08} className="flex gap-5">
-              <span className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-sand text-sindoor"><w.icon className="h-5 w-5" /></span>
+            <Reveal as="li" key={w.title} variant="slide" delay={i * 0.08} className="border-t border-line pt-5">
               <div>
                 <h3 className="font-sans text-base font-semibold">{w.title}</h3>
                 <p className="mt-1 text-sm leading-relaxed text-ink-soft">{w.body}</p>
@@ -95,7 +92,6 @@ export async function Testimonials() {
       <div className="mt-12 grid gap-5 md:grid-cols-2 lg:grid-cols-4">
         {getTestimonials(lang).map((x, i) => (
           <Reveal key={x.name} variant="deal" delay={i * 0.1} className="card flex flex-col p-6">
-            <Quote className="h-6 w-6 text-gold" />
             <p className="mt-4 flex-1 font-display text-xl leading-snug">{x.quote}</p>
             <div className="mt-6 border-t border-line pt-4">
               <p className="text-sm font-semibold">{x.name}</p>

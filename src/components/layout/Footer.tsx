@@ -20,7 +20,6 @@ export async function Footer() {
   const links: Array<[string, string]> = [["About", "/about"], ["Event Planner", "/event-planner"], ["Customize a plan", "/customize"], ["Search services", "/search"], ["My bookings", "/my-bookings"], ["FAQ", "/faq"], ["Contact", "/contact"]];
   return (
     <footer className="relative mt-28 bg-ink text-paper/80">
-      <div className="jamdani absolute inset-x-0 top-0 h-3 opacity-60" aria-hidden />
       <div className="container-x grid gap-12 py-16 md:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1.2fr]">
         <div>
           <Logo light />

@@ -1,7 +1,7 @@
 "use client";
 
 import { AnimatePresence, motion } from "motion/react";
-import { X, Trash2, ArrowRight, Sparkles } from "lucide-react";
+import { X, Trash2, ArrowRight } from "lucide-react";
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { lineEstimate, usePlan, usePlanItemName } from "./PlanProvider";
@@ -54,7 +54,6 @@ export function PlanDrawer() {
             <div className="flex-1 space-y-4 overflow-y-auto px-6 py-5">
               {plan.items.length === 0 && (
                 <div className="py-16 text-center">
-                  <Sparkles className="mx-auto h-8 w-8 text-gold" />
                   <p className="mt-4 font-display text-2xl">{t("Your plan is empty")}</p>
                   <p className="mt-1 text-sm text-ink-soft">{t("Add services from any category, or let the planner calculator suggest a combination.")}</p>
                   <ButtonLink href="/event-planner" variant="outline" size="sm" className="mt-6">{t("Open the planner")}</ButtonLink>

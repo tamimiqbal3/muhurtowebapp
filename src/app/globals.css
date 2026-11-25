@@ -207,3 +207,26 @@
   box-shadow: 0 4px 12px rgb(1 95 255 / 0.45);
   cursor: grab;
 }
+
+/* ── Loading screen: delivery truck ── */
+.truck-skyline { background: url("data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22420%22%20height%3D%2278%22%20viewBox%3D%220%200%20420%2078%22%3E%3Cg%20fill%3D%22%2316357f%22%20fill-opacity%3D%22.55%22%3E%3Crect%20x%3D%220%22%20y%3D%2240%22%20width%3D%2226%22%20height%3D%2238%22/%3E%3Crect%20x%3D%2230%22%20y%3D%2222%22%20width%3D%2220%22%20height%3D%2256%22/%3E%3Crect%20x%3D%2254%22%20y%3D%2248%22%20width%3D%2234%22%20height%3D%2230%22/%3E%3Crect%20x%3D%2292%22%20y%3D%2212%22%20width%3D%2218%22%20height%3D%2266%22/%3E%3Crect%20x%3D%2296%22%20y%3D%224%22%20width%3D%222%22%20height%3D%228%22/%3E%3Crect%20x%3D%22114%22%20y%3D%2234%22%20width%3D%2228%22%20height%3D%2244%22/%3E%3Crect%20x%3D%22146%22%20y%3D%2252%22%20width%3D%2240%22%20height%3D%2226%22/%3E%3Crect%20x%3D%22190%22%20y%3D%2226%22%20width%3D%2222%22%20height%3D%2252%22/%3E%3Crect%20x%3D%22216%22%20y%3D%2244%22%20width%3D%2230%22%20height%3D%2234%22/%3E%3Crect%20x%3D%22250%22%20y%3D%2218%22%20width%3D%2216%22%20height%3D%2260%22/%3E%3Crect%20x%3D%22270%22%20y%3D%2236%22%20width%3D%2236%22%20height%3D%2242%22/%3E%3Crect%20x%3D%22310%22%20y%3D%2254%22%20width%3D%2228%22%20height%3D%2224%22/%3E%3Crect%20x%3D%22342%22%20y%3D%2228%22%20width%3D%2224%22%20height%3D%2250%22/%3E%3Crect%20x%3D%22370%22%20y%3D%2246%22%20width%3D%2250%22%20height%3D%2232%22/%3E%3C/g%3E%3Cg%20fill%3D%22%23ffe6a3%22%20fill-opacity%3D%22.55%22%3E%3Crect%20x%3D%2235%22%20y%3D%2230%22%20width%3D%223%22%20height%3D%223%22/%3E%3Crect%20x%3D%2242%22%20y%3D%2242%22%20width%3D%223%22%20height%3D%223%22/%3E%3Crect%20x%3D%2297%22%20y%3D%2224%22%20width%3D%223%22%20height%3D%223%22/%3E%3Crect%20x%3D%22120%22%20y%3D%2244%22%20width%3D%223%22%20height%3D%223%22/%3E%3Crect%20x%3D%22196%22%20y%3D%2236%22%20width%3D%223%22%20height%3D%223%22/%3E%3Crect%20x%3D%22254%22%20y%3D%2230%22%20width%3D%223%22%20height%3D%223%22/%3E%3Crect%20x%3D%22278%22%20y%3D%2248%22%20width%3D%223%22%20height%3D%223%22/%3E%3Crect%20x%3D%22348%22%20y%3D%2240%22%20width%3D%223%22%20height%3D%223%22/%3E%3C/g%3E%3C/svg%3E") repeat-x bottom left / 420px 78px; animation: truck-pan 28s linear infinite; }
+.truck-trees { background: url("data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22240%22%20height%3D%2256%22%20viewBox%3D%220%200%20240%2056%22%3E%3Cg%20fill%3D%22%230d2a5c%22%3E%3Crect%20x%3D%2230%22%20y%3D%2234%22%20width%3D%223%22%20height%3D%2222%22/%3E%3Ccircle%20cx%3D%2231.5%22%20cy%3D%2228%22%20r%3D%2212%22/%3E%3Crect%20x%3D%22150%22%20y%3D%2240%22%20width%3D%223%22%20height%3D%2216%22/%3E%3Ccircle%20cx%3D%22151.5%22%20cy%3D%2234%22%20r%3D%229%22/%3E%3Ccircle%20cx%3D%22162%22%20cy%3D%2238%22%20r%3D%227%22/%3E%3C/g%3E%3Cg%20fill%3D%22%23243556%22%3E%3Crect%20x%3D%2296%22%20y%3D%2214%22%20width%3D%222%22%20height%3D%2242%22/%3E%3Crect%20x%3D%2296%22%20y%3D%2214%22%20width%3D%2212%22%20height%3D%222%22/%3E%3C/g%3E%3Crect%20x%3D%22105%22%20y%3D%2216%22%20width%3D%225%22%20height%3D%222%22%20fill%3D%22%23ffe6a3%22/%3E%3C/svg%3E") repeat-x bottom left / 240px 56px; animation: truck-pan-trees 5s linear infinite; }
+.truck-lane { background: repeating-linear-gradient(90deg, #ffe6a3 0 26px, transparent 26px 58px); animation: truck-lane 0.42s linear infinite; }
+.truck-body { animation: truck-bob 0.36s ease-in-out infinite alternate; }
+.truck-wheel { transform-box: fill-box; transform-origin: center; animation: truck-spin 0.45s linear infinite; }
+.truck-beam { opacity: .35; animation: truck-beam 1.8s ease-in-out infinite; }
+.truck-puff { transform-box: fill-box; transform-origin: center; animation: truck-puff 1.2s ease-out infinite; opacity: 0; }
+.truck-puff-2 { animation-delay: .4s; }
+.truck-puff-3 { animation-delay: .8s; }
+.truck-dots::after { content: ""; display: inline-block; width: 1.2em; text-align: left; animation: truck-dots 1.4s steps(4) infinite; }
+@keyframes truck-pan { to { background-position-x: -420px; } }
+@keyframes truck-pan-trees { to { background-position-x: -240px; } }
+@keyframes truck-lane { to { background-position-x: -58px; } }
+@keyframes truck-bob { from { transform: translateY(0); } to { transform: translateY(-1.2px); } }
+@keyframes truck-spin { to { transform: rotate(360deg); } }
+@keyframes truck-beam { 0%, 100% { opacity: .25; } 50% { opacity: .5; } }
+@keyframes truck-puff { 0% { opacity: .8; transform: translate(0, 0) scale(.6); } 100% { opacity: 0; transform: translate(-22px, -10px) scale(1.8); } }
+@keyframes truck-dots { 0% { content: ""; } 25% { content: "."; } 50% { content: ".."; } 75% { content: "..."; } }
+@media (prefers-reduced-motion: reduce) {
+  .truck-skyline, .truck-trees, .truck-lane, .truck-body, .truck-wheel, .truck-beam, .truck-puff, .truck-dots::after { animation: none; }
+}

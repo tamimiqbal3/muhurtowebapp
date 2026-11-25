@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { Aperture, Armchair, ArrowRight, CalendarDays, Camera, Check, Flower2, Lightbulb, MapPin, Minus, Palette, Plus, RotateCcw, Sparkles, Speaker, Users, Wallet, Wand2, X, Receipt } from "lucide-react";
+import { ArrowRight, Check, Minus, Plus, RotateCcw, X } from "lucide-react";
 import type { CategorySlug, PlannerRequirements, PlannerResult, Service } from "@/lib/types";
 import { CATEGORIES, CITIES } from "@/data/categories";
 import { EVENT_SUBS, SUB_LABELS, THEMES } from "@/lib/planner/constants";
@@ -18,7 +18,6 @@ import { useFlyToTarget } from "../food/FlyToTray";
 import { RollingNumber } from "../motion/RollingNumber";
 import { cn } from "@/lib/utils";
 
-const SUB_ICON: Record<string, typeof Flower2> = { decor: Flower2, "sitting-area": Armchair, lighting: Lightbulb, "photography-videography": Camera, "photo-booths": Aperture, sound: Speaker };
 const GUEST_PRESETS = [50, 100, 200, 300, 500, 1000];
 const BUDGET_PRESETS = [0, 50_000, 100_000, 300_000, 500_000, 1_000_000];
 const BUDGET_MAX = 3_000_000;
@@ -165,7 +164,7 @@ export function PlannerBoard({ services, aiEnabled }: { services: Service[]; aiE
     <div className="relative grid gap-8 lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start">
       <div className="space-y-10">
         {/* 1 · Occasion */}
-        <Panel step={1} title={t("What are you celebrating?")} icon={<Sparkles className="h-4 w-4" />}>
+        <Panel step={1} title={t("What are you celebrating?")}>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-5">
             {cats.map((c, i) => {
               const on = c.slug === category;
@@ -195,16 +194,16 @@ export function PlannerBoard({ services, aiEnabled }: { services: Service[]; aiE
         </Panel>
 
         {/* 2 · Details, all visible together */}
-        <Panel step={2} title={t("The details")} icon={<CalendarDays className="h-4 w-4" />}>
+        <Panel step={2} title={t("The details")}>
           <div className="grid gap-4 md:grid-cols-2">
-            <Field icon={<Users className="h-4 w-4" />} label={t("Guests")} value={<RollingNumber value={String(guests)} bangla={lang === "bn"} className="font-display text-3xl font-semibold text-brand" />}>
+            <Field label={t("Guests")} value={<RollingNumber value={String(guests)} bangla={lang === "bn"} className="font-display text-3xl font-semibold text-brand" />}>
               <input type="range" min={10} max={3000} step={10} value={Math.min(guests, 3000)} onChange={(e) => setGuests(Number(e.target.value))} className="range-brand w-full" aria-label={t("Guests")} />
               <div className="mt-2 flex flex-wrap gap-1.5">
                 {GUEST_PRESETS.map((g) => <Chip key={g} on={guests === g} onClick={() => setGuests(g)}>{lang === "bn" ? g.toLocaleString("bn-BD") : g}</Chip>)}
                 <Stepper value={guests} onChange={(v) => setGuests(Math.max(10, Math.min(20000, v)))} step={10} label={t("Guests")} />
               </div>
             </Field>
-            <Field icon={<Wallet className="h-4 w-4" />} label={t("Budget")} value={budget ? <RollingNumber value={formatBDT(budget)} bangla={lang === "bn"} className="font-display text-3xl font-semibold text-brand" /> : <span className="font-display text-2xl text-muted">{t("No limit")}</span>}>
+            <Field label={t("Budget")} value={budget ? <RollingNumber value={formatBDT(budget)} bangla={lang === "bn"} className="font-display text-3xl font-semibold text-brand" /> : <span className="font-display text-2xl text-muted">{t("No limit")}</span>}>
               <input type="range" min={0} max={BUDGET_MAX} step={10_000} value={Math.min(budget, BUDGET_MAX)} onChange={(e) => setBudget(Number(e.target.value))} className="range-brand w-full" aria-label={t("Budget")} />
               <div className="mt-2 flex flex-wrap gap-1.5">
                 {BUDGET_PRESETS.map((b) => <Chip key={b} on={budget === b} onClick={() => setBudget(b)}>{b === 0 ? t("No limit") : b >= 100_000 ? t("{n} lakh", { n: b / 100_000 }) : t("{n}K", { n: b / 1000 })}</Chip>)}
@@ -212,16 +211,16 @@ export function PlannerBoard({ services, aiEnabled }: { services: Service[]; aiE
             </Field>
           </div>
           <div className="mt-4 grid gap-4 sm:grid-cols-3">
-            <Field icon={<CalendarDays className="h-4 w-4" />} label={t("Event date")}>
+            <Field label={t("Event date")}>
               <input type="date" min={today || undefined} value={date} onChange={(e) => setDate(e.target.value)} className="h-12 w-full rounded-xl border border-line bg-paper px-3 text-sm font-medium focus:border-brand focus:outline-none" />
             </Field>
-              <Field icon={<MapPin className="h-4 w-4" />} label={t("City")}>
+              <Field label={t("City")}>
                 <select value={city ?? ""} onChange={(e) => setCity(e.target.value || null)} className="h-12 w-full rounded-xl border border-line bg-paper px-3 text-sm font-medium focus:border-brand focus:outline-none">
                   <option value="">{t("Any city")}</option>
                   {CITIES.map((c) => <option key={c} value={c}>{cityName(c, lang)}</option>)}
                 </select>
               </Field>
-              <Field icon={<Palette className="h-4 w-4" />} label={t("Theme")}>
+              <Field label={t("Theme")}>
                 <select value={theme ?? ""} onChange={(e) => setTheme(e.target.value || null)} className="h-12 w-full rounded-xl border border-line bg-paper px-3 text-sm font-medium focus:border-brand focus:outline-none">
                   <option value="">{t("No preference")}</option>
                   {THEMES.map((th) => <option key={th} value={th}>{themeName(th, lang)}</option>)}
@@ -229,7 +228,6 @@ export function PlannerBoard({ services, aiEnabled }: { services: Service[]; aiE
               </Field>
           </div>
           <form onSubmit={readNote} className="mt-4 flex flex-col gap-2 rounded-2xl border border-dashed border-brand/40 bg-brand/[0.03] p-3 sm:flex-row sm:items-center">
-            <Wand2 className="hidden h-5 w-5 shrink-0 text-brand sm:block" />
             <input value={note} onChange={(e) => setNote(e.target.value)} maxLength={500} placeholder={t("Or just type it: wedding in Rajshahi, 400 guests, 3 lakh")} className="h-11 min-w-0 flex-1 rounded-xl border border-line bg-paper px-3 text-sm focus:border-brand focus:outline-none" aria-label={t("Describe your event")} />
             <button type="submit" disabled={busy !== null || !note.trim()} className="h-11 rounded-xl bg-ink px-4 text-sm font-semibold text-paper transition hover:bg-brand disabled:opacity-40">{busy === "read" ? t("Reading your note…") : t("Fill it in")}</button>
           </form>
@@ -237,16 +235,12 @@ export function PlannerBoard({ services, aiEnabled }: { services: Service[]; aiE
 
         {/* 3 · Every service, laid out on the table */}
         {rows.length > 0 && (
-          <Panel step={3} title={t("Pick your services")} icon={<Check className="h-4 w-4" />} aside={<span className="text-xs text-muted">{t("One per row — tap again to remove")}</span>}>
+          <Panel step={3} title={t("Pick your services")} aside={<span className="text-xs text-muted">{t("One per row — tap again to remove")}</span>}>
             <div className="space-y-5">
               {rows.map(({ sub, items }, ri) => {
-                const Icon = SUB_ICON[sub] ?? Sparkles;
                 return (
                   <motion.div key={`${category}-${sub}`} initial={reduce ? false : { opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: ri * 0.06, type: "spring", stiffness: 160, damping: 20 }} className="grid gap-3 sm:grid-cols-[150px_1fr] sm:items-center">
-                    <div className="flex items-center gap-2 sm:flex-col sm:items-start">
-                      <span className="grid h-9 w-9 place-items-center rounded-xl bg-sand text-brand"><Icon className="h-4 w-4" /></span>
-                      <span className="text-sm font-semibold">{t(SUB_LABELS[sub] ?? sub)}</span>
-                    </div>
+                    <p className="text-[0.72rem] font-semibold tracking-[0.18em] text-ink-soft uppercase">{t(SUB_LABELS[sub] ?? sub)}</p>
                     <div className="grid grid-cols-1 gap-3 min-[460px]:grid-cols-2">
                       {items.map((s) => <ServiceTile key={s.id} s={s} on={Boolean(picks[s.id])} far={!serves(s, city)} onPick={(el) => toggle(s, el, true)} />)}
                     </div>
@@ -258,7 +252,7 @@ export function PlannerBoard({ services, aiEnabled }: { services: Service[]; aiE
         )}
 
         {/* 4 · Food counter */}
-        <Panel step={rows.length ? 4 : 3} title={category === "food-culinary" ? t("Pick your food") : t("Add food & drinks")} icon={<Sparkles className="h-4 w-4" />} aside={<span className="text-xs text-muted">{t("Pick as many as you like")}</span>}>
+        <Panel step={rows.length ? 4 : 3} title={category === "food-culinary" ? t("Pick your food") : t("Add food & drinks")} aside={<span className="text-xs text-muted">{t("Pick as many as you like")}</span>}>
           <FoodShop services={food} picked={(id) => Boolean(picks[id])} onPick={(s, el) => toggle(s, el, false)} />
         </Panel>
       </div>
@@ -294,7 +288,6 @@ export function PlannerBoard({ services, aiEnabled }: { services: Service[]; aiE
           {/* Paper receipt */}
           <div className="relative mt-4 rounded-t-xl bg-paper px-4 pt-4 pb-6 [mask-image:linear-gradient(#000,#000),radial-gradient(circle_at_8px_100%,transparent_7px,#000_7.5px)] [mask-size:100%_calc(100%-8px),16px_9px] [mask-position:top,bottom] [mask-repeat:no-repeat,repeat-x]">
             <div className="flex items-center gap-2 border-b border-dashed border-line pb-2">
-              <Receipt className="h-4 w-4 text-brand" />
               <p className="text-sm font-semibold">{t("Your plan")}</p>
               {lines.length > 0 && <button type="button" onClick={() => setPicks({})} className="ml-auto inline-flex items-center gap-1 text-xs text-muted hover:text-danger"><RotateCcw className="h-3 w-3" /> {t("Clear")}</button>}
             </div>
@@ -340,7 +333,7 @@ export function PlannerBoard({ services, aiEnabled }: { services: Service[]; aiE
           <div className="mt-4 grid gap-2">
             <motion.button type="button" onClick={suggest} disabled={busy !== null} whileTap={{ scale: 0.97 }} className="relative inline-flex h-12 items-center justify-center gap-2 overflow-hidden rounded-xl bg-paper text-sm font-semibold text-ink transition hover:bg-sand disabled:opacity-60">
               {busy === "suggest" && <motion.span aria-hidden className="absolute inset-0 bg-[linear-gradient(90deg,transparent,rgb(0_190_254/.35),transparent)]" animate={{ x: ["-100%", "100%"] }} transition={{ duration: 1.1, repeat: Infinity, ease: "linear" }} />}
-              <Sparkles className="h-4 w-4 text-brand" /> {busy === "suggest" ? t("Calculating…") : budget ? t("Suggest the best plan for my budget") : t("Suggest a plan for me")}
+              {busy === "suggest" ? t("Calculating…") : budget ? t("Suggest the best plan for my budget") : t("Suggest a plan for me")}
             </motion.button>
             <button type="button" onClick={() => book("/booking")} disabled={!lines.length} className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-brand-gradient text-sm font-semibold text-paper shadow-[0_10px_24px_-10px_rgb(0_190_254/.9)] transition hover:brightness-110 disabled:opacity-40">
               {t("Book this plan")} <ArrowRight className="h-4 w-4" />
@@ -376,7 +369,7 @@ export function PlannerBoard({ services, aiEnabled }: { services: Service[]; aiE
 }
 
 /* ─── Pieces ─── */
-function Panel({ step, title, icon, aside, children }: { step: number; title: string; icon: ReactNode; aside?: ReactNode; children: ReactNode }) {
+function Panel({ step, title, aside, children }: { step: number; title: string; aside?: ReactNode; children: ReactNode }) {
   const reduce = useReducedMotion();
   return (
     <motion.section
@@ -388,8 +381,8 @@ function Panel({ step, title, icon, aside, children }: { step: number; title: st
       className="rounded-[28px] bg-paper p-5 shadow-[var(--shadow-soft)] ring-1 ring-line sm:p-7"
     >
       <header className="mb-5 flex flex-wrap items-center gap-3">
-        <span className="grid h-9 w-9 place-items-center rounded-full bg-brand-gradient font-display text-lg font-semibold text-paper shadow-[0_6px_14px_-6px_rgb(1_95_255/.8)]">{step}</span>
-        <h2 className="flex items-center gap-2 text-3xl">{title}<span className="text-brand/70">{icon}</span></h2>
+        <span className="font-lcd text-sm tracking-[0.25em] text-brand">{String(step).padStart(2, "0")}</span>
+        <h2 className="text-3xl">{title}</h2>
         {aside && <span className="ml-auto">{aside}</span>}
       </header>
       {children}
@@ -397,11 +390,11 @@ function Panel({ step, title, icon, aside, children }: { step: number; title: st
   );
 }
 
-function Field({ icon, label, value, children }: { icon: ReactNode; label: string; value?: ReactNode; children: ReactNode }) {
+function Field({ label, value, children }: { label: string; value?: ReactNode; children: ReactNode }) {
   return (
     <div className="rounded-2xl bg-sand/50 p-4 ring-1 ring-line/60">
       <div className="mb-2 flex items-center justify-between gap-2">
-        <span className="flex items-center gap-1.5 text-xs font-semibold tracking-wide text-ink-soft uppercase">{icon}{label}</span>
+        <span className="text-xs font-semibold tracking-[0.16em] text-ink-soft uppercase">{label}</span>
         {value}
       </div>
       {children}

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { AnimatePresence, motion, useInView, useReducedMotion, useScroll, useSpring, useTransform } from "motion/react";
 import { useEffect, useRef, useState } from "react";
-import { ArrowRight, ArrowUpRight, Check, Sparkles } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Check } from "lucide-react";
 import { formatBDT } from "@/lib/format";
 import { RollingNumber } from "../motion/RollingNumber";
 import { CATEGORIES } from "@/data/categories";
@@ -40,7 +40,6 @@ export function AboutInvitation() {
             transition={{ duration: 1.1, delay: open && !reduce ? 0.9 : 0, ease: EASE }}
             className="absolute inset-x-6 top-16 z-10 rounded-2xl border border-gold/40 bg-paper p-8 text-center shadow-[var(--shadow-lift)]"
           >
-            <div className="jamdani absolute inset-2 rounded-xl opacity-40" aria-hidden />
             <div className="relative">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/brand/muhurto-logo-192.png" alt={t("MUHURTO")} className="mx-auto mb-4 h-20 w-20" />
@@ -250,10 +249,7 @@ export function PlannerTeaser() {
         </div>
         <div className="relative mx-auto w-full max-w-md [perspective:1400px]">
           <motion.div style={{ rotateX, y, scale, transformOrigin: "50% 100%" }} className="rounded-[28px] bg-paper p-5 shadow-[0_40px_70px_-30px_rgb(1_95_255/.55)] ring-1 ring-line">
-            <div className="flex items-center gap-2">
-              <span className="grid h-8 w-8 place-items-center rounded-full bg-brand-gradient text-paper"><Sparkles className="h-4 w-4" /></span>
-              <p className="font-display text-xl">{t("Your whole event, on one table")}</p>
-            </div>
+            <p className="font-display text-xl">{t("Your whole event, on one table")}</p>
             <ul className="mt-4 grid grid-cols-2 gap-2.5" aria-hidden>
               {demo.map((d, i) => {
                 const picked = i < on;
@@ -394,7 +390,7 @@ function FanCard({ i, k, p, reduce, href, name, tagline, img, accent, explore }:
       <Link href={href} className="group relative block h-[380px] overflow-hidden rounded-[22px] border-[6px] border-paper bg-paper shadow-[0_30px_50px_-24px_rgb(10_22_51/.6)]">
         <SafeImage src={img.src} alt={img.alt} fill sizes="(max-width: 1024px) 50vw, 260px" className="object-cover transition-transform duration-[1.2s] group-hover:scale-110" />
         <div className="absolute inset-0 bg-gradient-to-t from-ink/90 via-ink/20 to-transparent" />
-        <span className="absolute left-4 top-4 grid h-9 w-9 place-items-center rounded-full font-display text-lg text-paper" style={{ background: accent }}>{String(i + 2).padStart(2, "0")}</span>
+        <span className="absolute left-4 top-4 font-lcd text-xs tracking-[0.3em] text-paper/80">{String(i + 2).padStart(2, "0")}</span>
         <span className="absolute inset-x-4 bottom-4 text-paper">
           <span className="block font-display text-3xl leading-tight">{name}</span>
           <span className="mt-1 block text-xs text-paper/75">{tagline}</span>
@@ -411,7 +407,6 @@ export function ClosingInvite() {
   return (
     <section className="container-x pt-28">
       <Reveal variant="unfold" className="relative overflow-hidden rounded-[2rem] bg-sindoor px-8 py-16 text-paper sm:px-14">
-        <div className="jamdani absolute inset-0 opacity-20" aria-hidden />
         <div className="relative grid items-center gap-8 lg:grid-cols-[1.4fr_1fr]">
           <div>
             <p className="eyebrow text-paper/70">{t("Ready when you are")}</p>

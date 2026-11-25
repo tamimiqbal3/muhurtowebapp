@@ -66,7 +66,7 @@ export function Notice({ tone = "info", title, children, className }: { tone?: "
 export function EmptyState({ title, body, action, icon }: { title: string; body?: ReactNode; action?: ReactNode; icon?: ReactNode }) {
   return (
     <div className="card flex flex-col items-center px-6 py-14 text-center">
-      <div className="mb-4 grid h-14 w-14 place-items-center rounded-full bg-sand text-gold">{icon ?? <Diamond />}</div>
+      {icon && <div className="mb-4 text-muted">{icon}</div>}
       <h3 className="text-2xl">{title}</h3>
       {body && <p className="mt-2 max-w-md text-sm text-ink-soft">{body}</p>}
       {action && <div className="mt-6">{action}</div>}
@@ -83,21 +83,10 @@ export function Diamond({ className }: { className?: string }) {
   );
 }
 
-/** Decorative divider inspired by jamdani weaving motifs. */
+/** A plain hairline divider. */
 export function JamdaniRule({ className }: { className?: string }) {
-  return (
-    <div className={cn("flex items-center gap-3 text-gold", className)} aria-hidden>
-      <span className="h-px flex-1 bg-gradient-to-r from-transparent via-gold/50 to-gold/50" />
-      <svg viewBox="0 0 64 12" className="h-3 w-16" fill="none" stroke="currentColor" strokeWidth="1">
-        <path d="M32 1l5 5-5 5-5-5zM16 3l3 3-3 3-3-3zM48 3l3 3-3 3-3-3z" />
-        <circle cx="32" cy="6" r="1" fill="currentColor" />
-        <path d="M0 6h10M22 6h3M39 6h3M54 6h10" />
-      </svg>
-      <span className="h-px flex-1 bg-gradient-to-l from-transparent via-gold/50 to-gold/50" />
-    </div>
-  );
+  return <div className={cn("h-px bg-line", className)} aria-hidden />;
 }
-
 export function Skeleton({ className }: { className?: string }) {
   return <div className={cn("skeleton", className)} aria-hidden />;
 }

@@ -11,6 +11,7 @@ import { SafeImage } from "../ui/SafeImage";
 import { Reveal } from "../motion/Reveal";
 import { formatBDT } from "@/lib/format";
 import { FoodShopSection } from "../food/FoodShopSection";
+import { Scene } from "../motion/Cinema";
 import { getT } from "@/lib/i18n/server";
 import { localizeCategory, localizeService, localizeVendor } from "@/data/i18n-data";
 
@@ -88,7 +89,7 @@ export async function CategoryLanding({ slug }: { slug: CategorySlug }) {
       {category.subcategories.map((sub) => {
         const items = list.filter((s) => s.subcategorySlug === sub.slug);
         return (
-          <section key={sub.slug} id={sub.slug} className="container-x scroll-mt-36 pt-20">
+          <Scene key={sub.slug} tilt={6}><section id={sub.slug} className="container-x scroll-mt-36 pt-20">
             <JamdaniRule className="mb-10 opacity-70" />
             <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
               <SectionHeading eyebrow={category.name} title={sub.name} description={sub.description} />
@@ -102,7 +103,7 @@ export async function CategoryLanding({ slug }: { slug: CategorySlug }) {
             ) : (
               <p className="text-sm text-muted">{t("New partners are being onboarded for this section.")} <Link className="text-sindoor underline" href="/contact">{t("Request a quote")}</Link></p>
             )}
-          </section>
+          </section></Scene>
         );
       })}
         </>

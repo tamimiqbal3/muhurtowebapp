@@ -166,11 +166,12 @@ English is the default. The toggle in the navbar (and the mobile menu) sets the 
 
 The site is edited like a motion-graphics film:
 
+- **Hero**: built like a cinema — credit line, a widescreen screen with viewfinder marks, a running timecode and scene numbers, the title below, a billing-block credit line, a ticket-shaped call to action and a minimal search line. Scrolling walks you into the screen until it fills the room.
+- **Loading**: a MUHURTO delivery truck drives along a road at dusk (pure SVG + CSS).
 - **Title sequence** (once per visit): the mark resolves out of blur with a light sweep, the wordmark tracks in, and the frame splits open onto the homepage. Click to skip.
-- **Hero**: full-bleed footage with wipe cuts between shots, a slow dolly on each shot, colour grade, vignette, film grain and an anamorphic light streak on every cut; a chapter timeline fills like a video scrubber. On scroll the frame pulls back into a rounded screen while the titles drift up and blur.
 - **Scenes**: homepage sections push in from a tilted, smaller frame and settle back as they leave, so sections cut together like shots. Chapters are revealed by wipes with image drift against the scroll.
 - **Wedding**: palace doors swing open onto the wedding scene, light spills through the gap, and the doors close again at the end of the scene.
-- **Page transitions**: a brand-blue wipe with the mark between routes; every page opens on a graded title card with grain and a light streak.
+- **Page transitions**: a film cut — the frame shutters to black and opens on the next page; every page opens on a graded title card with grain and a light streak.
 - Lenis smooth scrolling on desktop; everything respects `prefers-reduced-motion`.
 
 ## Food counter
