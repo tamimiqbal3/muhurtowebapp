@@ -9,10 +9,14 @@ import { SEARCH_SUGGESTIONS } from "@/lib/search";
 import type { CategorySlug } from "@/lib/types";
 import { formatBDT } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { useLang } from "../i18n/LanguageProvider";
+import { cityName, localizeCategory } from "@/data/i18n-data";
+import { SERVICES_BN } from "@/data/services.bn";
 
 interface Hit {
   id: string;
   name: string;
+  subcategorySlug: string;
   categorySlug: CategorySlug;
   subcategory: string;
   startingPrice: number;
@@ -22,6 +26,8 @@ interface Hit {
 
 export function CategorySearch({ className, initialCategory = "", initialQuery = "", compact }: { className?: string; initialCategory?: string; initialQuery?: string; compact?: boolean }) {
   const router = useRouter();
+  const { t, lang } = useLang();
+  const cats = CATEGORIES.map((c) => localizeCategory(c, lang));
   const [category, setCategory] = useState(initialCategory);
   const [q, setQ] = useState(initialQuery);
   const [hits, setHits] = useState<Hit[] | null>(null);
@@ -85,14 +91,14 @@ export function CategorySearch({ className, initialCategory = "", initialQuery =
     <div ref={boxRef} className={cn("relative", className)}>
       <form onSubmit={submit} role="search" className="card flex flex-col gap-2 p-2 sm:flex-row sm:items-center sm:gap-0 sm:rounded-full sm:p-2">
         <label className="relative flex items-center sm:w-56 sm:shrink-0">
-          <span className="sr-only">Category</span>
+          <span className="sr-only">{t("Category")}</span>
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value)}
             className="h-12 w-full cursor-pointer appearance-none rounded-full bg-sand/70 pl-5 pr-10 text-sm font-semibold text-ink outline-none transition hover:bg-sand focus:ring-2 focus:ring-ink/10"
           >
-            <option value="">All categories</option>
-            {CATEGORIES.map((c) => (
+            <option value="">{t("All categories")}</option>
+            {cats.map((c) => (
               <option key={c.slug} value={c.slug}>{c.name}</option>
             ))}
           </select>
@@ -110,9 +116,9 @@ export function CategorySearch({ className, initialCategory = "", initialQuery =
               if (e.key === "ArrowUp") { e.preventDefault(); setActive((a) => Math.max(-1, a - 1)); }
               if (e.key === "Escape") setFocused(false);
             }}
-            placeholder={category ? `Search ${CATEGORIES.find((c) => c.slug === category)?.name} services…` : "Search décor, kacchi, photographers, fuchka…"}
+            placeholder={category ? t("Search {cat} services…", { cat: cats.find((c) => c.slug === category)?.name ?? "" }) : t("Search décor, kacchi, photographers, fuchka…")}
             className="h-12 min-w-0 flex-1 bg-transparent text-[0.95rem] outline-none placeholder:text-muted/80"
-            aria-label="Search services"
+            aria-label={t("Search services")}
             role="combobox"
             aria-expanded={showPanel}
             aria-controls={listId}
@@ -122,47 +128,47 @@ export function CategorySearch({ className, initialCategory = "", initialQuery =
           {loading && <Loader2 className="h-4 w-4 animate-spin text-muted" />}
         </div>
         <button type="submit" className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-ink px-7 text-sm font-semibold text-paper transition hover:bg-sindoor">
-          <Search className="h-4 w-4" /> Search
+          <Search className="h-4 w-4" /> {t("Search")}
         </button>
       </form>
 
       {showPanel && (
         <div id={listId} className="card absolute inset-x-0 top-full z-30 mt-2 max-h-[70vh] overflow-y-auto p-3 text-left">
           {q.trim().length >= 2 && hits && hits.length > 0 && (
-            <ul role="listbox" aria-label="Matching services">
+            <ul role="listbox" aria-label={t("Matching services")}>
               {hits.map((h, i) => (
                 <li key={h.id} id={`${listId}-${i}`} role="option" aria-selected={i === active}>
                   <Link href={`/service/${h.id}`} className={cn("flex items-center gap-3 rounded-xl p-2 transition", i === active ? "bg-sand" : "hover:bg-sand/60")}>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={`${h.image}?auto=compress&cs=tinysrgb&w=120`} alt="" className="h-12 w-12 rounded-lg object-cover" loading="lazy" />
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-semibold">{h.name}</p>
-                      <p className="truncate text-xs text-muted">{CATEGORIES.find((c) => c.slug === h.categorySlug)?.name} · {h.subcategory} · {h.city}</p>
+                      <p className="truncate text-sm font-semibold">{lang === "bn" ? SERVICES_BN[h.id]?.name ?? h.name : h.name}</p>
+                      <p className="truncate text-xs text-muted">{cats.find((c) => c.slug === h.categorySlug)?.name} · {cats.find((c) => c.slug === h.categorySlug)?.subcategories.find((x) => x.slug === h.subcategorySlug)?.name ?? h.subcategory} · {cityName(h.city, lang)}</p>
                     </div>
-                    <span className="text-xs font-semibold text-ink-soft">from {formatBDT(h.startingPrice)}</span>
+                    <span className="text-xs font-semibold text-ink-soft">{t("from {price}", { price: formatBDT(h.startingPrice) })}</span>
                   </Link>
                 </li>
               ))}
               <li>
                 <button onClick={() => submit()} className="mt-1 flex w-full items-center justify-center gap-1 rounded-xl py-2 text-xs font-semibold text-sindoor hover:bg-sand/60">
-                  See all results <ArrowUpRight className="h-3.5 w-3.5" />
+                  {t("See all results")} <ArrowUpRight className="h-3.5 w-3.5" />
                 </button>
               </li>
             </ul>
           )}
           {q.trim().length >= 2 && hits && hits.length === 0 && !loading && (
             <div className="px-2 py-4 text-sm">
-              <p className="font-semibold">No services match “{q}”{category && ` in ${CATEGORIES.find((c) => c.slug === category)?.name}`}.</p>
-              <p className="mt-1 text-ink-soft">Try a broader word, another category, or one of these:</p>
+              <p className="font-semibold">{t("No services match “{q}”.", { q })}</p>
+              <p className="mt-1 text-ink-soft">{t("Try a broader word, another category, or one of these:")}</p>
             </div>
           )}
           {(q.trim().length < 2 || (hits && hits.length === 0)) && (
             <div className="px-2 pb-1">
-              <p className="eyebrow mb-2">Popular searches</p>
+              <p className="eyebrow mb-2">{t("Popular searches")}</p>
               <div className="flex flex-wrap gap-2">
                 {suggestions.map((s) => (
-                  <button key={s} type="button" onClick={() => setQ(s)} className="rounded-full border border-line px-3 py-1.5 text-xs text-ink-soft transition hover:border-ink hover:text-ink">
-                    {s}
+                  <button key={s} type="button" onClick={() => setQ(t(s))} className="rounded-full border border-line px-3 py-1.5 text-xs text-ink-soft transition hover:border-ink hover:text-ink">
+                    {t(s)}
                   </button>
                 ))}
               </div>

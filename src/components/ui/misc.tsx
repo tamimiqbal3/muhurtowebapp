@@ -1,6 +1,9 @@
+"use client";
+
 import { Star, Info, AlertTriangle, CheckCircle2 } from "lucide-react";
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { useT } from "../i18n/LanguageProvider";
 
 export function Badge({ children, className, tone = "neutral" }: { children: ReactNode; className?: string; tone?: "neutral" | "gold" | "success" | "warning" | "danger" | "ink" | "sindoor" }) {
   const tones = {
@@ -16,16 +19,18 @@ export function Badge({ children, className, tone = "neutral" }: { children: Rea
 }
 
 export function DemoTag({ className }: { className?: string }) {
+  const t = useT();
   return (
     <Badge tone="gold" className={className}>
-      Demo data
+      {t("Demo data")}
     </Badge>
   );
 }
 
 export function Rating({ value, count, className, light }: { value: number; count?: number; className?: string; light?: boolean }) {
+  const t = useT();
   return (
-    <span className={cn("inline-flex items-center gap-1 text-xs font-semibold", light ? "text-paper" : "text-ink", className)} aria-label={`Rated ${value} out of 5${count ? ` from ${count} reviews` : ""}`}>
+    <span className={cn("inline-flex items-center gap-1 text-xs font-semibold", light ? "text-paper" : "text-ink", className)} aria-label={t("Rated {v} out of 5", { v: value })}>
       <Star className="h-3.5 w-3.5 fill-gold text-gold" aria-hidden />
       {value.toFixed(1)}
       {count != null && <span className={cn("font-normal", light ? "text-paper/70" : "text-muted")}>({count})</span>}
@@ -98,5 +103,6 @@ export function Skeleton({ className }: { className?: string }) {
 }
 
 export function Spinner({ className }: { className?: string }) {
-  return <span className={cn("inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-r-transparent", className)} role="status" aria-label="Loading" />;
+  const t = useT();
+  return <span className={cn("inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-r-transparent", className)} role="status" aria-label={t("Loading")} />;
 }

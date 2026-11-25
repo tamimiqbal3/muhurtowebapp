@@ -1,5 +1,7 @@
 import { CATEGORIES } from "../data/categories";
 import type { CategorySlug, Service, Vendor } from "./types";
+import { SERVICES_BN } from "../data/services.bn";
+import { CITY_BN } from "../data/i18n-data";
 
 export type SortKey = "relevance" | "price-asc" | "price-desc" | "rating";
 
@@ -42,7 +44,7 @@ export function tokenize(q: string): string[] {
   return q
     .toLowerCase()
     .normalize("NFKC")
-    .split(/[^\p{L}\p{N}]+/u)
+    .split(/[^\p{L}\p{M}\p{N}]+/u)
     .filter((t) => t.length > 1 && !["the", "and", "for", "with", "in", "of", "a", "an", "to", "my"].includes(t));
 }
 
@@ -58,15 +60,17 @@ export function servesCity(service: Service, city?: string | null): boolean {
 
 function haystack(s: Service, vendors: Map<string, Vendor>) {
   const cat = CATEGORIES.find((c) => c.slug === s.categorySlug);
+  const bn = SERVICES_BN[s.id];
+  const subBn = cat?.subcategories.find((x) => x.slug === s.subcategorySlug)?.nameBn ?? "";
   return {
-    name: s.name.toLowerCase(),
+    name: `${s.name} ${bn?.name ?? ""}`.toLowerCase(),
     tags: s.tags.join(" ").toLowerCase(),
-    sub: `${subName(s.categorySlug, s.subcategorySlug)} ${s.subcategorySlug.replace(/-/g, " ")}`.toLowerCase(),
-    cat: `${cat?.name ?? ""} ${s.categorySlug}`.toLowerCase(),
-    short: s.shortDescription.toLowerCase(),
-    desc: `${s.description} ${s.includes.join(" ")} ${s.themes.join(" ")}`.toLowerCase(),
+    sub: `${subName(s.categorySlug, s.subcategorySlug)} ${s.subcategorySlug.replace(/-/g, " ")} ${subBn}`.toLowerCase(),
+    cat: `${cat?.name ?? ""} ${s.categorySlug} ${cat?.nameBn ?? ""}`.toLowerCase(),
+    short: `${s.shortDescription} ${bn?.short ?? ""}`.toLowerCase(),
+    desc: `${s.description} ${s.includes.join(" ")} ${s.themes.join(" ")} ${bn?.desc ?? ""}`.toLowerCase(),
     vendor: (vendors.get(s.vendorId)?.name ?? "").toLowerCase(),
-    city: `${s.city} ${s.serviceAreas.join(" ")}`.toLowerCase(),
+    city: `${s.city} ${s.serviceAreas.join(" ")} ${[s.city, ...s.serviceAreas].map((c) => CITY_BN[c] ?? "").join(" ")}`.toLowerCase(),
   };
 }
 
@@ -74,7 +78,7 @@ function scoreToken(h: ReturnType<typeof haystack>, token: string): number {
   const variants = [token, ...(SYNONYMS[token] ?? [])];
   let best = 0;
   for (const v of variants) {
-    const re = new RegExp(`(^|[^\\p{L}\\p{N}])${v.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`, "u");
+    const re = new RegExp(`(^|[^\\p{L}\\p{M}\\p{N}])${v.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`, "u");
     let s = 0;
     if (re.test(h.name)) s = Math.max(s, 6);
     if (re.test(h.tags)) s = Math.max(s, 5);

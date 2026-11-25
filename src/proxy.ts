@@ -7,7 +7,7 @@ import { NextResponse, type NextRequest } from "next/server";
  * layout and API route using Firebase Admin.
  */
 export function proxy(req: NextRequest) {
-  const hasSession = Boolean(req.cookies.get("__session")?.value);
+  const hasSession = Boolean(req.cookies.get("__session")?.value || req.cookies.get("muhurto_demo")?.value);
   if (!hasSession) {
     const url = req.nextUrl.clone();
     url.pathname = "/login";

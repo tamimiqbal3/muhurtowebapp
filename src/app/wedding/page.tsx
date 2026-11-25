@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
+import { getT } from "@/lib/i18n/server";
 import { CategoryLanding } from "@/components/services/CategoryLanding";
 
-export const revalidate = 300;
 
-export const metadata: Metadata = {
-  title: "Wedding",
-  description: "Bangladeshi wedding décor, holud stages, photography, lighting and sound.",
-  alternates: { canonical: "/wedding" },
-  openGraph: { title: "Wedding · MUHURTO", description: "Bangladeshi wedding décor, holud stages, photography, lighting and sound." },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getT();
+  const title = t("Wedding");
+  const description = t("Bangladeshi wedding décor, holud stages, photography, lighting and sound.");
+  return { title, description, alternates: { canonical: "/wedding" }, openGraph: { title: `${title} · ${t("MUHURTO")}`, description } };
+}
 
 export default function Page() {
   return <CategoryLanding slug="wedding" />;

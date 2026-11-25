@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 
 export function Logo({ light, className }: { light?: boolean; className?: string }) {
   return (
-    <Link href="/" className={cn("group inline-flex items-center gap-2.5", className)} aria-label="MUHURTO home">
+    <Link href="/" className={cn("group inline-flex items-center gap-2.5", className)} aria-label="MUHURTO">
       <svg viewBox="0 0 40 40" className={cn("h-9 w-9 transition-transform duration-500 group-hover:rotate-45", light ? "text-paper" : "text-sindoor")} aria-hidden>
         <path d="M20 3l9 17-9 17-9-17z" fill="none" stroke="currentColor" strokeWidth="1.4" />
         <path d="M20 10l5 10-5 10-5-10z" fill="currentColor" opacity=".9" />

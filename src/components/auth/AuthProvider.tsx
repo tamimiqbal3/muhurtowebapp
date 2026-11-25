@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import type { Role } from "@/lib/types";
 import { getClientAuth } from "@/lib/firebase/client";
 import { isFirebaseClientConfigured } from "@/lib/config";
+import { demoAuth } from "@/lib/demo/store";
 
 export interface ClientUser {
   uid: string;
@@ -18,6 +19,8 @@ export interface ClientUser {
 interface AuthState {
   user: ClientUser | null;
   loading: boolean;
+  /** True while Firebase isn't connected: accounts live in this browser only. */
+  demo: boolean;
   configured: boolean;
   serverConfigured: boolean;
   signIn: (email: string, password: string) => Promise<void>;
@@ -50,13 +53,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<ClientUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [serverConfigured, setServerConfigured] = useState(true);
+  const demo = !isFirebaseClientConfigured || !serverConfigured;
 
   const refresh = useCallback(async () => {
+    if (!isFirebaseClientConfigured) {
+      const u = demoAuth.current();
+      setUser(u ? { uid: u.uid, email: u.email, name: u.name, role: u.role, phone: u.phone, city: u.city } : null);
+      setServerConfigured(false);
+      setLoading(false);
+      return;
+    }
     try {
       const res = await fetch("/api/me", { cache: "no-store" });
       const data = (await res.json()) as { user: ClientUser | null; configured: boolean };
-      setUser(data.user);
       setServerConfigured(data.configured);
+      if (!data.configured) {
+        const u = demoAuth.current();
+        setUser(u ? { uid: u.uid, email: u.email, name: u.name, role: u.role, phone: u.phone, city: u.city } : null);
+      } else setUser(data.user);
     } catch {
       setUser(null);
     } finally {
@@ -85,10 +99,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     () => ({
       user,
       loading,
+      demo,
       configured: isFirebaseClientConfigured,
       serverConfigured,
       refresh,
       async signIn(email, password) {
+        if (demo) {
+          await demoAuth.signIn(email, password);
+          await refresh();
+          router.refresh();
+          return;
+        }
         const auth = getClientAuth();
         if (!auth) throw new Error("Sign-in is not configured yet.");
         const { signInWithEmailAndPassword } = await import("firebase/auth");
@@ -100,6 +121,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       },
       async signUp({ name, email, password, phone }) {
+        if (demo) {
+          await demoAuth.register(name, email, password, phone);
+          await refresh();
+          router.refresh();
+          return;
+        }
         const auth = getClientAuth();
         if (!auth) throw new Error("Registration is not configured yet.");
         const { createUserWithEmailAndPassword, updateProfile } = await import("firebase/auth");
@@ -112,6 +139,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       },
       async signInWithGoogle() {
+        if (demo) {
+          await demoAuth.signInAsGuest();
+          await refresh();
+          router.refresh();
+          return;
+        }
         const auth = getClientAuth();
         if (!auth) throw new Error("Sign-in is not configured yet.");
         const { GoogleAuthProvider, signInWithPopup } = await import("firebase/auth");
@@ -123,6 +156,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       },
       async resetPassword(email) {
+        if (demo) {
+          if (!demoAuth.exists(email)) throw new Error("No demo account uses this email.");
+          return;
+        }
         const auth = getClientAuth();
         if (!auth) throw new Error("Password reset is not configured yet.");
         const { sendPasswordResetEmail } = await import("firebase/auth");
@@ -133,6 +170,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       },
       async signOut() {
+        if (demo) {
+          demoAuth.signOut();
+          setUser(null);
+          router.push("/");
+          router.refresh();
+          return;
+        }
         await fetch("/api/auth/session", { method: "DELETE" }).catch(() => undefined);
         const auth = getClientAuth();
         if (auth) {
@@ -144,7 +188,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         router.refresh();
       },
     }),
-    [user, loading, serverConfigured, refresh, createSession, router],
+    [user, loading, demo, serverConfigured, refresh, createSession, router],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

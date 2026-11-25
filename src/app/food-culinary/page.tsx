@@ -1,14 +1,14 @@
 import type { Metadata } from "next";
+import { getT } from "@/lib/i18n/server";
 import { CategoryLanding } from "@/components/services/CategoryLanding";
 
-export const revalidate = 300;
 
-export const metadata: Metadata = {
-  title: "Food & Culinary",
-  description: "Catering platters, live fuchka counters and cha / coffee stations for events in Bangladesh.",
-  alternates: { canonical: "/food-culinary" },
-  openGraph: { title: "Food & Culinary · MUHURTO", description: "Catering platters, live fuchka counters and cha / coffee stations for events in Bangladesh." },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const { t } = await getT();
+  const title = t("Food & Culinary");
+  const description = t("Catering platters, live fuchka counters and cha / coffee stations for events in Bangladesh.");
+  return { title, description, alternates: { canonical: "/food-culinary" }, openGraph: { title: `${title} · ${t("MUHURTO")}`, description } };
+}
 
 export default function Page() {
   return <CategoryLanding slug="food-culinary" />;

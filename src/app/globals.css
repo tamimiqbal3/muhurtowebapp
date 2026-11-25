@@ -1,9 +1,10 @@
 @import "tailwindcss";
 
 @theme inline {
-  --font-display: var(--font-cormorant), "Cormorant Garamond", Georgia, serif;
-  --font-sans: var(--font-manrope), "Manrope", system-ui, sans-serif;
+  --font-display: var(--font-cormorant), "Cormorant Garamond", var(--font-bengali), Georgia, serif;
+  --font-sans: var(--font-manrope), "Manrope", var(--font-bengali-sans), system-ui, sans-serif;
   --font-bangla: var(--font-bengali), "Noto Serif Bengali", serif;
+  --font-lcd: var(--font-lcd-mono), "Share Tech Mono", ui-monospace, monospace;
 }
 
 @theme {
@@ -33,10 +34,28 @@
   --animate-float: float 9s ease-in-out infinite;
   --animate-float-slow: float 14s ease-in-out infinite;
   --animate-shimmer: shimmer 1.6s linear infinite;
+  --animate-kenburns: kenburns 22s ease-in-out infinite alternate;
+  --animate-twinkle: twinkle 2.6s ease-in-out infinite;
+  --animate-petal: petal 11s linear infinite;
 
   @keyframes float {
     0%, 100% { transform: translate3d(0, 0, 0) rotate(0deg); }
     50% { transform: translate3d(0, -14px, 0) rotate(3deg); }
+  }
+  @keyframes kenburns {
+    0% { transform: scale(1.06) translate3d(0, 0, 0); }
+    100% { transform: scale(1.18) translate3d(-2.5%, -2%, 0); }
+  }
+  @keyframes twinkle {
+    0%, 100% { opacity: 1; filter: drop-shadow(0 0 6px rgb(255 214 140 / 0.95)); }
+    45% { opacity: 0.45; filter: drop-shadow(0 0 1px rgb(255 214 140 / 0.3)); }
+  }
+  @keyframes petal {
+    0% { transform: translate3d(0, -12vh, 0) rotate(0deg) rotateY(0deg); opacity: 0; }
+    8% { opacity: 1; }
+    50% { transform: translate3d(6vw, 50vh, 0) rotate(220deg) rotateY(180deg); }
+    92% { opacity: 1; }
+    100% { transform: translate3d(-3vw, 112vh, 0) rotate(420deg) rotateY(360deg); opacity: 0; }
   }
   @keyframes shimmer {
     from { background-position: -200% 0; }
@@ -67,8 +86,25 @@
     @apply font-display text-ink;
     letter-spacing: -0.01em;
   }
-  [lang="bn"], .bn {
+  .bn {
     font-family: var(--font-bangla);
+  }
+  html[lang="bn"] body {
+    font-family: var(--font-bengali-sans), var(--font-manrope), system-ui, sans-serif;
+  }
+  html[lang="bn"] h1, html[lang="bn"] h2, html[lang="bn"] h3, html[lang="bn"] h4 {
+    font-family: var(--font-bengali), var(--font-cormorant), serif;
+    letter-spacing: 0;
+    line-height: 1.25;
+  }
+  html[lang="bn"] .eyebrow {
+    letter-spacing: 0.04em;
+  }
+  html.lenis, html.lenis body {
+    height: auto;
+  }
+  .lenis.lenis-smooth {
+    scroll-behavior: auto !important;
   }
 }
 

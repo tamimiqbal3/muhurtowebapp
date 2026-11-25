@@ -8,7 +8,7 @@ export function ServiceGrid({ services, vendors, priorityCount = 0 }: { services
       {services.map((s, i) => {
         const v = vendors.find((x) => x.id === s.vendorId);
         return (
-          <Reveal key={s.id} delay={(i % 3) * 0.06}>
+          <Reveal key={s.id} variant={i % 3 === 1 ? "tilt" : i % 3 === 0 ? "swing" : "slide"} delay={(i % 3) * 0.08}>
             <ServiceCard service={s} vendorName={v?.name} vendorVerified={v?.verified} priority={i < priorityCount} />
           </Reveal>
         );

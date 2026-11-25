@@ -15,6 +15,7 @@ export const POST = handle(async (req: Request) => {
   const user = await requireApiUser();
   const body = await readJson(req);
   const bookingId = str(body.bookingId, "Booking", { max: 64 });
-  const { url } = await initPayment(bookingId, user);
+  const method = typeof body.method === "string" ? body.method.slice(0, 20) : null;
+  const { url } = await initPayment(bookingId, user, method);
   return NextResponse.json({ url });
 });

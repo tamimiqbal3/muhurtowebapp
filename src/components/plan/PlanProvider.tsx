@@ -3,6 +3,9 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import type { CategorySlug, CustomizationOption, EventDetails, PriceUnit, Service } from "@/lib/types";
 import { computeBreakdown } from "@/lib/pricing";
+import { useLang } from "../i18n/LanguageProvider";
+import { SERVICES_BN } from "@/data/services.bn";
+import { getSeedService } from "@/data/services";
 
 /** Snapshot used only for on-screen estimates — the server always re-prices. */
 export interface PlanItem {
@@ -83,14 +86,15 @@ export function PlanProvider({ children }: { children: ReactNode }) {
         quantity: qty,
         optionIds: opts?.optionIds ?? [],
         snapshot: {
-          name: service.name,
+          // Store the canonical (English) copy; display names are localised on render.
+          name: getSeedService(service.id)?.name ?? service.name,
           image: service.images[0]?.src ?? "",
           price: service.startingPrice,
           unit: service.unit,
           minQuantity: service.minQuantity,
           categorySlug: service.categorySlug,
           subcategorySlug: service.subcategorySlug,
-          options: service.options,
+          options: getSeedService(service.id)?.options ?? service.options,
         },
       };
       const idx = prev.findIndex((p) => p.serviceId === service.id);
@@ -143,4 +147,15 @@ export function usePlan(): PlanState {
   const ctx = useContext(Ctx);
   if (!ctx) throw new Error("usePlan must be used inside <PlanProvider>");
   return ctx;
+}
+
+/** Localised display names for items saved in the plan (snapshots are stored in English). */
+export function usePlanItemName() {
+  const { lang } = useLang();
+  return (item: Pick<PlanItem, "serviceId" | "snapshot">) => (lang === "bn" ? SERVICES_BN[item.serviceId]?.name ?? item.snapshot.name : item.snapshot.name);
+}
+
+export function usePlanOptionLabel() {
+  const { lang } = useLang();
+  return (serviceId: string, optionId: string, fallback: string) => (lang === "bn" ? SERVICES_BN[serviceId]?.options[optionId] ?? fallback : fallback);
 }

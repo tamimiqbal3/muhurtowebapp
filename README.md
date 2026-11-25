@@ -2,7 +2,7 @@
 
 Premium event management & planning marketplace for Bangladesh — weddings, birthdays, corporate events, family events and food & culinary services, with an AI event planner, customisation requests, SSLCommerz payments (2% platform fee) and a Monitoring Agent for every paid event.
 
-**Stack:** Next.js 16 (App Router) · TypeScript · Tailwind CSS v4 · Motion · React Three Fiber · Lucide · Firebase Auth / Firestore / Storage · Gemini API · SSLCommerz · Vercel
+**Stack:** Next.js 16 (App Router) · TypeScript · Tailwind CSS v4 · Motion · Lenis smooth scroll · React Three Fiber · Lucide · Firebase Auth / Firestore / Storage · Gemini API · SSLCommerz · Vercel
 
 ---
 
@@ -23,10 +23,16 @@ npm run build                  # production build + type-check
 | Homepage, 5 categories, 30 subsections, 60 listings, search & filters | ✅ (bundled demo catalogue) | ✅ (Firestore catalogue) | | |
 | Customize page & event plan (saved on device) | ✅ | ✅ | | |
 | AI Event Planner | ✅ rule-based mode (clearly labelled) | | ✅ Gemini mode | |
-| Accounts, bookings, dashboards, admin, agents | shows a setup notice | ✅ | | |
-| Payment | | booking saved, “gateway not connected” notice | | ✅ sandbox / live |
+| Login, register, customer dashboard, bookings, customisation requests | ✅ **demo mode** — stored in this browser (labelled) | ✅ real accounts | | |
+| Admin & agent workspaces | shows a setup notice | ✅ | | |
+| Payment | demo booking saved, “gateway not connected” notice | booking saved, “gateway not connected” notice | | ✅ sandbox / live |
+| English / বাংলা toggle | ✅ | ✅ | ✅ (planner replies in the chosen language) | |
 
 Nothing pretends to work: missing credentials produce an explicit notice, never a fake success.
+
+### Demo mode (no Firebase)
+
+While Firebase isn't configured, login and registration still work for demonstrations: accounts (salted SHA-256 hashes), bookings, customisation requests and notifications live in the browser's `localStorage`, and a `muhurto_demo` cookie lets the proxy open `/dashboard`, `/booking` and `/checkout`. Every demo screen carries a “Demo mode” label, and checkout never takes or simulates a payment. As soon as the Firebase variables are set, the same UI switches to real Firebase Auth + Firestore with no code changes.
 
 ---
 
@@ -94,6 +100,21 @@ Flow: `/booking` creates a booking priced **only from the server catalogue** →
 - Fee: `platformFee = round(subtotal × 2%)`, `total = subtotal + fee` (৳100,000 → ৳2,000 → ৳1,02,000). The breakdown is stored on the booking and the payment record.
 - No double charging: a paid booking can't start a new session; older unfinished sessions are superseded; confirmation is an idempotent transaction; a second successful payment for the same booking is flagged `duplicate_refund_required` for admins instead of being applied.
 - Payments are never simulated. Without credentials the Pay button is disabled with an explanation.
+- **Method picker:** customers choose bKash, Nagad, Rocket, Visa or Mastercard at checkout. The choice is sent to SSLCommerz as `multi_card_name` (`bkash`, `dbblmobilebanking`, `visacard`, `mastercard`) so the gateway opens on that method; Nagad opens the full SSLCommerz page (enable Nagad on your store). The choice is saved on the payment record as `preferredMethod`.
+
+### Payment logos
+
+Logos are loaded from `public/payments/` — **add the official files there** (they are trademarks, so take them from the official brand kits / your SSLCommerz merchant panel rather than redrawing them):
+
+| File | Source |
+|---|---|
+| `bkash.svg` or `bkash.png` | bKash brand resources / bKash merchant onboarding kit |
+| `nagad.svg` or `nagad.png` | Nagad merchant brand assets |
+| `rocket.svg` or `rocket.png` | Dutch-Bangla Bank Rocket brand assets |
+| `visa.svg` | Visa brand guidelines (visa.com → brand) |
+| `mastercard.svg` | Mastercard Brand Center |
+
+Visa and Mastercard fall back to their Wikimedia Commons files until local copies are added. If a logo file is missing, a brand-coloured name tile is shown instead so the layout never breaks.
 
 ---
 
@@ -106,9 +127,9 @@ Flow: `/booking` creates a booking priced **only from the server catalogue** →
 
 ---
 
-## AI Event Planner (Gemini)
+## Event Planner (calculator)
 
-`/event-planner` asks the eight required questions (category, date, location, budget, guests, theme, services, preferences) as a guided chat; free-text answers are parsed by Gemini (server-side) with a regex fallback. Recommendations:
+`/event-planner` is a calculator-style planner: an LCD, function keys (EVENT / CITY / THEME cycle; DATE, GUESTS and BUDGET switch the keypad's entry mode), service keys with indicator LEDs, a numeric keypad with `K`, `LAKH`, `00`, `⌫`, `C`, `AC` and `=`, optional key sounds (Web Audio, toggle on the device), full keyboard support, and a receipt printer that prints the itemised estimate with a count-up total and a tear-off. A free-text note (“wedding in Rajshahi, 400 guests, 3 lakh”) can be typed instead and is parsed by Gemini (server-side) with a regex fallback. Recommendations:
 
 - Gemini only sees — and may only return — IDs of listings in the catalogue; anything else is discarded.
 - Prices and totals are always computed on the server from the catalogue; results are labelled as estimates.
@@ -123,6 +144,21 @@ Flow: `/booking` creates a booking priced **only from the server catalogue** →
 3. Deploy. Then add the domain to Firebase Auth authorized domains and set the SSLCommerz IPN URL.
 
 ---
+
+## Languages (English / বাংলা)
+
+English is the default. The toggle in the navbar (and the mobile menu) sets the `muhurto_lang` cookie and refreshes, so server-rendered and client pages switch together, including `<html lang>`, metadata, dates (`bn-BD`) and digits in translated strings.
+
+- Strings: English text is the key; Bangla lives in `src/lib/i18n/bn.ts`. Use `const { t } = await getT()` in server components and `useT()` / `useLang()` in client components. Missing keys fall back to English.
+- Catalogue: category / subsection / city / theme names and all 60 listings are translated in `src/data/i18n-data.ts` and `src/data/services.bn.ts`; data stays canonical English internally (pricing, search and booking snapshots), and is localised only for display. Search matches both languages.
+- With Gemini enabled, planner notes and reasons are written in the selected language.
+- Not translated yet: the admin and agent workspaces' inner tables and forms (their navigation and headings are), and vendor-entered content.
+
+## Animations
+
+Each homepage section uses its own motion idea: a velvet curtain and Ken Burns slideshow with mouse parallax in the hero, an envelope that opens on an invitation card (founder / About), polaroids that drop and settle, a split-flap board for stats, a calculator that rises from the desk for the planner intro, palace doors that open on scroll for weddings, and a fanned hand of cards for other services. Lenis provides smooth scrolling on desktop. Everything respects `prefers-reduced-motion` (and Lenis is disabled on touch devices).
+
+The founder's name and role on the homepage come from `src/data/site.ts` (`FOUNDER`).
 
 ## Project structure
 

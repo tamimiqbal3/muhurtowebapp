@@ -197,6 +197,7 @@ export interface PaymentRecord {
   breakdown: PriceBreakdown;
   status: PaymentRecordStatus;
   sessionKey?: string;
+  preferredMethod?: string;
   valId?: string;
   bankTranId?: string;
   cardType?: string;

@@ -2,6 +2,7 @@ import "server-only";
 import { adminDb, COL } from "../firebase/admin";
 import { SITE_URL } from "../config";
 import type { Booking, PaymentRecord } from "../types";
+import { getPaymentMethod } from "../../data/payments";
 import { ApiError, type SessionUser } from "./auth";
 import { createPendingAssignment, autoAssign } from "./monitoring";
 import { writeEventUpdate, writeNotification } from "./notify";
@@ -22,7 +23,7 @@ export function sslcommerzConfig() {
 }
 
 /** Starts an SSLCommerz session for a booking and returns the hosted payment page URL. */
-export async function initPayment(bookingId: string, user: SessionUser): Promise<{ url: string; paymentId: string }> {
+export async function initPayment(bookingId: string, user: SessionUser, methodId: string | null = null): Promise<{ url: string; paymentId: string }> {
   const cfg = sslcommerzConfig();
   if (!cfg.configured) throw new ApiError(503, "Online payment is not available yet: the SSLCommerz sandbox credentials have not been configured. Your booking is saved and no money has been taken.");
   const db = adminDb();
@@ -42,6 +43,7 @@ export async function initPayment(bookingId: string, user: SessionUser): Promise
     const pRef = db.collection(COL.payments).doc();
     const payment: PaymentRecord = {
       id: pRef.id,
+      preferredMethod: methodId ?? undefined,
       bookingId,
       bookingCode: booking.code,
       customerId: user.uid,
@@ -81,6 +83,10 @@ export async function initPayment(bookingId: string, user: SessionUser): Promise
     product_profile: "non-physical-goods",
     value_a: booking.id,
   });
+  // Pre-select the customer's chosen method on the SSLCommerz page where supported.
+  const method = getPaymentMethod(methodId);
+  if (method?.gatewayCode) body.set("multi_card_name", method.gatewayCode);
+  if (method) body.set("value_b", method.id);
 
   let data: { status?: string; GatewayPageURL?: string; sessionkey?: string; failedreason?: string };
   try {

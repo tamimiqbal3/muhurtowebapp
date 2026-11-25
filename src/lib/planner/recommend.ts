@@ -2,6 +2,7 @@ import type { CategorySlug, PlannerRecommendationItem, PlannerRequirements, Serv
 import { servesCity } from "../search";
 import { suggestedQuantity } from "../pricing";
 import { PLATFORM_FEE_RATE } from "../config";
+import { makeT, type TFn } from "../i18n/core";
 import { CORE_SUBS, DEFAULT_SUBS, EXTRA_SUBS, FOOD_SUBS, SUB_LABELS, SUB_WEIGHTS } from "./constants";
 
 export interface SubPlan {
@@ -55,7 +56,8 @@ function rank(pool: Service[], req: PlannerRequirements): Service[] {
  * adds extra services only while they still fit. Used as the Gemini
  * fallback and as Gemini's baseline. Never invents listings or prices.
  */
-export function recommendByRules(req: PlannerRequirements, services: Service[]): { items: PlannerRecommendationItem[]; notes: string[] } {
+export function recommendByRules(req: PlannerRequirements, services: Service[], t: TFn = makeT("en"), cityLabel: (c: string) => string = (c) => c): { items: PlannerRecommendationItem[]; notes: string[] } {
+  const label = (sub: string) => t(SUB_LABELS[sub] ?? sub);
   const notes: string[] = [];
   const guests = req.guests ?? null;
   const category: CategorySlug = req.categorySlug ?? "wedding";
@@ -69,7 +71,7 @@ export function recommendByRules(req: PlannerRequirements, services: Service[]):
   const picks: Array<{ plan: SubPlan; service: Service; cost: number }> = [];
   for (const plan of corePlans) {
     const { pool, local } = localPool(plan, req.city);
-    if (!local) notes.push(`No ${SUB_LABELS[plan.sub] ?? plan.sub} listing currently lists ${req.city} as a service area; the closest option is shown — confirm travel with us.`);
+    if (!local) notes.push(t("No {sub} listing currently lists {city} as a service area; the closest option is shown — confirm travel with us.", { sub: label(plan.sub), city: cityLabel(req.city ?? "") }));
     const allocation = req.budget ? (req.budget / (1 + PLATFORM_FEE_RATE)) * ((SUB_WEIGHTS[plan.sub] ?? 0.05) / totalWeight) : Infinity;
     const ranked = rank(pool, req);
     const fitting = ranked.find((s) => costOf(s, guests) <= allocation * 1.15);
@@ -102,9 +104,9 @@ export function recommendByRules(req: PlannerRequirements, services: Service[]):
       while (withFee(total) > req.budget && picks.length > 1) {
         const dropped = picks.pop()!;
         total -= dropped.cost;
-        const label = SUB_LABELS[dropped.plan.sub] ?? dropped.plan.sub;
-        for (let i = notes.length - 1; i >= 0; i--) if (notes[i].includes(`No ${label} listing`)) notes.splice(i, 1);
-        notes.push(`${label} was left out to stay within budget — add it on the Customize page if you like.`);
+        const dl = label(dropped.plan.sub);
+        for (let i = notes.length - 1; i >= 0; i--) if (notes[i].includes(dl)) notes.splice(i, 1);
+        notes.push(t("{sub} was left out to stay within budget — add it on the Customize page if you like.", { sub: dl }));
       }
     }
     // Add extras that still fit the remaining budget.
@@ -117,23 +119,23 @@ export function recommendByRules(req: PlannerRequirements, services: Service[]):
         picks.push({ plan, service: fit, cost: costOf(fit, guests) });
         total += costOf(fit, guests);
       } else {
-        skipped.push(SUB_LABELS[plan.sub] ?? plan.sub);
+        skipped.push(label(plan.sub));
       }
     }
-    if (skipped.length) notes.push(`Not included to stay within budget: ${skipped.join(", ")}. You can add them on the Customize page.`);
-    if (withFee(total) > req.budget) notes.push("Even the most affordable combination is above your budget. Consider fewer services or guests, or send a customisation request so our team can suggest alternatives.");
-    else if (withFee(total) < req.budget * 0.7) notes.push("This plan leaves room in your budget for upgrades such as fresh flowers, drone coverage or a photo booth.");
+    if (skipped.length) notes.push(t("Not included to stay within budget: {list}. You can add them on the Customize page.", { list: skipped.join(", ") }));
+    if (withFee(total) > req.budget) notes.push(t("Even the most affordable combination is above your budget. Consider fewer services or guests, or send a customisation request so our team can suggest alternatives."));
+    else if (withFee(total) < req.budget * 0.7) notes.push(t("This plan leaves room in your budget for upgrades such as fresh flowers, drone coverage or a photo booth."));
   }
 
   const items: PlannerRecommendationItem[] = picks.map(({ plan, service }) => {
-    const bits = [`rated ${service.rating.toFixed(1)}★ across ${service.reviewCount} reviews`];
-    if (themeMatch(service, req.theme)) bits.push(`matches your "${req.theme}" theme`);
-    if (req.city && servesCity(service, req.city)) bits.push(`serves ${req.city}`);
+    const bits = [t("rated {r}★ across {n} reviews", { r: service.rating.toFixed(1), n: service.reviewCount })];
+    if (themeMatch(service, req.theme)) bits.push(t("matches your chosen theme"));
+    if (req.city && servesCity(service, req.city)) bits.push(t("serves {city}", { city: cityLabel(req.city) }));
     return {
       serviceId: service.id,
       quantity: suggestedQuantity(service, guests),
       optionIds: [],
-      reason: `Best-fit ${SUB_LABELS[plan.sub] ?? plan.sub}: ${bits.join(", ")}.`,
+      reason: t("Best-fit {sub}: {bits}.", { sub: label(plan.sub), bits: bits.join(", ") }),
     };
   });
   return { items, notes };

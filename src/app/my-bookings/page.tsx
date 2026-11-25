@@ -3,18 +3,21 @@ import { isAdminConfigured } from "@/lib/firebase/admin";
 import { requirePageUser } from "@/lib/server/auth";
 import { PageHero } from "@/components/layout/PageHero";
 import { BookingsList } from "@/components/booking/BookingsList";
-import { FirebaseSetupNotice } from "@/components/ui/SetupNotice";
+import { DemoGate } from "@/components/auth/DemoGate";
+import { getT } from "@/lib/i18n/server";
 
 export const metadata: Metadata = { title: "My bookings", robots: { index: false } };
 export const dynamic = "force-dynamic";
 
 export default async function MyBookingsPage() {
-  if (!isAdminConfigured()) return <FirebaseSetupNotice feature="My bookings" />;
-  await requirePageUser("/my-bookings");
+  const { t } = await getT();
+  const demo = !isAdminConfigured();
+  if (!demo) await requirePageUser("/my-bookings");
+  const body = <div className="container-x pt-10"><BookingsList /></div>;
   return (
     <>
-      <PageHero crumbs={[{ label: "Home", href: "/" }, { label: "My bookings" }]} eyebrow="Your events" title="My bookings" bn="আমার বুকিং" />
-      <div className="container-x pt-10"><BookingsList /></div>
+      <PageHero crumbs={[{ label: t("Home"), href: "/" }, { label: t("My bookings") }]} eyebrow={t("Your events")} title={t("My bookings")} />
+      {demo ? <DemoGate>{body}</DemoGate> : body}
     </>
   );
 }

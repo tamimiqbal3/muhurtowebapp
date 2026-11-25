@@ -7,6 +7,8 @@ import { priceItems, suggestedQuantity } from "../pricing";
 import { servesCity } from "../search";
 import type { CategorySlug, PlannerRecommendationItem, PlannerRequirements, PlannerResult } from "../types";
 import { getCatalogLookups } from "./catalog";
+import { makeT, type Lang } from "../i18n/core";
+import { cityName } from "../../data/i18n-data";
 import { geminiJSON, isGeminiConfigured } from "./gemini";
 
 const ALL_SUBS = [...EVENT_SUBS, ...FOOD_SUBS] as string[];
@@ -70,14 +72,15 @@ Return ONLY JSON: {"summary": string (2-4 sentences, friendly, may include a sho
 "items": [{"serviceId": string, "optionIds": string[], "reason": string (one sentence)}],
 "notes": string[] (practical tips, max 3)}.`;
 
-export async function recommend(requirements: PlannerRequirements): Promise<PlannerResult> {
+export async function recommend(requirements: PlannerRequirements, lang: Lang = "en"): Promise<PlannerResult> {
   const req = { ...emptyRequirements(), ...requirements };
+  const t = makeT(lang);
   const { services, getService, getVendor } = await getCatalogLookups();
-  const baseline = recommendByRules(req, services);
+  const baseline = recommendByRules(req, services, t, (c) => cityName(c, lang));
   let source: PlannerResult["source"] = "rules";
   let items: PlannerRecommendationItem[] = baseline.items;
   let notes = baseline.notes;
-  let summary = buildRuleSummary(req);
+  let summary = buildRuleSummary(req, lang);
 
   if (isGeminiConfigured()) {
     try {
@@ -94,7 +97,7 @@ export async function recommend(requirements: PlannerRequirements): Promise<Plan
           })),
       );
       const g = await geminiJSON<{ summary?: string; items?: Array<{ serviceId?: string; optionIds?: string[]; reason?: string }>; notes?: string[] }>(
-        RECOMMEND_SYSTEM,
+        RECOMMEND_SYSTEM + (lang === "bn" ? "\nWrite summary, reasons and notes in natural Bangla (বাংলা)." : "\nWrite in English."),
         `Customer requirements: ${JSON.stringify(req)}\nRequested sub-services: ${plans.map((p) => SUB_LABELS[p.sub]).join(", ")}\nRule-based baseline (valid fallback): ${JSON.stringify(baseline.items.map((i) => i.serviceId))}\nCatalogue: ${JSON.stringify(candidates)}`,
       );
       const allowed = new Map(candidates.map((c) => [c.id, c]));
@@ -125,11 +128,12 @@ export async function recommend(requirements: PlannerRequirements): Promise<Plan
     .map((i) => ({ ...i, line: priced.lines.find((l) => l.serviceId === i.serviceId)! }))
     .filter((i) => i.line);
   const withinBudget = req.budget ? priced.pricing.total <= req.budget : null;
-  if (req.budget && !withinBudget && source === "gemini") notes.push("The estimated total is above your stated budget — remove an option or ask us for a customised quote.");
+  if (req.budget && !withinBudget && source === "gemini") notes.push(t("The estimated total is above your stated budget — remove an option or ask us for a customised quote."));
   return { source, summary, items: enriched, estimate: priced.pricing, budget: req.budget, withinBudget, notes };
 }
 
-function buildRuleSummary(r: PlannerRequirements): string {
+function buildRuleSummary(r: PlannerRequirements, lang: Lang): string {
+  if (lang === "bn") return makeT("bn")("Here is a starting plan built from real MUHURTO listings, chosen for rating, location, theme and budget fit. Prices are estimates until you confirm a booking.");
   const parts = [
     r.categorySlug ? `a ${r.categorySlug.replace("-", " ")}` : "your event",
     r.city ? `in ${r.city}` : "",

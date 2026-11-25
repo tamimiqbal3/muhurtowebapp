@@ -1,3 +1,4 @@
+import type { Lang } from "../lib/i18n/core";
 import type { Review } from "../lib/types";
 import { IMG } from "./images";
 
@@ -44,12 +45,49 @@ export const FAQS = [
   { q: "Can I cancel or change my booking?", a: "You can request a cancellation or modification from the booking page. Our team reviews requests against each vendor's policy and replies in your dashboard." },
   { q: "Are the vendors verified?", a: "Vendors are reviewed before listing. Listings marked 'Demo' are sample data used while the platform is being prepared for launch." },
   { q: "Do you work outside Dhaka?", a: "Yes. Listings show their service areas — many vendors serve Chattogram, Rajshahi, Sylhet, Khulna and beyond. Search by city to see what's available near your venue." },
-  { q: "How does the AI Event Planner work?", a: "The planner asks a few guided questions (category, date, city, budget, guests, theme and services), then recommends a combination of real MUHURTO listings with an estimated total. Estimates are not confirmed prices until you book." },
+  { q: "How does the Event Planner calculator work?", a: "Key in your event type, date, city, budget, guests, theme and services, then press =. The calculator prints a combination of real MUHURTO listings with an estimated total. Prices are estimates until you book." },
 ];
 
 export const STEPS = [
-  { n: "01", title: "Explore Services", body: "Browse verified décor, food, photography and sound — or ask the AI planner for a shortlist." },
+  { n: "01", title: "Explore Services", body: "Browse verified décor, food, photography and sound — or build a shortlist on the planner calculator." },
   { n: "02", title: "Customize Your Event", body: "Pick options, quantities and themes. Request changes and approve an updated plan." },
   { n: "03", title: "Confirm & Pay", body: "Pay securely through SSLCommerz. The 2% platform fee is shown upfront — no surprises." },
   { n: "04", title: "Enjoy Your Moment", body: "A Monitoring Agent coordinates every vendor while you follow progress from your dashboard." },
 ];
+
+/* ─── Bangla versions ───────────────────────────────────────────────── */
+
+const TESTIMONIALS_BN = [
+  { name: "নুসরাত ও তানভীর", city: "ঢাকা", event: "বিয়ে · ৪৫০ অতিথি", quote: "সাজসজ্জা, কাচ্চি আর ফটোগ্রাফি এক জায়গায় বুক করেছি, আর অনুষ্ঠানের দিন মনিটরিং এজেন্ট সব ভেন্ডরের ফোন সামলেছেন। আমাদের পরিবার সত্যিই হলুদটা উপভোগ করতে পেরেছে।" },
+  { name: "ফারহানা আক্তার", city: "চট্টগ্রাম", event: "প্রথম জন্মদিন", quote: "অনলাইনে যে বেলুন সজ্জা আর ফটো বুথ বেছেছিলাম, ঠিক সেটাই পেয়েছি। ড্যাশবোর্ডে ভেন্ডরের অগ্রগতি দেখে আগের সপ্তাহটা অনেক নিশ্চিন্ত কেটেছে।" },
+  { name: "রেজাউল করিম", city: "রাজশাহী", event: "কর্পোরেট সেমিনার · ২২০ জন", quote: "২% ফি শুরুতেই দেখানো স্বচ্ছ মূল্য। সাউন্ড, আসন আর চায়ের স্টেশন সময়মতো এসেছে — এজেন্ট প্রতি ঘণ্টায় আপডেট দিয়েছেন।" },
+  { name: "শারমিন সুলতানা", city: "সিলেট", event: "মা-বাবার ৪০তম বিবাহবার্ষিকী", quote: "রবীন্দ্রসংগীতের সন্ধ্যা আর পারিবারিক ফিল্ম দেখে মা আনন্দে কেঁদে ফেলেছেন। সবকিছু ব্যক্তিগত মনে হয়েছে, প্যাকেজ নয়।" },
+];
+
+const FAQS_BN = [
+  { q: "মুহূর্তে মূল্য কীভাবে নির্ধারিত হয়?", a: "প্রতিটি লিস্টিংয়ে টাকায় শুরুর মূল্য দেখানো থাকে। আপনার মোট মূল্য হলো বেছে নেওয়া সার্ভিসগুলোর (অপশন ও পরিমাণসহ) যোগফল, সাথে চেকআউটে দেখানো ২% প্ল্যাটফর্ম ফি। একই বুকিংয়ের জন্য কখনো দুবার চার্জ করা হয় না।" },
+  { q: "মনিটরিং এজেন্ট কী?", a: "পেমেন্ট যাচাই হওয়ার পর মুহূর্ত আপনার অনুষ্ঠানে একজন মনিটরিং এজেন্ট নিয়োগ দেয়। তিনি সব ভেন্ডরের সমন্বয় করেন, প্রস্তুতির ধাপ অনুসরণ করেন এবং আপনার ড্যাশবোর্ডে আপডেট দেন — আপনাকে ভেন্ডরদের পেছনে ছুটতে হয় না।" },
+  { q: "কোন কোন পেমেন্ট পদ্ধতি চলে?", a: "পেমেন্ট প্রসেস করে SSLCommerz — বিকাশ, নগদ, রকেট, ভিসা, মাস্টারকার্ডসহ কার্ড ও ইন্টারনেট ব্যাংকিং। মুহূর্ত কখনো আপনার কার্ডের তথ্য দেখে বা সংরক্ষণ করে না।" },
+  { q: "প্যাকেজ কি নিজের মতো সাজানো যায়?", a: "হ্যাঁ। কাস্টমাইজ পেজে সার্ভিস, পরিমাণ, থিম ও বিশেষ নির্দেশনা বেছে নিন, তারপর সরাসরি বুক করুন অথবা কাস্টমাইজেশন অনুরোধ পাঠান। আমাদের টিম পর্যালোচনা করে হালনাগাদ প্ল্যান পাঠাবে, যা পেমেন্টের আগে আপনি অনুমোদন করবেন।" },
+  { q: "বুকিং বাতিল বা পরিবর্তন করা যায়?", a: "বুকিং পেজ থেকে বাতিল বা পরিবর্তনের অনুরোধ করতে পারেন। আমাদের টিম প্রতিটি ভেন্ডরের নীতি অনুযায়ী অনুরোধ পর্যালোচনা করে ড্যাশবোর্ডে উত্তর দেয়।" },
+  { q: "ভেন্ডররা কি যাচাইকৃত?", a: "লিস্টিংয়ের আগে ভেন্ডরদের পর্যালোচনা করা হয়। 'ডেমো' চিহ্নিত লিস্টিংগুলো লঞ্চের প্রস্তুতিকালীন নমুনা তথ্য।" },
+  { q: "ঢাকার বাইরে কাজ করেন?", a: "হ্যাঁ। লিস্টিংয়ে সার্ভিস এলাকা দেখানো থাকে — অনেক ভেন্ডর চট্টগ্রাম, রাজশাহী, সিলেট, খুলনা ও অন্যান্য জেলায় কাজ করেন। আপনার ভেন্যুর কাছাকাছি কী আছে দেখতে শহর দিয়ে খুঁজুন।" },
+  { q: "ইভেন্ট প্ল্যানার ক্যালকুলেটর কীভাবে কাজ করে?", a: "ক্যালকুলেটরে অনুষ্ঠানের ধরন, তারিখ, শহর, বাজেট, অতিথি, থিম ও সার্ভিস দিন, তারপর = চাপুন। এটি মুহূর্তের আসল লিস্টিং থেকে একটি সমন্বয় ও আনুমানিক মোট মূল্য প্রিন্ট করে। বুক করার আগ পর্যন্ত মূল্য আনুমানিক।" },
+];
+
+const STEPS_BN = [
+  { n: "০১", title: "সার্ভিস খুঁজুন", body: "যাচাই করা সাজসজ্জা, খাবার, ফটোগ্রাফি ও সাউন্ড দেখুন — অথবা প্ল্যানার ক্যালকুলেটর দিয়ে তালিকা বানান।" },
+  { n: "০২", title: "অনুষ্ঠান সাজান", body: "অপশন, পরিমাণ ও থিম বেছে নিন। পরিবর্তন চান? অনুরোধ পাঠিয়ে হালনাগাদ প্ল্যান অনুমোদন করুন।" },
+  { n: "০৩", title: "নিশ্চিত করুন ও পেমেন্ট দিন", body: "SSLCommerz-এর মাধ্যমে নিরাপদে পেমেন্ট দিন। ২% প্ল্যাটফর্ম ফি শুরুতেই দেখানো — কোনো চমক নেই।" },
+  { n: "০৪", title: "মুহূর্তটি উপভোগ করুন", body: "মনিটরিং এজেন্ট সব ভেন্ডরের সমন্বয় করবেন, আর আপনি ড্যাশবোর্ড থেকে অগ্রগতি দেখবেন।" },
+];
+
+const GALLERY_LABEL_BN: Record<string, string> = {
+  "Reception stage": "রিসেপশন মঞ্চ", "Live fuchka": "লাইভ ফুচকা", "Mehendi details": "মেহেদির কারুকাজ", "Conference keynote": "কনফারেন্সের কিনোট",
+  "Cha station": "চায়ের স্টেশন", "Birthday sparkle": "জন্মদিনের ঝলক", "Family evening": "পারিবারিক সন্ধ্যা", "Chattogram wedding": "চট্টগ্রামের বিয়ে", "Wedding buffet": "বিয়ের বুফে",
+};
+
+export const getTestimonials = (lang: Lang) => (lang === "bn" ? TESTIMONIALS_BN : TESTIMONIALS);
+export const getFaqs = (lang: Lang) => (lang === "bn" ? FAQS_BN : FAQS);
+export const getSteps = (lang: Lang) => (lang === "bn" ? STEPS_BN : STEPS);
+export const getGallery = (lang: Lang) => GALLERY.map((g) => ({ ...g, label: lang === "bn" ? GALLERY_LABEL_BN[g.label] ?? g.label : g.label }));

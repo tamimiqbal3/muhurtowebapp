@@ -3,6 +3,7 @@ import { fail, handle, readJson } from "@/lib/server/api";
 import { parseRequirements, recommend, sanitizeRequirements } from "@/lib/server/planner";
 import { isGeminiConfigured } from "@/lib/server/gemini";
 import { clientIp, rateLimit } from "@/lib/server/rate-limit";
+import { getLang } from "@/lib/i18n/server";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 30;
@@ -23,7 +24,7 @@ export const POST = handle(async (req: Request) => {
   }
   if (body.mode === "recommend") {
     if (!current.categorySlug) return fail(400, "Please choose an event category first.");
-    const result = await recommend(current);
+    const result = await recommend(current, await getLang());
     return NextResponse.json(result);
   }
   return fail(400, "Unknown planner mode.");

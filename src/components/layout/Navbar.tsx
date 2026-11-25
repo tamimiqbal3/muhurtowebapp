@@ -10,6 +10,8 @@ import { ButtonLink } from "../ui/Button";
 import { useAuth } from "../auth/AuthProvider";
 import { usePlan } from "../plan/PlanProvider";
 import { cn } from "@/lib/utils";
+import { useT } from "../i18n/LanguageProvider";
+import { LanguageToggle } from "../i18n/LanguageToggle";
 
 export const NAV_LINKS = [
   { href: "/", label: "Home" },
@@ -29,6 +31,7 @@ export function Navbar() {
   const [menu, setMenu] = useState(false);
   const { user, signOut, loading } = useAuth();
   const plan = usePlan();
+  const t = useT();
   const overHero = pathname === "/" && !scrolled && !open;
 
   useEffect(() => {
@@ -52,31 +55,32 @@ export function Navbar() {
 
   return (
     <header className={cn("fixed inset-x-0 top-0 z-50 transition-all duration-500", overHero ? "bg-transparent" : "border-b border-line/80 bg-ivory/85 backdrop-blur-xl")}>
-      <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:rounded-full focus:bg-ink focus:px-4 focus:py-2 focus:text-paper">Skip to content</a>
+      <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:rounded-full focus:bg-ink focus:px-4 focus:py-2 focus:text-paper">{t("Skip to content")}</a>
       <nav className="container-x flex h-[72px] items-center justify-between gap-4" aria-label="Main">
         <Logo light={overHero} />
-        <ul className="hidden items-center gap-0.5 xl:flex">
+        <ul className="hidden items-center gap-0 min-[1320px]:flex">
           {NAV_LINKS.map((l) => (
             <li key={l.href}>
               <Link
                 href={l.href}
                 className={cn(
-                  "relative rounded-full px-3 py-2 text-[0.8rem] font-medium transition-colors",
+                  "relative rounded-full px-2.5 py-2 text-[0.78rem] font-medium transition-colors",
                   overHero ? "text-paper/85 hover:text-paper" : "text-ink-soft hover:text-ink",
                   isActive(l.href) && (overHero ? "text-paper" : "text-ink"),
                 )}
               >
-                {l.label}
+                {t(l.label)}
                 {isActive(l.href) && <motion.span layoutId="nav-dot" className={cn("absolute inset-x-3 -bottom-0.5 h-px", overHero ? "bg-paper" : "bg-sindoor")} />}
               </Link>
             </li>
           ))}
         </ul>
         <div className="flex items-center gap-2">
+          <LanguageToggle compact light={overHero} className="hidden sm:inline-flex" />
           <button
             onClick={() => plan.setDrawerOpen(true)}
             className={cn("relative grid h-10 w-10 place-items-center rounded-full transition", overHero ? "text-paper hover:bg-paper/10" : "text-ink hover:bg-sand")}
-            aria-label={`Open event plan (${plan.items.length} services)`}
+            aria-label={t("Open event plan ({n} services)", { n: plan.items.length })}
           >
             <ShoppingBag className="h-5 w-5" />
             {plan.hydrated && plan.items.length > 0 && (
@@ -94,13 +98,13 @@ export function Navbar() {
                 <AnimatePresence>
                   {menu && (
                     <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} className="card absolute right-0 mt-2 w-56 overflow-hidden p-1.5 text-sm">
-                      <MenuLink href="/dashboard" icon={<LayoutDashboard className="h-4 w-4" />}>Dashboard</MenuLink>
-                      <MenuLink href="/my-bookings" icon={<ShoppingBag className="h-4 w-4" />}>My bookings</MenuLink>
-                      <MenuLink href="/dashboard/profile" icon={<User className="h-4 w-4" />}>Profile</MenuLink>
-                      {(user.role === "agent" || user.role === "admin") && <MenuLink href="/agent" icon={<Radar className="h-4 w-4" />}>Agent workspace</MenuLink>}
-                      {user.role === "admin" && <MenuLink href="/admin" icon={<Shield className="h-4 w-4" />}>Admin</MenuLink>}
+                      <MenuLink href="/dashboard" icon={<LayoutDashboard className="h-4 w-4" />}>{t("Dashboard")}</MenuLink>
+                      <MenuLink href="/my-bookings" icon={<ShoppingBag className="h-4 w-4" />}>{t("My bookings")}</MenuLink>
+                      <MenuLink href="/dashboard/profile" icon={<User className="h-4 w-4" />}>{t("Profile")}</MenuLink>
+                      {(user.role === "agent" || user.role === "admin") && <MenuLink href="/agent" icon={<Radar className="h-4 w-4" />}>{t("Agent workspace")}</MenuLink>}
+                      {user.role === "admin" && <MenuLink href="/admin" icon={<Shield className="h-4 w-4" />}>{t("Admin")}</MenuLink>}
                       <button onClick={() => void signOut()} className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-danger hover:bg-sand">
-                        <LogOut className="h-4 w-4" /> Sign out
+                        <LogOut className="h-4 w-4" /> {t("Sign out")}
                       </button>
                     </motion.div>
                   )}
@@ -108,41 +112,42 @@ export function Navbar() {
               </>
             ) : (
               <Link href="/login" className={cn("rounded-full px-3 py-2 text-sm font-medium transition", overHero ? "text-paper hover:bg-paper/10" : "text-ink hover:bg-sand", loading && "opacity-0")}>
-                Login
+                {t("Login")}
               </Link>
             )}
           </div>
           <ButtonLink href="/event-planner" variant={overHero ? "light" : "accent"} size="sm" className="hidden md:inline-flex">
-            Plan Your Event
+            {t("Plan Your Event")}
           </ButtonLink>
-          <button className={cn("grid h-10 w-10 place-items-center rounded-full xl:hidden", overHero ? "text-paper" : "text-ink")} onClick={() => setOpen((o) => !o)} aria-label={open ? "Close menu" : "Open menu"} aria-expanded={open}>
+          <button className={cn("grid h-10 w-10 place-items-center rounded-full min-[1320px]:hidden", overHero ? "text-paper" : "text-ink")} onClick={() => setOpen((o) => !o)} aria-label={open ? t("Close menu") : t("Open menu")} aria-expanded={open}>
             {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </button>
         </div>
       </nav>
       <AnimatePresence>
         {open && (
-          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "calc(100dvh - 72px)" }} exit={{ opacity: 0, height: 0 }} className="overflow-y-auto border-t border-line bg-ivory xl:hidden">
+          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "calc(100dvh - 72px)" }} exit={{ opacity: 0, height: 0 }} className="overflow-y-auto border-t border-line bg-ivory min-[1320px]:hidden">
             <ul className="container-x space-y-1 py-6">
               {NAV_LINKS.map((l, i) => (
                 <motion.li key={l.href} initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.03 * i }}>
                   <Link href={l.href} className={cn("flex items-center justify-between border-b border-line/70 py-3.5 font-display text-2xl", isActive(l.href) ? "text-sindoor" : "text-ink")}>
-                    {l.label}
+                    {t(l.label)}
                   </Link>
                 </motion.li>
               ))}
             </ul>
             <div className="container-x grid gap-3 pb-10">
-              <ButtonLink href="/event-planner" variant="accent" size="lg">Plan Your Event</ButtonLink>
+              <LanguageToggle className="justify-self-start" />
+              <ButtonLink href="/event-planner" variant="accent" size="lg">{t("Plan Your Event")}</ButtonLink>
               {user ? (
                 <>
-                  <ButtonLink href="/dashboard" variant="outline" size="lg">Dashboard</ButtonLink>
-                  {user.role === "admin" && <ButtonLink href="/admin" variant="outline" size="lg">Admin</ButtonLink>}
-                  {(user.role === "agent" || user.role === "admin") && <ButtonLink href="/agent" variant="outline" size="lg">Agent workspace</ButtonLink>}
-                  <button onClick={() => void signOut()} className="py-3 text-sm font-semibold text-danger">Sign out</button>
+                  <ButtonLink href="/dashboard" variant="outline" size="lg">{t("Dashboard")}</ButtonLink>
+                  {user.role === "admin" && <ButtonLink href="/admin" variant="outline" size="lg">{t("Admin")}</ButtonLink>}
+                  {(user.role === "agent" || user.role === "admin") && <ButtonLink href="/agent" variant="outline" size="lg">{t("Agent workspace")}</ButtonLink>}
+                  <button onClick={() => void signOut()} className="py-3 text-sm font-semibold text-danger">{t("Sign out")}</button>
                 </>
               ) : (
-                <ButtonLink href="/login" variant="outline" size="lg">Login / Register</ButtonLink>
+                <ButtonLink href="/login" variant="outline" size="lg">{t("Login / Register")}</ButtonLink>
               )}
             </div>
           </motion.div>

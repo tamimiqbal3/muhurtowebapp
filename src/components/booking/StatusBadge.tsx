@@ -1,5 +1,8 @@
+"use client";
+
 import type { BookingStatus, MonitoringStatus, PaymentStatus } from "@/lib/types";
 import { Badge } from "../ui/misc";
+import { useT } from "../i18n/LanguageProvider";
 
 const BOOKING: Record<BookingStatus, { label: string; tone: "neutral" | "gold" | "success" | "warning" | "danger" | "ink" }> = {
   pending_payment: { label: "Awaiting payment", tone: "warning" },
@@ -28,13 +31,13 @@ const MONITORING: Record<MonitoringStatus, { label: string; tone: "neutral" | "g
 
 export function BookingStatusBadge({ status }: { status: BookingStatus }) {
   const s = BOOKING[status] ?? { label: status, tone: "neutral" as const };
-  return <Badge tone={s.tone}>{s.label}</Badge>;
+  return <Badge tone={s.tone}>{useT()(s.label)}</Badge>;
 }
 export function PaymentStatusBadge({ status }: { status: PaymentStatus }) {
   const s = PAYMENT[status] ?? { label: status, tone: "neutral" as const };
-  return <Badge tone={s.tone}>{s.label}</Badge>;
+  return <Badge tone={s.tone}>{useT()(s.label)}</Badge>;
 }
 export function MonitoringBadge({ status }: { status: MonitoringStatus }) {
   const s = MONITORING[status] ?? { label: status, tone: "neutral" as const };
-  return <Badge tone={s.tone}>{s.label}</Badge>;
+  return <Badge tone={s.tone}>{useT()(s.label)}</Badge>;
 }
