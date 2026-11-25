@@ -1,7 +1,6 @@
 "use client";
 
 import { useRef } from "react";
-import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import { ShoppingBasket, Minus, Plus, X, ArrowRight } from "lucide-react";
 import type { Service } from "@/lib/types";
@@ -9,7 +8,8 @@ import { suggestedQuantity, unitLabel } from "@/lib/pricing";
 import { formatBDT } from "@/lib/format";
 import { usePlan, lineEstimate } from "../plan/PlanProvider";
 import { useLang } from "../i18n/LanguageProvider";
-import { FoodShop, type FoodPick } from "./FoodShop";
+import { FoodShop } from "./FoodShop";
+import { useFlyToTarget } from "./FlyToTray";
 import { RollingNumber } from "../motion/RollingNumber";
 import { ButtonLink } from "../ui/Button";
 
@@ -17,19 +17,18 @@ import { ButtonLink } from "../ui/Button";
 export function FoodShopSection({ services }: { services: Service[] }) {
   const { t, lang } = useLang();
   const plan = usePlan();
-  const router = useRouter();
   const trayRef = useRef<HTMLDivElement>(null);
+  const { launch, layer } = useFlyToTarget();
   const guests = plan.event.guests ?? 100;
   const byId = new Map(services.map((s) => [s.id, s]));
   const tray = plan.items.filter((i) => byId.has(i.serviceId));
   const trayTotal = tray.reduce((s, i) => s + lineEstimate(i), 0);
 
-  const getPick = (id: string): FoodPick | null => {
-    const it = plan.items.find((i) => i.serviceId === id);
-    return it ? { qty: it.quantity, optionIds: it.optionIds } : null;
-  };
-  const add = (s: Service, p: FoodPick) => plan.add(s, { quantity: p.qty, optionIds: p.optionIds, openDrawer: false });
-  const order = (s: Service, p: FoodPick) => { add(s, p); router.push("/booking"); };
+  function pick(s: Service, el: HTMLElement | null) {
+    if (plan.has(s.id)) { plan.remove(s.id); return; }
+    plan.add(s, { quantity: suggestedQuantity(s, guests), openDrawer: false });
+    launch(s.images[0]?.src, el, trayRef.current);
+  }
   function setGuests(n: number) {
     const g = Math.max(10, Math.min(20000, Math.round(n)));
     plan.setEvent({ guests: g });
@@ -40,8 +39,8 @@ export function FoodShopSection({ services }: { services: Service[] }) {
   }
 
   return (
-    <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
-      <FoodShop services={services} guests={guests} getPick={getPick} onAdd={add} onRemove={plan.remove} onOrder={order} />
+    <div className="grid gap-8 lg:grid-cols-[1fr_340px] lg:items-start">
+      <FoodShop services={services} picked={(id) => plan.has(id)} onPick={pick} />
 
       {/* Tray */}
       <div ref={trayRef} className="lg:sticky lg:top-28">
@@ -49,7 +48,7 @@ export function FoodShopSection({ services }: { services: Service[] }) {
           <div className="rounded-[20px] bg-paper p-5">
             <div className="flex items-center gap-2">
               <ShoppingBasket className="h-5 w-5 text-brand" />
-              <p className="font-display text-2xl">{t("Your order")}</p>
+              <p className="font-display text-2xl">{t("Your tray")}</p>
               <span className="ml-auto rounded-full bg-sand px-2.5 py-0.5 text-xs font-semibold">{t("{n} items", { n: tray.length })}</span>
             </div>
             <div className="mt-4 flex items-center justify-between rounded-xl bg-sand/70 px-3 py-2">
@@ -73,7 +72,7 @@ export function FoodShopSection({ services }: { services: Service[] }) {
                   </motion.li>
                 ))}
               </AnimatePresence>
-              {!tray.length && <li className="rounded-xl border border-dashed border-line px-3 py-6 text-center text-sm text-muted">{t("Your order is empty — tap any dish in the case to see it and order.")}</li>}
+              {!tray.length && <li className="rounded-xl border border-dashed border-line px-3 py-6 text-center text-sm text-muted">{t("Your tray is empty — tap any dish to pick it.")}</li>}
             </ul>
             <div className="mt-5 flex items-end justify-between border-t border-dashed border-line pt-4">
               <span className="text-sm text-muted">{t("Food estimate")}</span>
@@ -87,6 +86,7 @@ export function FoodShopSection({ services }: { services: Service[] }) {
           </div>
         </div>
       </div>
+      {layer}
     </div>
   );
 }

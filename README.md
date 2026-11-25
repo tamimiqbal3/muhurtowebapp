@@ -147,7 +147,7 @@ Visa and Mastercard fall back to their Wikimedia Commons files until local copie
 
 ## Food counter
 
-The Food & Culinary page (and the planner's food step) shows dishes in a bakery-style glass display case: lit shelves for platters, fuchka counters and the cha/coffee bar, each dish on its own tray with a black price label in front. Tapping a tray opens its details — description, what's included, add-ons and quantity with a live total — with **Order now** (adds it and goes to booking) and **Add to order**. The order panel scales quantities to the guest count.
+The Food & Culinary page (and the planner's food step) shows dishes like a shop counter: a striped awning, a chalkboard sign, glass shelves for platters, fuchka counters and the cha/coffee bar, a plate and a hanging price tag for each item. Tap a dish to put it in your tray; the tray scales quantities to your guest count and totals as you pick.
 
 ## Brand
 
