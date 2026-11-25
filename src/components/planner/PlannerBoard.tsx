@@ -258,8 +258,14 @@ export function PlannerBoard({ services, aiEnabled }: { services: Service[]; aiE
         )}
 
         {/* 4 · Food counter */}
-        <Panel step={rows.length ? 4 : 3} title={category === "food-culinary" ? t("Pick your food") : t("Add food & drinks")} icon={<Sparkles className="h-4 w-4" />} aside={<span className="text-xs text-muted">{t("Pick as many as you like")}</span>}>
-          <FoodShop services={food} picked={(id) => Boolean(picks[id])} onPick={(s, el) => toggle(s, el, false)} />
+        <Panel step={rows.length ? 4 : 3} title={category === "food-culinary" ? t("Pick your food") : t("Add food & drinks")} icon={<Sparkles className="h-4 w-4" />} aside={<span className="text-xs text-muted">{t("Tap a dish to see it and add it")}</span>}>
+          <FoodShop
+            services={food}
+            guests={guests}
+            getPick={(id) => { const p = picks[id]; const s = byId.get(id); return p && s ? { qty: p.qty ?? suggestedQuantity(s, guests), optionIds: p.optionIds } : null; }}
+            onAdd={(s, p) => { setPicks((cur) => ({ ...cur, [s.id]: { qty: p.qty, optionIds: p.optionIds } })); setFlash(t("{name} added to your plan", { name: s.name })); setTimeout(() => setFlash(null), 2200); }}
+            onRemove={remove}
+          />
         </Panel>
       </div>
 
