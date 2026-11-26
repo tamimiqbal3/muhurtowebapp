@@ -22,7 +22,7 @@ export const CATEGORIES: Category[] = [
     accent: "#015fff",
     route: "/wedding",
     hero: IMG.wLightChandelier,
-    card: IMG.wRedGold,
+    card: IMG.wSofaWhite,
     subcategories: eventSubs("Photography and Videography", "Decor"),
   },
   {
@@ -34,7 +34,7 @@ export const CATEGORIES: Category[] = [
     accent: "#f29a1d",
     route: "/birthday",
     hero: IMG.dPinkParty,
-    card: IMG.dBalloonArch,
+    card: IMG.dGoldBalloons,
     subcategories: eventSubs("Photo and Videography", "Décor"),
   },
   {
@@ -69,7 +69,7 @@ export const CATEGORIES: Category[] = [
     description: "Catering platters, live fuchka counters and cha/coffee stations that bring Bangladesh's favourite flavours to your guests.",
     accent: "#e2761b",
     route: "/food-culinary",
-    hero: IMG.pWeddingBuffet,
+    hero: IMG.pBiryani,
     card: IMG.fuSpicy,
     subcategories: [
       { slug: "platter", name: "Platter", nameBn: "প্ল্যাটার", description: "Catering platters, set menus and buffet spreads." },

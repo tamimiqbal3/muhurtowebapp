@@ -16,17 +16,17 @@ import { cn } from "@/lib/utils";
 
 /** Décor, venues and setups only — no people — cut together like a showreel. */
 const SCENES: Array<{ img: ImageRef; label: string }> = [
-  { img: IMG.wLightChandelier, label: "Wedding · floral mandap" },
-  { img: IMG.dBanquetChandelier, label: "Reception · banquet hall" },
+  { img: IMG.wSofaWhite, label: "Wedding · floral mandap" },
+  { img: IMG.wLightChandelier, label: "Reception · banquet hall" },
   { img: IMG.dPinkParty, label: "Birthday · themed setup" },
-  { img: IMG.eStageBlue, label: "Corporate · stage lighting" },
-  { img: IMG.wRedGold, label: "Wedding · royal canopy" },
-  { img: IMG.dReceptionFloral, label: "Family · reception décor" },
-  { img: IMG.cStage, label: "Corporate · conference hall" },
-  { img: IMG.dBalloonArch, label: "Birthday · balloon arch" },
   { img: IMG.wLightCeiling, label: "Wedding · floral ceiling" },
+  { img: IMG.eStageBlue, label: "Corporate · stage lighting" },
   { img: IMG.dTableCandles, label: "Family · candlelit dinner" },
-  { img: IMG.pWeddingBuffet, label: "Catering · buffet service" },
+  { img: IMG.dBanquetChandelier, label: "Reception · banquet hall" },
+  { img: IMG.dConfetti, label: "Birthday · balloon arch" },
+  { img: IMG.wSeatRomantic, label: "Wedding · royal canopy" },
+  { img: IMG.dReceptionFloral, label: "Family · reception décor" },
+  { img: IMG.wVenueFloral, label: "Reception · banquet hall" },
 ];
 const FADE = 1.2;
 

@@ -32,7 +32,7 @@ function initial(): Draft {
 }
 
 /** Conversational planner: asks one thing at a time, understands free text, and builds a priced plan from the catalogue. */
-export function PlannerChat() {
+export function PlannerChat({ onClose, onBooked }: { onClose?: () => void; onBooked?: () => void }) {
   const { t, lang } = useLang();
   const router = useRouter();
   const plan = usePlan();
@@ -46,7 +46,7 @@ export function PlannerChat() {
   const [picked, setPicked] = useState<string[]>([]);
   const [lines, setLines] = useState<PlanLine[] | null>(null);
   const [notes, setNotes] = useState<string[]>([]);
-  const endRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const started = useRef(false);
 
   const catName = (slug: string | null) => {
@@ -103,12 +103,14 @@ export function PlannerChat() {
   useEffect(() => {
     if (started.current) return;
     started.current = true;
-    say([t("Hello! I am the MUHURTO planning assistant. I will help you plan your event in Dhaka step by step."), t("You can tap an answer or simply type, for example: “Wedding for 200 guests in Gulshan on 14 February, budget 5 lakh”."), question("occasion", draft)]);
+    say([t("Hello! I am Shubho, your celebration planner. I will help you plan your event in Dhaka step by step."), t("You can tap an answer or simply type, for example: “Wedding for 200 guests in Gulshan on 14 February, budget 5 lakh”."), question("occasion", draft)]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Keep the newest message in view by scrolling only the message list — never the page.
   useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    const el = scrollRef.current;
+    if (el) el.scrollTo({ top: el.scrollHeight, behavior: "smooth" });
   }, [msgs, typing, lines]);
 
   /** Apply an update, acknowledge it and ask the next question (or build the plan). */
@@ -255,6 +257,7 @@ export function PlannerChat() {
       if (s) plan.add(s, { quantity: l.quantity, optionIds: [], openDrawer: false });
     }
     plan.setEvent({ categorySlug: draft.categorySlug ?? undefined, guests: draft.guests ?? undefined, date: draft.date ?? undefined, city: draft.area ?? undefined, venue: draft.venue ?? undefined, theme: draft.theme ?? undefined, notes: [draft.notes, draft.venueHelp ? "Please suggest a venue." : ""].filter(Boolean).join(" ") });
+    onBooked?.();
     router.push("/booking");
   }
 
@@ -280,17 +283,18 @@ export function PlannerChat() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-3xl flex-col overflow-hidden rounded-3xl border border-line bg-paper shadow-[0_30px_70px_-50px_rgb(8_20_48/.6)]">
+    <div className="flex h-full w-full flex-col overflow-hidden bg-paper">
       <div className="flex items-center gap-3 border-b border-line bg-[linear-gradient(120deg,#015fff,#00befe)] px-5 py-4 text-paper">
-        <span className="grid h-11 w-11 place-items-center rounded-full bg-paper"><LogoMark className="h-9 w-9" /></span>
+        <span className="relative grid h-11 w-11 shrink-0 place-items-center rounded-full bg-paper"><LogoMark className="h-9 w-9" /><span className="absolute right-0 bottom-0 h-3 w-3 rounded-full border-2 border-paper bg-emerald-400" /></span>
         <div className="min-w-0 flex-1">
-          <p className="font-semibold">{t("MUHURTO planning assistant")}</p>
-          <p className="text-xs text-paper/85">{t("Plans events in Dhaka · replies instantly")}</p>
+          <p className="font-semibold">{t("Shubho")}</p>
+          <p className="truncate text-xs text-paper/85">{t("Your celebration planner · online")}</p>
         </div>
-        <button onClick={restart} className="inline-flex items-center gap-1.5 rounded-full bg-paper/15 px-3 py-1.5 text-xs font-semibold hover:bg-paper/25"><RotateCcw className="h-3.5 w-3.5" /> {t("Start over")}</button>
+        <button onClick={restart} title={t("Start over")} aria-label={t("Start over")} className="grid h-9 w-9 place-items-center rounded-full bg-paper/15 hover:bg-paper/25"><RotateCcw className="h-4 w-4" /></button>
+        {onClose && <button onClick={onClose} aria-label={t("Close")} className="grid h-9 w-9 place-items-center rounded-full bg-paper/15 hover:bg-paper/25"><X className="h-4 w-4" /></button>}
       </div>
 
-      <div className="h-[min(62vh,560px)] space-y-3 overflow-y-auto bg-[#f6f8fc] px-4 py-5 sm:px-6" aria-live="polite">
+      <div ref={scrollRef} className="min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain bg-[#f6f8fc] px-4 py-5" aria-live="polite">
         {msgs.map((m) => (
           <div key={m.id} className={cn("flex", m.from === "user" ? "justify-end" : "justify-start")}>
             <p className={cn("max-w-[85%] rounded-2xl px-4 py-2.5 text-[0.95rem] leading-relaxed", m.from === "user" ? "rounded-br-md bg-brand text-paper" : "rounded-bl-md bg-paper text-ink shadow-[0_1px_0_rgb(0_0_0/.04)] ring-1 ring-line")}>{m.text}</p>
@@ -331,11 +335,10 @@ export function PlannerChat() {
             </div>
           </div>
         )}
-        <div ref={endRef} />
       </div>
 
       {!typing && step !== "plan" && (
-        <div className="border-t border-line bg-paper px-4 pt-3 sm:px-6">
+        <div className="max-h-[38%] shrink-0 overflow-y-auto border-t border-line bg-paper px-4 pt-3">
           <div className="scrollbar-none flex flex-wrap gap-2 pb-3">
             {step === "occasion" && data.categories.map((c) => <button key={c.slug} className={chip} onClick={() => pickOccasion(c.slug)}>{localizeCategory(c, lang).name}</button>)}
             {step === "guests" && [50, 100, 150, 200, 300, 500].map((n) => <button key={n} className={chip} onClick={() => pickGuests(n)}>{t("{n} guests", { n })}</button>)}
@@ -377,7 +380,7 @@ export function PlannerChat() {
         </div>
       )}
 
-      <form onSubmit={submit} className="flex items-center gap-2 border-t border-line bg-paper p-3 sm:p-4">
+      <form onSubmit={submit} className="flex shrink-0 items-center gap-2 border-t border-line bg-paper p-3">
         <input value={text} onChange={(e) => setText(e.target.value)} className="field !rounded-full !py-2.5" placeholder={step === "plan" ? t("Ask for changes or type “start over”") : t("Type your answer…")} aria-label={t("Message")} maxLength={600} />
         <button type="submit" disabled={!text.trim()} className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-brand text-paper disabled:opacity-40" aria-label={t("Send")}><ArrowUp className="h-5 w-5" /></button>
       </form>

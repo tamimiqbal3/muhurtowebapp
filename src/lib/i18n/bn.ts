@@ -877,4 +877,12 @@ export const BN: Record<string, string> = {
   "What our hosts say": "আয়োজকদের মতামত",
   "per person": "জনপ্রতি",
   "{n} guests — noted.": "{n} জন অতিথি — লিখে রাখলাম।",
+  "Shubho": "শুভ",
+  "Your celebration planner · online": "আপনার উৎসব পরিকল্পনাকারী · অনলাইন",
+  "Hello! I am Shubho, your celebration planner. I will help you plan your event in Dhaka step by step.": "স্বাগতম! আমি শুভ, আপনার উৎসব পরিকল্পনাকারী। ধাপে ধাপে ঢাকায় আপনার অনুষ্ঠান পরিকল্পনায় সহায়তা করব।",
+  "Close chat": "চ্যাট বন্ধ করুন",
+  "Chat with Shubho": "শুভর সঙ্গে কথা বলুন",
+  "Planning an event?": "অনুষ্ঠানের পরিকল্পনা করছেন?",
+  "Plan with our assistant or choose services yourself, with clear published prices.": "সহকারীর সঙ্গে পরিকল্পনা করুন অথবা স্পষ্ট প্রকাশিত মূল্যে নিজেই সেবা বেছে নিন।",
+  "Your event, clearly priced": "স্পষ্ট মূল্যে আপনার অনুষ্ঠান",
 };

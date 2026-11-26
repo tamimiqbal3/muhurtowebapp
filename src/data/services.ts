@@ -234,7 +234,7 @@ const FAMILY: Row[] = [
 
 /* ═════════════ FOOD & CULINARY ═════════════ */
 const FOOD: Row[] = [
-  ["food-platter-kacchi", "platter", "Dhakaiya Kacchi Biryani", "ঢাকাইয়া কাচ্চি বিরিয়ানি", "Mutton kacchi with aloo, borhani and salad.", "আলু, বোরহানি ও সালাদসহ খাসির কাচ্চি।", 35000, IMG.pWeddingBuffet, ["Kacchi biryani", "Borhani", "Salad", "Serving staff"], ["কাচ্চি বিরিয়ানি", "বোরহানি", "সালাদ", "পরিবেশনকারী"], ["kacchi", "biryani"], true],
+  ["food-platter-kacchi", "platter", "Dhakaiya Kacchi Biryani", "ঢাকাইয়া কাচ্চি বিরিয়ানি", "Mutton kacchi with aloo, borhani and salad.", "আলু, বোরহানি ও সালাদসহ খাসির কাচ্চি।", 35000, IMG.pBiryani, ["Kacchi biryani", "Borhani", "Salad", "Serving staff"], ["কাচ্চি বিরিয়ানি", "বোরহানি", "সালাদ", "পরিবেশনকারী"], ["kacchi", "biryani"], true],
   ["food-platter-polao", "platter", "Morog Polao Menu", "মোরগ পোলাও মেনু", "Morog polao with roast, egg korma and firni.", "রোস্ট, ডিমের কোরমা ও ফিরনিসহ মোরগ পোলাও।", 27500, IMG.pDiverse, ["Morog polao", "Roast", "Egg korma", "Firni"], ["মোরগ পোলাও", "রোস্ট", "ডিমের কোরমা", "ফিরনি"], ["polao"]],
   ["food-platter-tehari", "platter", "Beef Tehari Menu", "গরুর তেহারি মেনু", "Old Dhaka beef tehari with salad and soft drinks.", "সালাদ ও কোমল পানীয়সহ পুরান ঢাকার গরুর তেহারি।", 22500, IMG.pBanquet, ["Beef tehari", "Salad", "Soft drinks"], ["গরুর তেহারি", "সালাদ", "কোমল পানীয়"], ["tehari"]],
   ["food-platter-mezban", "platter", "Mezban Beef Feast", "মেজবানি গরুর ভোজ", "Mezbani beef, dal and plain rice served in the traditional style.", "ঐতিহ্যবাহী ধারায় পরিবেশিত মেজবানি গরু, ডাল ও সাদা ভাত।", 30000, IMG.pGourmet, ["Mezbani beef", "Dal", "Rice"], ["মেজবানি গরু", "ডাল", "ভাত"], ["mezban"]],

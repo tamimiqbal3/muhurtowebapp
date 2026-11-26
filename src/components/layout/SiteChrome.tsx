@@ -1,7 +1,9 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { Suspense } from "react";
 import { usePathname } from "next/navigation";
+import { ChatWidget } from "../planner/ChatWidget";
 
 /** Customer-facing header, footer and plan drawer; hidden inside the independent admin panel and printable invoices. */
 export function SiteChrome({ header, footer, drawer, children }: { header: ReactNode; footer: ReactNode; drawer: ReactNode; children: ReactNode }) {
@@ -14,6 +16,7 @@ export function SiteChrome({ header, footer, drawer, children }: { header: React
       <main id="main" className="min-h-[70vh]">{children}</main>
       {footer}
       {drawer}
+      <Suspense fallback={null}><ChatWidget /></Suspense>
     </>
   );
 }
