@@ -12,8 +12,7 @@ import { useLang } from "../i18n/LanguageProvider";
 import { Button, ButtonLink } from "../ui/Button";
 import { EmptyState, Notice, Spinner } from "../ui/misc";
 import { SafeImage } from "../ui/SafeImage";
-import { PAYMENT_METHODS } from "@/data/payments";
-import { PaymentLogo } from "../payments/PaymentLogo";
+import { WeAccept } from "../payments/WeAccept";
 import { formatBDT } from "@/lib/format";
 import { computeBreakdown } from "@/lib/pricing";
 import { demoCreateBooking } from "@/lib/demo/store";
@@ -153,7 +152,7 @@ export function BookingReview() {
             <ButtonLink href="/login?next=/booking" variant="primary" size="lg" className="mt-5 w-full"><LogIn className="h-4 w-4" /> {t("Sign in to book")}</ButtonLink>
           )}
           <p className="mt-4 flex items-center gap-2 text-xs text-muted"><ShieldCheck className="h-4 w-4 text-success" /> {t("You'll choose how to pay on the next step.")}</p>
-          <div className="mt-3 flex flex-wrap items-center gap-2">{PAYMENT_METHODS.map((m) => <span key={m.id} className="grid h-8 place-items-center rounded-md border border-line bg-paper px-2"><PaymentLogo method={m} size="sm" className="h-5" /></span>)}</div>
+          <WeAccept title={false} className="mt-4 [&_ul]:justify-start [&_ul]:gap-x-4 [&_ul]:gap-y-3 [&_img]:h-4" />
         </div>
       </aside>
     </form>

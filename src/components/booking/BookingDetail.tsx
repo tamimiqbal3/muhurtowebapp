@@ -130,7 +130,7 @@ export function BookingDetail({ id }: { id: string }) {
             <ul className="space-y-2 text-sm">
               {data.payments.map((p) => (
                 <li key={p.id} className="flex items-center justify-between gap-2">
-                  <span><span className="font-medium">{t(titleCase(p.status))}</span><span className="block text-xs text-muted">{formatDateTime(p.paidAt ?? p.createdAt, lang)}{p.mode === "sandbox" && ` · ${t("sandbox")}`}{p.cardType && ` · ${p.cardType}`}</span></span>
+                  <span><span className="font-medium">{t(titleCase(p.status))}</span><span className="block text-xs text-muted">{formatDateTime(p.paidAt ?? p.createdAt, lang)}{p.cardType && ` · ${p.cardType}`}</span></span>
                   <span className="font-semibold">{formatBDT(p.amount)}</span>
                 </li>
               ))}

@@ -49,8 +49,8 @@ function Services() {
   return (
     <div className="space-y-5">
       {data.source === "demo" && (
-        <Notice tone="warning" title="Catalogue is using bundled demo data">
-          Import the demo catalogue into Firestore to start adding, editing and deleting listings from this dashboard.
+        <Notice tone="warning" title="Showing the starter catalogue">
+          Import it into your database once to add, edit and remove listings from this dashboard.
           <div className="mt-3"><Button size="sm" onClick={seed} disabled={busy}><Database className="h-4 w-4" /> Import catalogue into Firestore</Button></div>
         </Notice>
       )}

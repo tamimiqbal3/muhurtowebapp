@@ -39,7 +39,7 @@ export default function AdminVendors() {
   const demo = data.source === "demo";
   return (
     <div className="space-y-5">
-      {demo && <Notice tone="warning">Vendors are bundled demo data. Import the catalogue (Admin → Services) to manage vendors.</Notice>}
+      {demo && <Notice tone="warning">These are the starter vendors. Import the catalogue (Admin → Services) to edit, add and remove vendors.</Notice>}
       {msg && <Notice tone={msg.tone}>{msg.text}</Notice>}
       <Button size="sm" disabled={demo} onClick={() => setEdit({ ...blank })}><Plus className="h-4 w-4" /> New vendor</Button>
       {edit && (

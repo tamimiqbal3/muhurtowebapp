@@ -77,13 +77,13 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
       <div className="my-6 flex items-center gap-3 text-xs text-muted"><span className="h-px flex-1 bg-line" />{t("or")}<span className="h-px flex-1 bg-line" /></div>
       <Button variant="outline" size="lg" className="w-full" disabled={busy} onClick={async () => { setBusy(true); setError(null); try { await auth.signInWithGoogle(); } catch (e) { setError(t((e as Error).message)); } finally { setBusy(false); } }}>
         <svg viewBox="0 0 24 24" className="h-4 w-4" aria-hidden><path fill="#EA4335" d="M12 10.2v3.9h5.5c-.2 1.3-1.6 3.8-5.5 3.8-3.3 0-6-2.7-6-6.1s2.7-6.1 6-6.1c1.9 0 3.1.8 3.8 1.5l2.6-2.5C16.8 3.2 14.6 2.2 12 2.2 6.6 2.2 2.2 6.6 2.2 12s4.4 9.8 9.8 9.8c5.7 0 9.4-4 9.4-9.6 0-.6-.1-1.1-.2-1.6H12z" /></svg>
-        {auth.demo ? t("Continue as demo guest") : t("Continue with Google")}
+        {t("Continue with Google")}
       </Button>
       <div className="mt-6 flex flex-wrap justify-between gap-2 text-sm">
         {mode === "login" ? (
           <>
             <Link href={`/register?next=${encodeURIComponent(next)}`} className="font-semibold text-sindoor hover:underline">{t("Create an account")}</Link>
-            <button type="button" className="text-ink-soft hover:text-ink" onClick={async () => { setError(null); setInfo(null); if (!form.email) { setError(t("Enter your email above first.")); return; } try { await auth.resetPassword(form.email); setInfo(auth.demo ? t("Demo accounts can't receive emails — create a new demo account if you've forgotten the password.") : t("If an account exists, a reset link is on its way.")); } catch (e) { setError(t((e as Error).message)); } }}>{t("Forgot password?")}</button>
+            <button type="button" className="text-ink-soft hover:text-ink" onClick={async () => { setError(null); setInfo(null); if (!form.email) { setError(t("Enter your email above first.")); return; } try { await auth.resetPassword(form.email); setInfo(t("If an account exists, a reset link is on its way.")); } catch (e) { setError(t((e as Error).message)); } }}>{t("Forgot password?")}</button>
           </>
         ) : (
           <Link href={`/login?next=${encodeURIComponent(next)}`} className="font-semibold text-sindoor hover:underline">{t("Already have an account? Sign in")}</Link>

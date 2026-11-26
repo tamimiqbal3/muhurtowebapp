@@ -12,9 +12,10 @@ import { localizeCategory } from "@/data/i18n-data";
 import { IMG } from "@/data/images";
 import type { CategorySlug, ImageRef } from "@/lib/types";
 import { useLang } from "../i18n/LanguageProvider";
+import { useSiteSettings } from "../SiteSettingsProvider";
 import { cn } from "@/lib/utils";
 
-const SLIDE_MS = 6000;
+const DEFAULT_SLIDE_MS = 1400;
 const EASE = [0.22, 1, 0.36, 1] as const;
 
 const SLIDES: Array<{ img: ImageRef; label: string }> = [
@@ -36,6 +37,7 @@ const REELS: Record<CategorySlug, ImageRef[]> = {
 export function Hero() {
   const { t, lang } = useLang();
   const cats = CATEGORIES.map((c) => localizeCategory(c, lang));
+  const SLIDE_MS = useSiteSettings().hero.intervalMs || DEFAULT_SLIDE_MS;
   const [slide, setSlide] = useState(0);
   const [cycle, setCycle] = useState(0);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -43,7 +45,7 @@ export function Hero() {
   useEffect(() => {
     const id = setTimeout(() => { setSlide((s) => (s + 1) % SLIDES.length); setCycle((c) => c + 1); }, SLIDE_MS);
     return () => clearTimeout(id);
-  }, [slide, cycle]);
+  }, [slide, cycle, SLIDE_MS]);
   const go = (i: number) => { setSlide(i); setCycle((c) => c + 1); };
 
   // Pointer parallax inside the frame, and a gentle settle as the page scrolls.
@@ -82,12 +84,16 @@ export function Hero() {
         >
           <motion.div style={{ x: px, y: py }} className="absolute -inset-6">
             <AnimatePresence initial={false}>
-              <motion.div key={`${slide}-${cycle}`} className="absolute inset-0" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 1.4, ease: "easeInOut" }}>
-                <motion.div className="absolute inset-0" initial={{ scale: 1.16 }} animate={{ scale: 1.02 }} transition={{ duration: SLIDE_MS / 1000 + 1.6, ease: "linear" }}>
+              <motion.div key={`${slide}-${cycle}`} className="absolute inset-0" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: Math.min(0.75, SLIDE_MS / 2000), ease: [0.4, 0, 0.2, 1] }}>
+                <motion.div className="absolute inset-0" initial={{ scale: 1.08 }} animate={{ scale: 1.02 }} transition={{ duration: SLIDE_MS / 1000 + 0.8, ease: "linear" }}>
                   <SafeImage src={current.img.src} alt={current.img.alt} fill priority={cycle === 0} sizes="(max-width: 1320px) 94vw, 1240px" className="object-cover" />
                 </motion.div>
               </motion.div>
             </AnimatePresence>
+            {/* Keep every slide decoded so fast transitions never flash empty. */}
+            <div aria-hidden className="pointer-events-none absolute inset-0 opacity-0">
+              {SLIDES.map((sl, i) => i !== slide && <SafeImage key={sl.img.src} src={sl.img.src} alt="" fill priority={i < 2} sizes="(max-width: 1320px) 94vw, 1240px" className="object-cover" />)}
+            </div>
           </motion.div>
           <div aria-hidden className="absolute inset-0 bg-[linear-gradient(180deg,rgb(5_11_28/.15)_0%,rgb(5_11_28/.25)_40%,rgb(5_11_28/.88)_100%)] lg:bg-[linear-gradient(90deg,rgb(5_11_28/.85)_0%,rgb(5_11_28/.45)_50%,rgb(5_11_28/.05)_100%)]" />
 

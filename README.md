@@ -102,23 +102,21 @@ Flow: `/booking` creates a booking priced **only from the server catalogue** →
 - Payments are never simulated. Without credentials the Pay button is disabled with an explanation.
 - **Method picker:** customers choose bKash, Nagad, Rocket, Upay, Visa, Mastercard, American Express, internet banking or bank transfer at checkout. Bank transfer is handled by the team (the customer gets account details by email/phone; the gateway is not used). The choice is sent to SSLCommerz as `multi_card_name` (`bkash`, `dbblmobilebanking`, `visacard`, `mastercard`, `amexcard`, `internetbank`) so the gateway opens on that method; Nagad opens the full SSLCommerz page (enable Nagad on your store). The choice is saved on the payment record as `preferredMethod`.
 
-### Payment logos
+### Payment methods & logos
 
-Logos are loaded from `public/payments/` — **add the official files there** (they are trademarks, so take them from the official brand kits / your SSLCommerz merchant panel rather than redrawing them):
+All SSLCOMMERZ methods are listed in `src/data/payments.ts` (10 mobile wallets, 5 card networks, 10 internet-banking banks, plus manual bank transfer). Each carries its SSLCOMMERZ `multi_card_name`; providers without a dedicated code open the matching gateway section (`mobilebank`, `internetbank`, `othercard`).
 
-| File | Source |
-|---|---|
-| `bkash.svg` or `bkash.png` | bKash brand resources / bKash merchant onboarding kit |
-| `nagad.svg` or `nagad.png` | Nagad merchant brand assets |
-| `rocket.svg` or `rocket.png` | Dutch-Bangla Bank Rocket brand assets |
-| `upay.svg` or `upay.png` | Upay (UCB Fintech) brand assets — falls back to upaybd.com |
-| `citybank.svg` or `.png` | City Bank brand assets — falls back to citybankplc.com |
-| `islamibank.svg` or `.png` | Islami Bank Bangladesh brand assets (no fallback) |
-| `mastercard.svg` | Mastercard Brand Center |
-| `amex.svg` | American Express brand guidelines |
-| `visa.svg` | Visa brand guidelines (visa.com → brand) |
+Only **official** logo artwork is shown. Each logo is looked up in this order:
 
-Until local copies are added, bKash and Nagad load published copies of their marks (logotyp.us) and Visa loads its Wikimedia Commons file; Rocket needs the local file. If a logo file is missing, a brand-coloured name tile is shown instead so the layout never breaks.
+1. A file uploaded in **Admin → Site settings → Payment methods** (PNG/JPEG/WebP from the provider's brand kit or your SSLCOMMERZ merchant panel).
+2. `public/payments/<id>.svg` or `.png` — ids: `bkash nagad rocket upay tap okwallet mycash mcash firstpay rupalicash visa mastercard amex unionpay nexus citybank islamibank bracbank bankasia abbank mtb fsibl woori southeast ncc`.
+3. The provider's own published file where known (Upay, City Bank, Visa, Mastercard, American Express, UnionPay, bKash, Nagad).
+
+If none is available the provider's name is shown as plain text — logos are never redrawn. The "We accept" strip and checkout show only the methods ticked in Site settings, in the order set there.
+
+## Site settings (Admin → Site settings)
+
+Signed-in admins (emails listed in `ADMIN_EMAILS`) can change, without code: contact address/phone/email/hours (English and Bangla), social links, homepage slider speed, which payment methods are offered and in what order, payment logos, and bank-transfer instructions. Settings are stored in Firestore `settings/site` and apply to the live site immediately.
 
 ---
 

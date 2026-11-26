@@ -31,7 +31,7 @@ export default async function PaymentSuccess({ searchParams }: { searchParams: P
         <p className="mt-5 text-ink-soft">
           {paid
             ? t("Booking {code} for {date} is confirmed. You paid {amount}, including the 2% platform fee.", { code: booking.code, date: formatDate(booking.event.date, undefined, lang), amount: formatBDT(booking.pricing.total) })
-            : t("We haven't received confirmation from the gateway yet. This page will reflect the final status once SSLCommerz confirms it — no need to pay again.")}
+            : t("We haven't received confirmation from the gateway yet. This page will update as soon as the payment is confirmed — there is no need to pay again.")}
         </p>
         {duplicate && <Notice tone="warning" className="mt-6 text-left">{t("This booking was already paid. The second payment has been flagged for a refund by our team.")}</Notice>}
         {paid && (

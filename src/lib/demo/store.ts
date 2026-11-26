@@ -62,7 +62,7 @@ export const demoAuth = {
     write(K.users, users);
     write(K.session, user.uid);
     setCookie(true);
-    demoNotify(user.uid, "Welcome to MUHURTO", "Your demo account is ready. Explore, plan and book — everything is saved in this browser.", "/dashboard");
+    demoNotify(user.uid, "Welcome to MUHURTO", "Your account is ready. Explore, plan and book your event.", "/dashboard");
     return user;
   },
   async signIn(email: string, password: string): Promise<DemoUser> {

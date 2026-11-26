@@ -10,10 +10,13 @@ import { SmoothScroll } from "./motion/SmoothScroll";
 import { ScrollThread } from "./motion/ScrollThread";
 import { Preloader } from "./motion/Preloader";
 import type { Lang } from "@/lib/i18n/core";
+import type { SiteSettings } from "@/lib/site-settings";
+import { SiteSettingsProvider } from "./SiteSettingsProvider";
 
-export function Providers({ children, lang }: { children: ReactNode; lang: Lang }) {
+export function Providers({ children, lang, settings }: { children: ReactNode; lang: Lang; settings: SiteSettings }) {
   return (
     <MotionConfig reducedMotion="never">
+      <SiteSettingsProvider value={settings}>
       <LanguageProvider initial={lang}>
         <AuthProvider>
           <PlanProvider>
@@ -25,6 +28,7 @@ export function Providers({ children, lang }: { children: ReactNode; lang: Lang 
           </PlanProvider>
         </AuthProvider>
       </LanguageProvider>
+      </SiteSettingsProvider>
     </MotionConfig>
   );
 }

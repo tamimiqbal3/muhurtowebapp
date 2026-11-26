@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { LayoutDashboard, CalendarRange, Store, Users, CreditCard, Layers, MessagesSquare, Radar, Star } from "lucide-react";
+import { LayoutDashboard, CalendarRange, Store, Users, CreditCard, Layers, MessagesSquare, Radar, Star, Settings } from "lucide-react";
 import { Shell } from "../dashboard/Shell";
 import { useT } from "../i18n/LanguageProvider";
 
@@ -21,6 +21,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
         { href: "/admin/customers", label: t("Customers"), icon: <Users className="h-4 w-4" /> },
         { href: "/admin/payments", label: t("Payments"), icon: <CreditCard className="h-4 w-4" /> },
         { href: "/admin/reviews", label: t("Reviews"), icon: <Star className="h-4 w-4" /> },
+        { href: "/admin/settings", label: t("Site settings"), icon: <Settings className="h-4 w-4" /> },
       ]}
     >
       {children}

@@ -3,6 +3,7 @@ import { adminDb, COL } from "../firebase/admin";
 import { SITE_URL } from "../config";
 import type { Booking, PaymentRecord } from "../types";
 import { getPaymentMethod } from "../../data/payments";
+import { getSiteSettings } from "./settings";
 import { ApiError, type SessionUser } from "./auth";
 import { createPendingAssignment, autoAssign } from "./monitoring";
 import { writeEventUpdate, writeNotification } from "./notify";
@@ -25,8 +26,12 @@ export function sslcommerzConfig() {
 /** Starts an SSLCommerz session for a booking and returns the hosted payment page URL. */
 export async function initPayment(bookingId: string, user: SessionUser, methodId: string | null = null): Promise<{ url: string; paymentId: string }> {
   if (getPaymentMethod(methodId)?.kind === "bank") throw new ApiError(400, "Bank transfers are arranged by our team — choose another method to pay online.");
+  if (methodId) {
+    const { payments } = await getSiteSettings();
+    if (!payments.enabled.includes(methodId as never)) throw new ApiError(400, "This payment method is not available. Please choose another.");
+  }
   const cfg = sslcommerzConfig();
-  if (!cfg.configured) throw new ApiError(503, "Online payment is not available yet: the SSLCommerz sandbox credentials have not been configured. Your booking is saved and no money has been taken.");
+  if (!cfg.configured) throw new ApiError(503, "Online payment is temporarily unavailable. Please try again shortly or contact our support team.");
   const db = adminDb();
   const bRef = db.collection(COL.bookings).doc(bookingId);
 

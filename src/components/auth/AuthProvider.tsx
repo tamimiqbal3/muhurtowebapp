@@ -157,7 +157,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       },
       async resetPassword(email) {
         if (demo) {
-          if (!demoAuth.exists(email)) throw new Error("No demo account uses this email.");
+          if (!demoAuth.exists(email)) throw new Error("No account found with this email.");
           return;
         }
         const auth = getClientAuth();

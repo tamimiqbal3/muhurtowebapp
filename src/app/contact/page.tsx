@@ -3,6 +3,7 @@ import { PageHero } from "@/components/layout/PageHero";
 import { ContactForm } from "@/components/ContactForm";
 import { Reveal } from "@/components/motion/Reveal";
 import { getT } from "@/lib/i18n/server";
+import { getSiteSettings } from "@/lib/server/settings";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getT();
@@ -10,12 +11,13 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function ContactPage() {
-  const { t } = await getT();
+  const [{ t, lang }, { contact }] = await Promise.all([getT(), getSiteSettings()]);
+  const bn = lang === "bn";
   const rows = [
-    { t: t("Visit"), b: t("House 12, Road 7, Banani, Dhaka 1213") },
-    { t: t("Call"), b: "+880 9600-000000" },
-    { t: t("Email"), b: "hello@muhurto.app" },
-    { t: t("Hours"), b: t("Saturday–Thursday, 10am–8pm") },
+    { t: t("Visit"), b: bn ? contact.addressBn : contact.address },
+    { t: t("Call"), b: contact.phone },
+    { t: t("Email"), b: contact.email },
+    { t: t("Hours"), b: bn ? contact.hoursBn : contact.hours },
   ];
   return (
     <>

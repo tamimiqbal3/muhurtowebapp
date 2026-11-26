@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import { Cormorant_Garamond, Manrope, Noto_Sans_Bengali, Noto_Serif_Bengali, Share_Tech_Mono } from "next/font/google";
 import "./globals.css";
+import { getSiteSettings } from "@/lib/server/settings";
 import { Providers } from "@/components/Providers";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
@@ -37,11 +38,11 @@ export async function generateMetadata(): Promise<Metadata> {
 export const viewport: Viewport = { themeColor: "#f4f7fc", width: "device-width", initialScale: 1 };
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
-  const lang = await getLang();
+  const [lang, settings] = await Promise.all([getLang(), getSiteSettings()]);
   return (
     <html lang={lang} className={`${display.variable} ${sans.variable} ${bengali.variable} ${bengaliSans.variable} ${lcd.variable}`}>
       <body>
-        <Providers lang={lang}>
+        <Providers lang={lang} settings={settings}>
           <Navbar />
           <main id="main" className="min-h-[70vh]">{children}</main>
           <Footer />
