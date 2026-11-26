@@ -27,7 +27,6 @@ export default async function ContactPage() {
               <p className="text-[0.7rem] font-semibold tracking-[0.2em] text-muted uppercase">{x.t}</p><p className="mt-1 text-lg">{x.b}</p>
             </Reveal>
           ))}
-          <p className="text-xs text-muted">{t("Address and numbers are placeholders until launch.")}</p>
         </div>
         <Reveal variant="unfold" className="card p-6 sm:p-8"><ContactForm /></Reveal>
       </div>

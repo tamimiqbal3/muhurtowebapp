@@ -7,14 +7,15 @@ import { Notice, Spinner } from "../ui/misc";
 import { formatBDT } from "@/lib/format";
 import { useT } from "../i18n/LanguageProvider";
 import { PaymentMethodPicker } from "../payments/PaymentMethodPicker";
-import type { PaymentMethodId } from "@/data/payments";
+import { getPaymentMethod, type PaymentMethodId } from "@/data/payments";
 
 export function PayButton({ bookingId, total, gatewayConfigured, sandbox, demo }: { bookingId: string; total: number; gatewayConfigured: boolean; sandbox: boolean; demo?: boolean }) {
   const t = useT();
   const [method, setMethod] = useState<PaymentMethodId | null>("bkash");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const enabled = gatewayConfigured && !demo;
+  const isBank = getPaymentMethod(method)?.kind === "bank";
+  const enabled = gatewayConfigured && !demo && !isBank;
 
   async function pay() {
     setBusy(true);
@@ -33,17 +34,17 @@ export function PayButton({ bookingId, total, gatewayConfigured, sandbox, demo }
   return (
     <div className="space-y-4">
       <PaymentMethodPicker value={method} onChange={setMethod} />
-      {demo ? (
-        <Notice tone="warning" title={t("Demo mode — no payment taken")}>{t("Payments open once Firebase and the SSLCommerz sandbox are connected. Your booking is saved and nothing has been charged.")}</Notice>
-      ) : !gatewayConfigured ? (
-        <Notice tone="warning" title={t("Payment gateway not connected")}>{t("SSLCommerz sandbox credentials haven't been added to this deployment, so online payment is disabled. Your booking is saved and no money has been taken.")}</Notice>
+      {isBank ? (
+        <Notice tone="info" title={t("Pay by bank transfer")}>{t("Our team will send the bank account details to your email and phone with your booking code. Your booking is confirmed as soon as the transfer arrives.")}</Notice>
+      ) : demo || !gatewayConfigured ? (
+        <Notice tone="info" title={t("Online payment opens soon")}>{t("Your booking is saved and nothing has been charged. We will confirm payment options with you directly.")}</Notice>
       ) : sandbox ? (
         <Notice tone="info" title={t("Sandbox mode")}>{t("Payments run in SSLCommerz test mode. Use sandbox test cards or wallets; no real money moves.")}</Notice>
       ) : null}
       {error && <Notice tone="warning">{error}</Notice>}
-      <Button variant="accent" size="lg" className="w-full" disabled={busy || !enabled || !method} onClick={pay}>
+      {!isBank && <Button variant="accent" size="lg" className="w-full" disabled={busy || !enabled || !method} onClick={pay}>
         {busy ? <Spinner /> : <><Lock className="h-4 w-4" /> {t("Pay {amount} securely", { amount: formatBDT(total) })}</>}
-      </Button>
+      </Button>}
       <p className="text-center text-xs text-muted">{t("Encrypted payment. MUHURTO never sees your card number or wallet PIN.")}</p>
     </div>
   );

@@ -14,5 +14,5 @@ export default async function AgentLayout({ children }: { children: ReactNode })
   if (!isAdminConfigured()) return <FirebaseSetupNotice feature={t("The agent workspace")} />;
   const user = await requirePageRole(["agent"], "/agent");
   if (user === "forbidden") return <Forbidden area={t("Monitoring Agent workspace")} />;
-  return <div className="container-x pt-28">{children}</div>;
+  return <div className="container-x pt-20 lg:pt-28">{children}</div>;
 }

@@ -51,7 +51,6 @@ export async function Footer() {
             <li className="flex gap-3"><Phone className="mt-0.5 h-4 w-4 shrink-0 text-gold" /> <a href="tel:+8809600000000" className="hover:text-gold">+880 9600-000000</a></li>
             <li className="flex gap-3"><Mail className="mt-0.5 h-4 w-4 shrink-0 text-gold" /> <a href="mailto:hello@muhurto.app" className="hover:text-gold">hello@muhurto.app</a></li>
           </ul>
-          <p className="mt-4 text-xs text-paper/45">{t("Contact details are placeholders until launch.")}</p>
         </div>
       </div>
       <div className="container-x pb-10">

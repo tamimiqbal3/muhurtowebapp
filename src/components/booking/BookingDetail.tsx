@@ -96,7 +96,6 @@ export function BookingDetail({ id }: { id: string }) {
   return (
     <div className="grid gap-8 lg:grid-cols-[1fr_360px]">
       <div className="space-y-6">
-        {demo && <Notice title={t("Demo booking")}>{t("This booking is saved in your browser. In the live version it's stored securely and payment opens through SSLCommerz.")}</Notice>}
         <div className="card p-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex flex-wrap gap-2"><BookingStatusBadge status={booking.status} /><PaymentStatusBadge status={booking.paymentStatus} /></div>
@@ -162,7 +161,6 @@ export function BookingDetail({ id }: { id: string }) {
           )}
           <Link href="/contact" className="mt-4 block text-xs font-semibold text-ink-soft hover:text-ink">{t("Contact support")}</Link>
         </div>
-        {demo && <p className="flex items-center gap-2 text-xs text-muted"><FlaskConical className="h-3.5 w-3.5" /> {t("Demo mode")}</p>}
       </aside>
     </div>
   );

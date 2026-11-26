@@ -24,6 +24,7 @@ export function sslcommerzConfig() {
 
 /** Starts an SSLCommerz session for a booking and returns the hosted payment page URL. */
 export async function initPayment(bookingId: string, user: SessionUser, methodId: string | null = null): Promise<{ url: string; paymentId: string }> {
+  if (getPaymentMethod(methodId)?.kind === "bank") throw new ApiError(400, "Bank transfers are arranged by our team — choose another method to pay online.");
   const cfg = sslcommerzConfig();
   if (!cfg.configured) throw new ApiError(503, "Online payment is not available yet: the SSLCommerz sandbox credentials have not been configured. Your booking is saved and no money has been taken.");
   const db = adminDb();

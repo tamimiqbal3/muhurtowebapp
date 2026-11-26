@@ -20,7 +20,7 @@ export default function AgentHome() {
   return (
     <div>
       <p className="eyebrow">Monitoring Agent</p>
-      <h1 className="mt-1 text-5xl">Assigned events</h1>
+      <h1 className="mt-1 text-4xl sm:text-5xl">Assigned events</h1>
       <div className="mt-8">
         {error && <Notice tone="warning">{error}</Notice>}
         {!items ? <Skeleton className="h-40" /> : items.length === 0 ? <EmptyState title="No events assigned yet" body="When an admin assigns you to a paid booking, it will appear here." /> : (

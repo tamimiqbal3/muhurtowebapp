@@ -53,12 +53,6 @@ export function AuthForm({ mode }: { mode: "login" | "register" }) {
     <motion.div initial={{ opacity: 0, rotateX: -12, y: 30 }} animate={{ opacity: 1, rotateX: 0, y: 0 }} transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }} style={{ transformPerspective: 1000 }} className="card w-full max-w-md p-8">
       <h1 className="text-4xl">{mode === "login" ? t("Welcome back") : t("Create your account")}</h1>
       <p className="mt-1 text-sm text-ink-soft">{mode === "login" ? t("Sign in to see your bookings and event updates.") : t("Save plans, book services and follow your event.")}</p>
-      {auth.demo && (
-        <div className="mt-6 flex gap-3 rounded-2xl border border-gold/40 bg-gold-soft/30 p-4 text-sm">
-          <FlaskConical className="mt-0.5 h-4 w-4 shrink-0 text-[#6f5426]" />
-          <p className="text-ink-soft"><strong className="text-ink">{t("Demo mode.")}</strong> {t("Accounts are stored only in this browser until Firebase is connected. Use any email and a password of 8+ characters.")}</p>
-        </div>
-      )}
       <form onSubmit={submit} className="mt-6 space-y-4">
         {mode === "register" && (
           <>

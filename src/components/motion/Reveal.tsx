@@ -2,7 +2,7 @@
 
 import { motion, type Variants } from "motion/react";
 import { useReducedMotion } from "@/components/motion/useReducedMotion";
-import type { ReactNode } from "react";
+import { Fragment, type ReactNode } from "react";
 
 /**
  * Scroll-triggered entrances inspired by physical objects:
@@ -63,17 +63,21 @@ export function SplitWords({ text, className, delay = 0, stagger = 0.06, inView 
   return (
     <motion.span className={className} initial={reduce ? false : "hidden"} {...anim} transition={{ staggerChildren: stagger, delayChildren: delay }} aria-label={text}>
       {words.map((w, i) => (
-        <span key={i} aria-hidden className="inline-block overflow-hidden pb-[0.12em] align-bottom [perspective:600px]">
-          <motion.span
-            className="inline-block will-change-transform"
-            variants={{ hidden: { y: "105%", rotateX: -80, opacity: 0 }, show: { y: "0%", rotateX: 0, opacity: 1 } }}
-            transition={{ duration: 0.9, ease: EASE }}
-            style={{ transformOrigin: "50% 100%" }}
-          >
-            {w}
-          </motion.span>
-          {i < words.length - 1 && " "}
-        </span>
+        // The space sits *between* the clipped word boxes, so every browser (Safari included)
+        // can wrap the line there; long words may still break rather than run off-screen.
+        <Fragment key={i}>
+          <span aria-hidden className="inline-block max-w-full overflow-x-visible overflow-y-clip pb-[0.12em] align-bottom [overflow-wrap:anywhere] [perspective:600px]">
+            <motion.span
+              className="inline-block max-w-full will-change-transform"
+              variants={{ hidden: { y: "105%", rotateX: -80, opacity: 0 }, show: { y: "0%", rotateX: 0, opacity: 1 } }}
+              transition={{ duration: 0.9, ease: EASE }}
+              style={{ transformOrigin: "50% 100%" }}
+            >
+              {w}
+            </motion.span>
+          </span>
+          {i < words.length - 1 && " "}
+        </Fragment>
       ))}
     </motion.span>
   );

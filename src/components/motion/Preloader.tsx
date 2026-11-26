@@ -2,11 +2,11 @@
 
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
-import { TruckLoader } from "../ui/TruckLoader";
+import { StageLoader } from "../ui/StageLoader";
 import { useT } from "../i18n/LanguageProvider";
 
 /**
- * First visit of a session: the delivery truck drives while the page and its photos load,
+ * First visit of a session: the stage is set while the page and its photos load,
  * then the frame shutters open onto the site. Later navigations use the route loader.
  */
 export function Preloader() {
@@ -37,7 +37,7 @@ export function Preloader() {
           <motion.div className="absolute inset-x-0 top-0 h-1/2 bg-ivory" exit={{ y: "-100%" }} transition={{ duration: 0.9, ease: [0.76, 0, 0.24, 1] }} />
           <motion.div className="absolute inset-x-0 bottom-0 h-1/2 bg-ivory" exit={{ y: "100%" }} transition={{ duration: 0.9, ease: [0.76, 0, 0.24, 1] }} />
           <motion.div className="absolute inset-0 grid place-items-center" exit={{ opacity: 0, scale: 0.96 }} transition={{ duration: 0.4 }}>
-            <TruckLoader label={t("Delivering your moment")} />
+            <StageLoader label={t("Setting the stage")} />
           </motion.div>
         </motion.div>
       )}

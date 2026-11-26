@@ -42,7 +42,6 @@ export function ServiceCard({ service, vendorName, vendorVerified, priority, cla
             <span className="rounded-full bg-paper/90 px-2.5 py-1 text-[0.65rem] font-semibold tracking-wide backdrop-blur" style={{ color: cat?.accent }}>
               {sub?.name ?? service.subcategorySlug}
             </span>
-            {service.isDemo && <Badge tone="gold" className="bg-paper/90 backdrop-blur">{t("Demo")}</Badge>}
           </div>
         </Link>
         <div className="flex flex-1 flex-col p-5">

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { ShoppingBag, User, LogOut, LayoutDashboard, Shield, Radar, ChevronDown, House, LayoutGrid, CalendarPlus } from "lucide-react";
+import { ShoppingBag, User, LogOut, LayoutDashboard, Shield, Radar, ChevronDown, LayoutGrid, CalendarPlus, X } from "lucide-react";
 import { LogoMark } from "./Logo";
 import { ButtonLink } from "../ui/Button";
 import { useAuth } from "../auth/AuthProvider";
@@ -72,7 +72,7 @@ export function Navbar() {
 
       {/* ── Top capsule ── */}
       <motion.header
-        className="fixed inset-x-0 top-0 z-[70] px-3 pt-3 sm:px-5 sm:pt-4"
+        className="fixed inset-x-0 top-0 z-[70] hidden px-5 pt-4 lg:block"
         animate={{ y: hidden && !open ? -110 : 0 }}
         transition={{ duration: 0.45, ease: EASE }}
       >
@@ -141,7 +141,7 @@ export function Navbar() {
               onClick={() => setOpen((o) => !o)}
               aria-label={open ? t("Close menu") : t("Open menu")}
               aria-expanded={open}
-              className={cn("relative grid h-10 w-10 place-items-center rounded-full transition xl:hidden", open ? "bg-paper text-ink" : onLight ? "bg-ink text-paper" : "bg-paper text-ink")}
+              className={cn("relative hidden h-10 w-10 place-items-center rounded-full transition lg:grid xl:hidden", open ? "bg-paper text-ink" : onLight ? "bg-ink text-paper" : "bg-paper text-ink")}
             >
               <motion.span className="absolute h-[2px] w-4 rounded bg-current" animate={open ? { rotate: 45, y: 0 } : { rotate: 0, y: -3.5 }} transition={{ duration: 0.35, ease: EASE }} />
               <motion.span className="absolute h-[2px] w-4 rounded bg-current" animate={open ? { rotate: -45, y: 0, width: 16 } : { rotate: 0, y: 3.5, width: 10 }} transition={{ duration: 0.35, ease: EASE }} style={{ x: open ? 0 : 3 }} />
@@ -149,6 +149,18 @@ export function Navbar() {
           </div>
         </nav>
       </motion.header>
+
+      {/* ── Phones & tablets: only the language switch sits at the top; navigation lives in the dock ── */}
+      <motion.div
+        className="fixed right-3 top-[max(12px,env(safe-area-inset-top))] z-[70] lg:hidden"
+        initial={{ opacity: 0, y: -16 }}
+        animate={{ opacity: hidden && !open ? 0 : 1, y: hidden && !open ? -60 : 0 }}
+        transition={{ duration: 0.45, ease: EASE }}
+      >
+        <div className="rounded-full border border-white/10 bg-[#070d1f]/75 p-1 shadow-[0_10px_30px_-12px_rgb(0_0_0/.6)] backdrop-blur-xl">
+          <LanguageToggle compact light />
+        </div>
+      </motion.div>
 
       {/* ── Full-screen menu: iris reveal ── */}
       <AnimatePresence>
@@ -162,8 +174,14 @@ export function Navbar() {
             transition={{ duration: 0.8, ease: EASE }}
           >
             <div aria-hidden className="pointer-events-none absolute -right-24 top-1/3 h-80 w-80 rounded-full bg-brand/30 blur-3xl" />
-            <div className="relative mx-auto flex min-h-full max-w-xl flex-col px-6 pb-32 pt-28">
-              <p className="text-[0.65rem] font-semibold tracking-[0.3em] text-paper/50 uppercase">{t("Menu")}</p>
+            <div className="relative mx-auto flex min-h-full max-w-xl flex-col px-6 pb-32 pt-20 lg:pt-28">
+              <div className="flex items-center justify-between">
+                <Link href="/" className="flex items-center gap-2.5" aria-label="MUHURTO">
+                  <LogoMark light className="h-10 w-10" />
+                  <span className="font-display text-lg font-semibold tracking-[0.2em] text-paper">MUHURTO</span>
+                </Link>
+              </div>
+              <p className="mt-8 text-[0.65rem] font-semibold tracking-[0.3em] text-paper/50 uppercase">{t("Menu")}</p>
               <ul className="mt-4">
                 {NAV_LINKS.map((l, i) => (
                   <li key={l.href} className="overflow-hidden border-b border-white/10">
@@ -204,8 +222,8 @@ function MobileDock({ isActive, count, onPlan, onMenu, menuOpen, signedIn }: { i
   const t = useT();
   const pathname = usePathname();
   const items: Array<{ key: string; label: string; icon: ReactNode; href?: string; onClick?: () => void; active: boolean; badge?: number }> = [
-    { key: "home", label: t("Home"), icon: <House className="h-[19px] w-[19px]" />, href: "/", active: pathname === "/" && !menuOpen },
-    { key: "menu", label: t("Explore"), icon: <LayoutGrid className="h-[19px] w-[19px]" />, onClick: onMenu, active: menuOpen },
+    { key: "home", label: t("Home"), icon: <LogoMark className="h-[22px] w-[22px]" />, href: "/", active: pathname === "/" && !menuOpen },
+    { key: "menu", label: menuOpen ? t("Close") : t("Explore"), icon: menuOpen ? <X className="h-[19px] w-[19px]" /> : <LayoutGrid className="h-[19px] w-[19px]" />, onClick: onMenu, active: menuOpen },
     { key: "plan", label: t("Plan"), icon: <ShoppingBag className="h-[19px] w-[19px]" />, onClick: onPlan, active: false, badge: count },
     { key: "me", label: signedIn ? t("Account") : t("Login"), icon: <User className="h-[19px] w-[19px]" />, href: signedIn ? "/dashboard" : "/login", active: !menuOpen && (isActive("/dashboard") || isActive("/login")) },
   ];

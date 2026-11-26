@@ -56,7 +56,7 @@ export function ProfileForm() {
       <div className="card space-y-4 p-6">
         <h2 className="text-3xl">{t("Account")}</h2>
         <p className="text-sm"><span className="text-muted">{t("Email")}</span><br />{user.email}</p>
-        <p className="text-sm"><span className="text-muted">{t("Role")}</span><br /><Badge tone="ink">{t(user.role)}</Badge>{demo && <Badge tone="gold" className="ml-2">{t("Demo account")}</Badge>}</p>
+        <p className="text-sm"><span className="text-muted">{t("Role")}</span><br /><Badge tone="ink">{t(user.role)}</Badge></p>
         {!demo && <Button variant="outline" size="sm" onClick={async () => { try { await resetPassword(user.email); setMsg({ tone: "success", text: t("Password reset email sent.") }); } catch (e) { setMsg({ tone: "warning", text: t((e as Error).message) }); } }}>{t("Send password reset email")}</Button>}
       </div>
     </div>

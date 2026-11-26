@@ -100,7 +100,6 @@ export async function Testimonials() {
           </Reveal>
         ))}
       </div>
-      <p className="mt-4 text-xs text-muted">{t("Testimonials are sample content for this pre-launch build.")}</p>
     </section>
   );
 }

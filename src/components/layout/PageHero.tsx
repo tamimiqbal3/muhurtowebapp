@@ -28,7 +28,7 @@ export function Breadcrumbs({ items, light }: { items: Array<{ label: string; hr
 export function PageHero({ title, bn, eyebrow, description, image, crumbs, children, accent }: { title: ReactNode; bn?: string; eyebrow?: string; description?: ReactNode; image?: ImageRef; crumbs?: Array<{ label: string; href?: string }>; children?: ReactNode; accent?: string }) {
   // Every page opens on a title card: graded footage (or a deep navy plate), grain and a light streak.
   return (
-    <section className={cn("relative isolate overflow-hidden bg-[#050b1c] text-paper", image ? "pb-16 pt-36 sm:pb-20 sm:pt-44" : "pb-14 pt-32 sm:pt-36")}>
+    <section className={cn("relative isolate overflow-hidden bg-[#050b1c] text-paper", image ? "pb-14 pt-24 sm:pb-20 sm:pt-32 lg:pt-44" : "pb-12 pt-20 sm:pt-28 lg:pt-36")}>
       {image ? (
         <motion.div className="absolute inset-0 -z-20 overflow-hidden" initial={{ clipPath: "inset(0 0 0 100%)" }} animate={{ clipPath: "inset(0 0 0 0%)" }} transition={{ duration: 1.2, ease: [0.76, 0, 0.24, 1] }}>
           <SafeImage src={image.src} alt={image.alt} fill priority sizes="100vw" className="animate-kenburns object-cover" />
@@ -48,7 +48,7 @@ export function PageHero({ title, bn, eyebrow, description, image, crumbs, child
             <span className="eyebrow text-paper/75">{eyebrow}</span>
           </motion.div>
         )}
-        <h1 className={cn("mt-3 max-w-3xl leading-[1.05] text-paper", image ? "text-5xl sm:text-7xl" : "text-5xl sm:text-6xl")}>{typeof title === "string" ? <SplitWords text={title} inView={false} delay={0.2} /> : title}</h1>
+        <h1 className={cn("mt-3 max-w-3xl leading-[1.05] text-paper", image ? "text-[2.35rem] sm:text-6xl lg:text-7xl" : "text-[2.35rem] sm:text-6xl")}>{typeof title === "string" ? <SplitWords text={title} inView={false} delay={0.2} /> : title}</h1>
         {bn && <p className="bn mt-3 text-2xl text-sky" lang="bn">{bn}</p>}
         {description && <motion.p initial={{ opacity: 0, y: 14, filter: "blur(6px)" }} animate={{ opacity: 1, y: 0, filter: "blur(0px)" }} transition={{ duration: 0.9, delay: 0.55 }} className="mt-5 max-w-2xl text-paper/80">{description}</motion.p>}
         {children}

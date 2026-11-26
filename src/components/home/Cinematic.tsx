@@ -20,71 +20,75 @@ import { cn } from "@/lib/utils";
 
 const EASE = [0.22, 1, 0.36, 1] as const;
 
-/* ═════════ About: an invitation that opens, categories dealt like cards ═════════ */
-export function AboutInvitation() {
-  const { t, lang } = useLang();
-  const reduce = useReducedMotion();
-  const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, amount: 0.25 });
-  const open = inView || !!reduce;
-  const cats = CATEGORIES.map((c) => localizeCategory(c, lang));
+/* ═════════ About: who we are, with a layered photo composition ═════════ */
 
+export function AboutInvitation() {
+  const { t } = useLang();
+  const ref = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
+  const backY = useTransform(scrollYProgress, [0, 1], ["6%", "-6%"]);
+  const frontY = useTransform(scrollYProgress, [0, 1], ["18%", "-14%"]);
+  const points = [
+    { t: t("Verified vendors"), b: t("Every decorator, caterer, photographer and sound team is checked for quality, reliability and fair pricing before listing.") },
+    { t: t("Clear prices"), b: t("Starting prices on every service and one 2% platform fee at checkout — nothing hidden.") },
+    { t: t("One agent on the day"), b: t("After payment a Monitoring Agent coordinates every vendor, so you can be a guest at your own event.") },
+    { t: t("Help in Bangla or English"), b: t("Real people answer before, during and after your event.") },
+  ];
   return (
-    <section id="about" className="container-x scroll-mt-24 pt-24">
-      <div className="grid items-center gap-16 lg:grid-cols-[0.95fr_1.05fr]">
-        {/* Envelope */}
-        <div ref={ref} className="relative mx-auto h-[420px] w-full max-w-[440px] [perspective:1400px]" aria-hidden={false}>
-          {/* card that slides out */}
+    <section id="about" className="container-x scroll-mt-24 pt-20 sm:pt-24">
+      <div ref={ref} className="grid items-center gap-10 lg:grid-cols-[1fr_1.05fr] lg:gap-16">
+        {/* photo composition */}
+        <div className="relative mx-auto w-full max-w-[560px] pb-10 sm:pb-14">
           <motion.div
-            initial={false}
-            animate={open ? { y: -70, rotate: -2, z: 40 } : { y: 70, rotate: 0, z: 0 }}
-            transition={{ duration: 1.1, delay: open && !reduce ? 0.9 : 0, ease: EASE }}
-            className="absolute inset-x-6 top-16 z-10 rounded-2xl border border-gold/40 bg-paper p-8 text-center shadow-[var(--shadow-lift)]"
+            style={{ y: backY }}
+            initial={{ clipPath: "inset(0 0 100% 0 round 24px)" }}
+            whileInView={{ clipPath: "inset(0 0 0% 0 round 24px)" }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 1.2, ease: [0.76, 0, 0.24, 1] }}
+            className="relative aspect-[4/5] w-[82%] overflow-hidden rounded-[24px] bg-sand"
           >
-            <div className="relative">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/brand/muhurto-logo-192.png" alt={t("MUHURTO")} className="mx-auto mb-4 h-20 w-20" />
-              <p className="font-display text-3xl tracking-[0.2em] text-ink">MUHURTO</p>
-              <p className="mt-1 text-sm text-ink-soft">{t("Every moment deserves to be extraordinary.")}</p>
-              <JamdaniRule className="mx-auto my-5 w-40" />
-              <p className="text-sm leading-relaxed text-ink-soft">{t("“Families should remember the moment — not the phone calls it took to make it happen.”")}</p>
-            </div>
+            <motion.div className="absolute inset-0" initial={{ scale: 1.2 }} whileInView={{ scale: 1 }} viewport={{ once: true }} transition={{ duration: 2, ease: [0.22, 1, 0.36, 1] }}>
+              <SafeImage src={IMG.wStageWarm.src} alt={IMG.wStageWarm.alt} fill sizes="(max-width: 1024px) 80vw, 460px" className="object-cover" />
+            </motion.div>
           </motion.div>
-          {/* envelope body */}
-          <div className="absolute inset-x-0 bottom-0 z-20 h-[230px] overflow-hidden rounded-b-2xl rounded-t-md bg-[linear-gradient(180deg,#1f6dff,#0a45c4)] shadow-[0_30px_60px_-25px_rgb(10_22_51/.7)]">
-            <div className="absolute inset-0" style={{ background: "linear-gradient(155deg, transparent 49.6%, rgb(0 0 0 / .18) 50%, transparent 50.4%), linear-gradient(-155deg, transparent 49.6%, rgb(0 0 0 / .18) 50%, transparent 50.4%)" }} />
-            <div className="absolute bottom-6 left-0 right-0 text-center font-display text-sm tracking-[0.4em] text-paper/80">MUHURTO</div>
-          </div>
-          {/* flap */}
           <motion.div
-            initial={false}
-            animate={open ? { rotateX: 180 } : { rotateX: 0 }}
-            transition={{ duration: 0.9, ease: [0.65, 0, 0.35, 1] }}
-            style={{ transformOrigin: "50% 0%", transformStyle: "preserve-3d", top: 190 }}
-            className={cn("absolute inset-x-0 h-[150px]", open ? "z-0" : "z-30")}
+            style={{ y: frontY }}
+            initial={{ opacity: 0, x: 40, rotate: 4 }}
+            whileInView={{ opacity: 1, x: 0, rotate: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 1.1, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
+            className="absolute bottom-0 right-0 aspect-[4/5] w-[48%] overflow-hidden rounded-[20px] border-[6px] border-ivory bg-sand shadow-[0_30px_60px_-30px_rgb(10_22_51/.6)]"
           >
-            <div className="absolute inset-0 bg-[linear-gradient(180deg,#0a45c4,#1f6dff)] [backface-visibility:hidden]" style={{ clipPath: "polygon(0 0, 100% 0, 50% 100%)" }} />
-            <div className="absolute inset-0 bg-[linear-gradient(180deg,#04205e,#0a45c4)] [backface-visibility:hidden] [transform:rotateX(180deg)]" style={{ clipPath: "polygon(0 0, 100% 0, 50% 100%)" }} />
-            {/* wax seal */}
-            <motion.div animate={open ? { opacity: 0, scale: 0.6 } : { opacity: 1, scale: 1 }} transition={{ duration: 0.3 }} className="absolute left-1/2 top-[82px] grid h-[68px] w-[68px] -translate-x-1/2 place-items-center rounded-full bg-[radial-gradient(circle_at_35%_35%,#fff6c9,#ffc727_60%,#c27c0e)] p-1.5 shadow-[0_4px_10px_rgb(0_0_0/.4)] [backface-visibility:hidden]"><img src="/brand/muhurto-logo-192.png" alt="" className="h-full w-full rounded-full bg-paper object-contain p-0.5" /></motion.div>
+            <SafeImage src={IMG.fElders.src} alt={IMG.fElders.alt} fill sizes="(max-width: 1024px) 45vw, 260px" className="object-cover" />
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, delay: 0.7 }}
+            className="absolute left-4 top-4 rounded-2xl bg-paper/90 px-4 py-3 shadow-[var(--shadow-soft)] backdrop-blur sm:left-6 sm:top-6"
+          >
+            <p className="font-display text-3xl leading-none text-ink">60+</p>
+            <p className="mt-1 text-[0.6rem] font-semibold tracking-[0.18em] text-muted uppercase">{t("Services")}</p>
           </motion.div>
         </div>
 
-        {/* Copy + dealt category cards */}
-        <div>
-          <Reveal variant="rise"><p className="eyebrow">{t("About")}</p></Reveal>
-          <h2 className="mt-3 text-4xl leading-[1.08] sm:text-5xl"><SplitWords text={t("Moments, managed with heart.")} /></h2>
-          <Reveal variant="focus" delay={0.15}>
-            <p className="mt-5 max-w-xl text-ink-soft">{t("MUHURTO is a Bangladeshi event marketplace. One place to explore trusted vendors, plan everything on one page, book securely — and hand the running of the day to a dedicated Monitoring Agent.")}</p>
+        {/* words */}
+        <div className="min-w-0">
+          <Reveal><p className="eyebrow">{t("About")}</p></Reveal>
+          <h2 className="mt-3 text-4xl leading-[1.05] sm:text-5xl"><SplitWords text={t("Moments, managed with heart.")} /></h2>
+          <Reveal delay={0.1}>
+            <p className="mt-5 text-ink-soft">{t("MUHURTO is a Bangladeshi event marketplace. One place to explore trusted vendors, plan everything on one page, book securely — and hand the running of the day to a dedicated Monitoring Agent.")}</p>
+            <p className="mt-3 text-ink-soft">{t("We plan weddings, gaye holud, birthdays, corporate events, family gatherings and food — from a small aqiqah at home to a 1,000-guest reception.")}</p>
           </Reveal>
-          <Reveal delay={0.2} className="mt-8 grid grid-cols-3 gap-4 border-t border-line pt-6">
-            {([["60+", t("Services")], ["5", t("Occasions")], ["1", t("Agent per event")]] as const).map(([v, l]) => (
-              <div key={l}>
-                <p className="font-display text-4xl leading-none text-ink">{v}</p>
-                <p className="mt-2 text-[0.62rem] font-semibold tracking-[0.16em] text-muted uppercase">{l}</p>
-              </div>
+          <ul className="mt-8 grid gap-x-8 gap-y-5 sm:grid-cols-2">
+            {points.map((p, i) => (
+              <Reveal as="li" key={p.t} variant="slide" delay={0.12 + i * 0.08} className="border-t border-line pt-4">
+                <p className="font-semibold text-ink">{p.t}</p>
+                <p className="mt-1.5 text-sm leading-relaxed text-ink-soft">{p.b}</p>
+              </Reveal>
             ))}
-          </Reveal>
+          </ul>
           <Reveal delay={0.3} className="mt-8 flex flex-wrap gap-3">
             <ButtonLink href="/about" variant="outline">{t("Our story")}</ButtonLink>
             <ButtonLink href="/event-planner" variant="accent">{t("Plan your event")}</ButtonLink>

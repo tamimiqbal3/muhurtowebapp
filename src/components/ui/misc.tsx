@@ -18,13 +18,9 @@ export function Badge({ children, className, tone = "neutral" }: { children: Rea
   return <span className={cn("inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[0.68rem] font-semibold tracking-wide", tones[tone], className)}>{children}</span>;
 }
 
-export function DemoTag({ className }: { className?: string }) {
-  const t = useT();
-  return (
-    <Badge tone="gold" className={className}>
-      {t("Demo data")}
-    </Badge>
-  );
+/** Sample-data markers are hidden on the public site. */
+export function DemoTag(_props: { className?: string }) {
+  return null;
 }
 
 export function Rating({ value, count, className, light }: { value: number; count?: number; className?: string; light?: boolean }) {

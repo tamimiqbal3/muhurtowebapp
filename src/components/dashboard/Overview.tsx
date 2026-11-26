@@ -32,7 +32,6 @@ export function Overview() {
 
   return (
     <div className="space-y-10">
-      {demo && <Notice title={t("Demo mode")}>{t("Your account, bookings and requests are saved in this browser until Firebase is connected.")}</Notice>}
       {error && <Notice tone="warning">{t(error)}</Notice>}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {[

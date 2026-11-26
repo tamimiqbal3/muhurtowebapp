@@ -13,6 +13,14 @@ export function PaymentLogo({ method, className, size = "md" }: { method: Paymen
   const [idx, setIdx] = useState(0);
   const src = method.logo[idx];
   const h = size === "sm" ? "h-6" : size === "lg" ? "h-10" : "h-8";
+  if (!src && (method.kind === "bank" || method.kind === "online")) {
+    // Not a brand: a plain typographic tile.
+    return (
+      <span className={cn("inline-flex items-center justify-center rounded-md border border-line px-2 text-[0.62rem] font-bold tracking-wide text-ink uppercase", h, className)} title={method.name}>
+        {method.kind === "bank" ? "BANK" : "NET"}
+      </span>
+    );
+  }
   if (!src) {
     return (
       <span className={cn("inline-flex items-center justify-center rounded-md px-2 text-[0.7rem] font-bold tracking-wide text-paper", h, className)} style={{ background: method.brandColor }} title={method.name}>

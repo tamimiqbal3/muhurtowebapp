@@ -10,9 +10,10 @@ import { cn } from "@/lib/utils";
 /** Payment options laid out like cards in a wallet; the chosen one lifts out. */
 export function PaymentMethodPicker({ value, onChange }: { value: PaymentMethodId | null; onChange: (id: PaymentMethodId) => void }) {
   const { t, lang } = useLang();
-  const groups: Array<{ kind: "mfs" | "card"; label: string }> = [
+  const groups: Array<{ kind: "mfs" | "card" | "bank"; label: string }> = [
     { kind: "mfs", label: t("Mobile wallets") },
     { kind: "card", label: t("Cards") },
+    { kind: "bank", label: t("Bank") },
   ];
   return (
     <fieldset className="space-y-4">
@@ -20,8 +21,8 @@ export function PaymentMethodPicker({ value, onChange }: { value: PaymentMethodI
       {groups.map((g) => (
         <div key={g.kind}>
           <p className="mb-2 text-xs text-muted">{g.label}</p>
-          <div className="grid grid-cols-3 gap-2">
-            {PAYMENT_METHODS.filter((m) => m.kind === g.kind).map((m) => {
+          <div className="grid grid-cols-2 gap-2 min-[420px]:grid-cols-4">
+            {PAYMENT_METHODS.filter((m) => (g.kind === "bank" ? m.kind === "bank" || m.kind === "online" : m.kind === g.kind)).map((m) => {
               const on = value === m.id;
               return (
                 <motion.label
@@ -34,7 +35,7 @@ export function PaymentMethodPicker({ value, onChange }: { value: PaymentMethodI
                 >
                   <input type="radio" name="payment-method" className="sr-only" checked={on} onChange={() => onChange(m.id)} />
                   <PaymentLogo method={m} size="sm" />
-                  <span className="text-[0.65rem] font-medium text-ink-soft">{lang === "bn" ? m.nameBn : m.name}</span>
+                  <span className="max-w-full truncate text-[0.65rem] font-medium text-ink-soft">{lang === "bn" ? m.nameBn : m.name}</span>
                   {on && <span className="absolute right-1.5 top-1.5 grid h-4 w-4 place-items-center rounded-full bg-ink text-paper"><Check className="h-2.5 w-2.5" /></span>}
                 </motion.label>
               );

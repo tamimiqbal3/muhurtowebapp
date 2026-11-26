@@ -43,7 +43,6 @@ export async function CategoryLanding({ slug }: { slug: CategorySlug }) {
 
       {slug === "food-culinary" ? (
         <div className="container-x pt-14">
-          {source === "demo" && <Notice title={t("Sample listings")} className="mb-10">{t("These listings, vendors, ratings and reviews are demo data for this pre-launch build. Prices are indicative starting prices.")}</Notice>}
           <FoodShopSection services={list} />
         </div>
       ) : (
@@ -62,7 +61,6 @@ export async function CategoryLanding({ slug }: { slug: CategorySlug }) {
       </nav>
 
       <div className="container-x pt-16">
-        {source === "demo" && <Notice title={t("Sample listings")} className="mb-10">{t("These listings, vendors, ratings and reviews are demo data for this pre-launch build. Prices are indicative starting prices.")}</Notice>}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {category.subcategories.map((sub, i) => {
             const items = list.filter((s) => s.subcategorySlug === sub.slug);

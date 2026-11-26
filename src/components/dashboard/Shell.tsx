@@ -16,10 +16,10 @@ export function Shell({ title, subtitle, links, children }: { title: string; sub
   const pathname = usePathname();
   const t = useT();
   return (
-    <div className="container-x pt-28">
+    <div className="container-x pt-20 lg:pt-28">
       <div className="mb-8">
         <p className="eyebrow">{subtitle}</p>
-        <h1 className="mt-1 text-5xl">{title}</h1>
+        <h1 className="mt-1 text-4xl sm:text-5xl">{title}</h1>
       </div>
       <div className="grid gap-8 lg:grid-cols-[220px_1fr]">
         <nav aria-label={t("{area} navigation", { area: title })} className="scrollbar-none -mx-5 flex gap-2 overflow-x-auto px-5 lg:sticky lg:top-28 lg:mx-0 lg:flex-col lg:self-start lg:px-0">
@@ -54,7 +54,7 @@ export function Forbidden({ area }: { area: string }) {
   return (
     <div className="container-x py-40 text-center">
       <p className="eyebrow">403</p>
-      <h1 className="mt-2 text-5xl">{t("Restricted area")}</h1>
+      <h1 className="mt-2 text-4xl sm:text-5xl">{t("Restricted area")}</h1>
       <p className="mx-auto mt-4 max-w-md text-ink-soft">{t("Your account doesn't have access to the {area}. If you think this is a mistake, contact a MUHURTO administrator.", { area })}</p>
       <Link href="/dashboard" className="mt-8 inline-flex h-11 items-center rounded-full bg-ink px-6 text-sm font-semibold text-paper">{t("Go to your dashboard")}</Link>
     </div>

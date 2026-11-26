@@ -6,7 +6,7 @@ type Variant = "primary" | "accent" | "outline" | "ghost" | "light" | "danger";
 type Size = "sm" | "md" | "lg";
 
 const base =
-  "inline-flex items-center justify-center gap-2 rounded-full font-semibold tracking-wide transition-all duration-300 select-none disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98] whitespace-nowrap";
+  "inline-flex items-center justify-center gap-2 rounded-full font-semibold tracking-wide transition-all duration-300 select-none disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98] max-w-full text-center leading-tight";
 const variants: Record<Variant, string> = {
   primary: "bg-ink text-paper hover:bg-ink-soft shadow-[0_6px_20px_-8px_rgb(10_22_51/0.6)]",
   accent: "bg-brand-gradient text-paper hover:brightness-110 shadow-[0_8px_24px_-8px_rgb(1_95_255/0.6)]",
@@ -16,9 +16,9 @@ const variants: Record<Variant, string> = {
   danger: "bg-danger text-paper hover:opacity-90",
 };
 const sizes: Record<Size, string> = {
-  sm: "h-9 px-4 text-xs",
-  md: "h-11 px-6 text-sm",
-  lg: "h-13 px-8 text-[0.95rem] py-3.5",
+  sm: "min-h-9 px-4 py-2 text-xs",
+  md: "min-h-11 px-6 py-2.5 text-sm",
+  lg: "min-h-13 px-6 py-3.5 text-[0.95rem] sm:px-8",
 };
 
 interface Common {

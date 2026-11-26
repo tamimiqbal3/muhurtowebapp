@@ -56,7 +56,7 @@ export default function AgentEvent({ params }: { params: Promise<{ bookingId: st
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="eyebrow">{getCategory(b.event.categorySlug)?.name} · {b.code}</p>
-          <h1 className="mt-1 text-5xl">{formatDate(b.event.date, { weekday: "short", day: "numeric", month: "long" })}</h1>
+          <h1 className="mt-1 text-4xl sm:text-5xl">{formatDate(b.event.date, { weekday: "short", day: "numeric", month: "long" })}</h1>
           <p className="mt-1 text-ink-soft">{b.event.venue}, {b.event.city} · {b.event.guests} guests{b.event.theme && ` · ${b.event.theme}`}</p>
         </div>
         <div className="flex flex-wrap gap-2">

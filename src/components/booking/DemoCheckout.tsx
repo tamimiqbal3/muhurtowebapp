@@ -32,7 +32,7 @@ export function CheckoutSummary({ booking, children }: { booking: Booking; child
       <aside className="lg:sticky lg:top-28 lg:self-start">
         <div className="card space-y-4 p-6">
           <p className="eyebrow">{t("Total payable")}</p>
-          <p className="font-display text-5xl font-semibold">{formatBDT(booking.pricing.total)}</p>
+          <p className="font-display text-4xl font-semibold sm:text-5xl">{formatBDT(booking.pricing.total)}</p>
           <p className="text-xs text-muted">{t("Includes {fee} platform fee (2% of {sub}).", { fee: formatBDT(booking.pricing.platformFee), sub: formatBDT(booking.pricing.subtotal) })}</p>
           {children}
           <Link href={`/booking/${booking.id}`} className="block text-center text-xs font-semibold text-ink-soft hover:text-ink">{t("View booking details")}</Link>

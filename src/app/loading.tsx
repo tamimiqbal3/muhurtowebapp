@@ -1,7 +1,7 @@
 import { getT } from "@/lib/i18n/server";
-import { TruckLoader } from "@/components/ui/TruckLoader";
+import { StageLoader } from "@/components/ui/StageLoader";
 
 export default async function Loading() {
   const { t } = await getT();
-  return <TruckLoader label={t("Delivering your moment")} />;
+  return <StageLoader label={t("Setting the stage")} />;
 }

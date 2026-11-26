@@ -24,10 +24,10 @@ export default async function PaymentSuccess({ searchParams }: { searchParams: P
   const paid = booking.paymentStatus === "paid";
 
   return (
-    <div className="container-x py-36">
+    <div className="container-x py-24 lg:py-36">
       <div className="card mx-auto max-w-2xl p-8 text-center sm:p-12">
         {paid ? <CheckCircle2 className="mx-auto h-14 w-14 text-success" /> : <Radar className="mx-auto h-14 w-14 text-warning" />}
-        <h1 className="mt-6 text-5xl">{paid ? t("Payment received") : t("Verifying your payment")}</h1>
+        <h1 className="mt-6 text-4xl sm:text-5xl">{paid ? t("Payment received") : t("Verifying your payment")}</h1>
         <p className="mt-5 text-ink-soft">
           {paid
             ? t("Booking {code} for {date} is confirmed. You paid {amount}, including the 2% platform fee.", { code: booking.code, date: formatDate(booking.event.date, undefined, lang), amount: formatBDT(booking.pricing.total) })

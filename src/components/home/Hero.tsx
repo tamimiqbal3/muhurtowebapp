@@ -59,7 +59,7 @@ export function Hero() {
   const current = SLIDES[slide];
 
   return (
-    <section className="relative overflow-hidden bg-ivory pt-[84px] sm:pt-24">
+    <section className="relative overflow-hidden bg-ivory pt-16 sm:pt-20 lg:pt-24">
       {/* soft brand light behind the frame */}
       <div aria-hidden className="pointer-events-none absolute -top-40 left-1/2 h-[520px] w-[900px] max-w-[140vw] -translate-x-1/2 rounded-full bg-[radial-gradient(closest-side,rgb(0_190_254/.18),transparent)]" />
 
