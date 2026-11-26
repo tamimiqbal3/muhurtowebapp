@@ -48,7 +48,7 @@ export function AboutInvitation() {
             className="relative aspect-[4/5] w-[82%] overflow-hidden rounded-[24px] bg-sand"
           >
             <motion.div className="absolute inset-0" initial={{ scale: 1.2 }} whileInView={{ scale: 1 }} viewport={{ once: true }} transition={{ duration: 2, ease: [0.22, 1, 0.36, 1] }}>
-              <SafeImage src={IMG.wStageWarm.src} alt={IMG.wStageWarm.alt} fill sizes="(max-width: 1024px) 80vw, 460px" className="object-cover" />
+              <SafeImage src={IMG.wVenueFloral.src} alt={IMG.wVenueFloral.alt} fill sizes="(max-width: 1024px) 80vw, 460px" className="object-cover" />
             </motion.div>
           </motion.div>
           <motion.div
@@ -59,7 +59,7 @@ export function AboutInvitation() {
             transition={{ duration: 1.1, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
             className="absolute bottom-0 right-0 aspect-[4/5] w-[48%] overflow-hidden rounded-[20px] border-[6px] border-ivory bg-sand shadow-[0_30px_60px_-30px_rgb(10_22_51/.6)]"
           >
-            <SafeImage src={IMG.fElders.src} alt={IMG.fElders.alt} fill sizes="(max-width: 1024px) 45vw, 260px" className="object-cover" />
+            <SafeImage src={IMG.wSeatingGarden.src} alt={IMG.wSeatingGarden.alt} fill sizes="(max-width: 1024px) 45vw, 260px" className="object-cover" />
           </motion.div>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -108,50 +108,54 @@ export function Polaroids() {
     { img: IMG.fGarland, title: t("Relax"), body: t("Your Monitoring Agent manages the day while you follow progress online.") },
   ];
   return (
-    <section className="relative mt-24 overflow-hidden bg-[#050b1c] py-24 text-paper">
+    <section className="relative mt-24 overflow-hidden bg-[#050b1c] py-20 text-paper sm:py-24">
       <FilmGrain strength={0.06} />
-      <div className="container-x relative">
-        <div className="mx-auto max-w-2xl text-center">
+      <div className="container-x relative grid gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:gap-16">
+        {/* left: the statement, held in place while the chapters scroll past */}
+        <div className="lg:sticky lg:top-28 lg:self-start">
           <Reveal><p className="eyebrow text-sky">{t("What MUHURTO does")}</p></Reveal>
-          <h2 className="mt-3 text-4xl text-paper sm:text-5xl"><SplitWords text={t("From first idea to last guest.")} /></h2>
+          <h2 className="mt-3 text-4xl leading-[1.05] text-paper sm:text-5xl"><SplitWords text={t("From first idea to last guest.")} /></h2>
+          <Reveal delay={0.1}><p className="mt-5 max-w-md text-paper/75">{t("Three steps from planning to a well-run event.")}</p></Reveal>
+          <Reveal delay={0.2} className="mt-8 flex flex-wrap gap-3">
+            <ButtonLink href="/event-planner" variant="accent">{t("Plan your event")}</ButtonLink>
+            <ButtonLink href="/about" variant="light">{t("How it works")}</ButtonLink>
+          </Reveal>
         </div>
-        <div className="mt-10 grid gap-6 md:grid-cols-3">
+        {/* right: three chapters, always visible */}
+        <ol className="grid gap-5">
           {items.map((it, i) => <Chapter key={it.title} i={i} {...it} />)}
-        </div>
+        </ol>
       </div>
     </section>
   );
 }
 
-/** A tall frame whose footage is revealed by a wipe, with the image drifting against the scroll. */
+/** One chapter: a photo that drifts against the scroll, beside its number, title and line. */
 function Chapter({ i, img, title, body }: { i: number; img: { src: string; alt: string }; title: string; body: string }) {
-  const reduce = useReducedMotion();
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLLIElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
-  const drift = useTransform(scrollYProgress, [0, 1], reduce ? ["0%", "0%"] : ["-12%", "12%"]);
+  const drift = useTransform(scrollYProgress, [0, 1], ["-10%", "10%"]);
   return (
-    <div ref={ref} className="group">
-      <motion.div
-        className="relative aspect-[3/4] overflow-hidden rounded-[6px] bg-[#0b1530]"
-        initial={reduce ? false : { clipPath: "inset(100% 0 0 0)" }}
-        whileInView={{ clipPath: "inset(0% 0 0 0)" }}
-        viewport={{ once: true, amount: 0.15 }}
-        transition={{ duration: 1.3, delay: i * 0.15, ease: [0.76, 0, 0.24, 1] }}
-      >
-        <motion.div style={{ y: drift }} className="absolute -inset-y-[14%] inset-x-0">
-          <motion.div className="absolute inset-0" initial={reduce ? false : { scale: 1.3 }} whileInView={{ scale: 1.02 }} viewport={{ once: true }} transition={{ duration: 2.2, delay: i * 0.15, ease: [0.22, 1, 0.36, 1] }}>
-            <SafeImage src={img.src} alt={img.alt} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover transition-transform duration-[1.4s] group-hover:scale-105" />
-          </motion.div>
+    <motion.li
+      ref={ref}
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.01, margin: "0px 0px -8% 0px" }}
+      transition={{ duration: 0.9, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
+      className="group grid overflow-hidden rounded-[20px] bg-white/[0.04] ring-1 ring-white/10 sm:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]"
+    >
+      <div className="relative aspect-[16/10] overflow-hidden sm:aspect-auto sm:min-h-[200px]">
+        <motion.div style={{ y: drift }} className="absolute -inset-y-[12%] inset-x-0">
+          <SafeImage src={img.src} alt={img.alt} fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 45vw, 28vw" className="object-cover transition-transform duration-[1.4s] group-hover:scale-105" />
         </motion.div>
-        <div className="absolute inset-0 bg-gradient-to-t from-[#050b1c] via-[#050b1c]/30 to-transparent" />
-        <span className="absolute left-5 top-4 font-lcd text-sm tracking-[0.3em] text-paper/70">{String(i + 1).padStart(2, "0")} / 03</span>
-        <div className="absolute inset-x-5 bottom-5">
-          <motion.p className="font-display text-4xl text-paper" initial={reduce ? false : { opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.9, delay: 0.6 + i * 0.15 }}>{title}</motion.p>
-          <motion.span className="mt-3 block h-px bg-sky" initial={reduce ? false : { width: 0 }} whileInView={{ width: 48 }} viewport={{ once: true }} transition={{ duration: 0.9, delay: 0.8 + i * 0.15 }} />
-          <motion.p className="mt-3 text-sm leading-relaxed text-paper/75" initial={reduce ? false : { opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} transition={{ duration: 0.9, delay: 0.9 + i * 0.15 }}>{body}</motion.p>
-        </div>
-      </motion.div>
-    </div>
+      </div>
+      <div className="flex flex-col justify-center p-6 sm:p-7">
+        <span className="font-lcd text-xs tracking-[0.3em] text-sky">{String(i + 1).padStart(2, "0")} / 03</span>
+        <p className="mt-3 font-display text-3xl text-paper sm:text-4xl">{title}</p>
+        <span className="mt-3 block h-px w-12 bg-sky" />
+        <p className="mt-3 text-sm leading-relaxed text-paper/75">{body}</p>
+      </div>
+    </motion.li>
   );
 }
 

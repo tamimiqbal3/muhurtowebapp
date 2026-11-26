@@ -111,7 +111,9 @@ Logos are loaded from `public/payments/` — **add the official files there** (t
 | `bkash.svg` or `bkash.png` | bKash brand resources / bKash merchant onboarding kit |
 | `nagad.svg` or `nagad.png` | Nagad merchant brand assets |
 | `rocket.svg` or `rocket.png` | Dutch-Bangla Bank Rocket brand assets |
-| `upay.svg` or `upay.png` | Upay (UCB Fintech) brand assets |
+| `upay.svg` or `upay.png` | Upay (UCB Fintech) brand assets — falls back to upaybd.com |
+| `citybank.svg` or `.png` | City Bank brand assets — falls back to citybankplc.com |
+| `islamibank.svg` or `.png` | Islami Bank Bangladesh brand assets (no fallback) |
 | `mastercard.svg` | Mastercard Brand Center |
 | `amex.svg` | American Express brand guidelines |
 | `visa.svg` | Visa brand guidelines (visa.com → brand) |

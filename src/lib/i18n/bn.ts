@@ -574,6 +574,7 @@ export const BN: Record<string, string> = {
   "This moment doesn't exist": "এই মুহূর্তটির অস্তিত্ব নেই",
   "This page": "এই পৃষ্ঠা",
   "This plan leaves room in your budget for upgrades such as fresh flowers, drone coverage or a photo booth.": "এই পরিকল্পনায় তাজা ফুল, ড্রোন কভারেজ বা ফটো বুথের মতো আপগ্রেডের জন্য বাজেটে জায়গা থাকে।",
+  "Three steps from planning to a well-run event.": "পরিকল্পনা থেকে সুষ্ঠু আয়োজন — তিনটি ধাপে।",
   "Too many attempts. Please wait a moment and try again.": "অনেকবার চেষ্টা হয়েছে। একটু অপেক্ষা করে আবার চেষ্টা করুন।",
   "Top rated": "সর্বোচ্চ রেটিং",
   "Total": "মোট",
