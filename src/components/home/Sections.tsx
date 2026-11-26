@@ -32,7 +32,7 @@ export async function WhyChoose() {
     { title: t("Verified Service Providers"), body: t("Vendors are reviewed for quality, reliability and fair pricing before they are listed.") },
     { title: t("Centralized Event Monitoring"), body: t("A dedicated Monitoring Agent coordinates every vendor and updates your dashboard.") },
     { title: t("Customizable Packages"), body: t("Mix services, quantities and add-ons, or request a tailored plan from our team.") },
-    { title: t("Secure Payments"), body: t("Pay with bKash, Nagad, Rocket, Visa or Mastercard through SSLCommerz. 2% fee, shown upfront.") },
+    { title: t("Secure Payments"), body: t("Pay with bKash, Nagad, Rocket or Visa. The 2% fee is shown upfront.") },
     { title: t("Dedicated Support"), body: t("Real people to help in Bangla or English — before, during and after your event.") },
   ];
   return (

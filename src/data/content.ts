@@ -40,7 +40,7 @@ export const GALLERY = [
 export const FAQS = [
   { q: "How does MUHURTO pricing work?", a: "Every listing shows a starting price in BDT. Your total is the sum of the services you select (with any options and quantities), plus a transparent 2% platform fee shown at checkout. You are never charged twice for the same booking." },
   { q: "What is a Monitoring Agent?", a: "After your payment is verified, MUHURTO assigns a Monitoring Agent to your event. The agent coordinates every vendor, tracks preparation milestones and posts updates to your dashboard, so you don't have to chase vendors yourself." },
-  { q: "Which payment methods are supported?", a: "Payments are processed by SSLCommerz, which supports bKash, Nagad, Rocket, local and international cards and internet banking. MUHURTO never sees or stores your card details." },
+  { q: "Which payment methods are supported?", a: "bKash, Nagad, Rocket and Visa cards. You choose the method at checkout, and payment is confirmed instantly by the payment gateway." },
   { q: "Can I customise a package?", a: "Yes. Use the Customize page to choose services, quantities, themes and special instructions, then either book directly or send a customisation request. Our team reviews it and sends back an updated plan for you to approve before paying." },
   { q: "Can I cancel or change my booking?", a: "You can request a cancellation or modification from the booking page. Our team reviews requests against each vendor's policy and replies in your dashboard." },
   { q: "Are the vendors verified?", a: "Vendors are reviewed before listing. Listings marked 'Demo' are sample data used while the platform is being prepared for launch." },
@@ -51,7 +51,7 @@ export const FAQS = [
 export const STEPS = [
   { n: "01", title: "Explore Services", body: "Browse verified décor, food, photography and sound — or build a shortlist on the planner calculator." },
   { n: "02", title: "Customize Your Event", body: "Pick options, quantities and themes. Request changes and approve an updated plan." },
-  { n: "03", title: "Confirm & Pay", body: "Pay securely through SSLCommerz. The 2% platform fee is shown upfront — no surprises." },
+  { n: "03", title: "Confirm & Pay", body: "Pay securely with bKash, Nagad, Rocket or Visa. The 2% platform fee is shown upfront — no surprises." },
   { n: "04", title: "Enjoy Your Moment", body: "A Monitoring Agent coordinates every vendor while you follow progress from your dashboard." },
 ];
 
@@ -67,7 +67,7 @@ const TESTIMONIALS_BN = [
 const FAQS_BN = [
   { q: "মুহূর্তে মূল্য কীভাবে নির্ধারিত হয়?", a: "প্রতিটি লিস্টিংয়ে টাকায় শুরুর মূল্য দেখানো থাকে। আপনার মোট মূল্য হলো বেছে নেওয়া সার্ভিসগুলোর (অপশন ও পরিমাণসহ) যোগফল, সাথে চেকআউটে দেখানো ২% প্ল্যাটফর্ম ফি। একই বুকিংয়ের জন্য কখনো দুবার চার্জ করা হয় না।" },
   { q: "মনিটরিং এজেন্ট কী?", a: "পেমেন্ট যাচাই হওয়ার পর মুহূর্ত আপনার অনুষ্ঠানে একজন মনিটরিং এজেন্ট নিয়োগ দেয়। তিনি সব ভেন্ডরের সমন্বয় করেন, প্রস্তুতির ধাপ অনুসরণ করেন এবং আপনার ড্যাশবোর্ডে আপডেট দেন — আপনাকে ভেন্ডরদের পেছনে ছুটতে হয় না।" },
-  { q: "কোন কোন পেমেন্ট পদ্ধতি চলে?", a: "পেমেন্ট প্রসেস করে SSLCommerz — বিকাশ, নগদ, রকেট, ভিসা, মাস্টারকার্ডসহ কার্ড ও ইন্টারনেট ব্যাংকিং। মুহূর্ত কখনো আপনার কার্ডের তথ্য দেখে বা সংরক্ষণ করে না।" },
+  { q: "কোন কোন পেমেন্ট পদ্ধতি চলে?", a: "বিকাশ, নগদ, রকেট ও ভিসা কার্ড। চেকআউটে পদ্ধতি বাছাই করবেন, পেমেন্ট গেটওয়ে সঙ্গে সঙ্গে পেমেন্ট নিশ্চিত করে।" },
   { q: "প্যাকেজ কি নিজের মতো সাজানো যায়?", a: "হ্যাঁ। কাস্টমাইজ পেজে সার্ভিস, পরিমাণ, থিম ও বিশেষ নির্দেশনা বেছে নিন, তারপর সরাসরি বুক করুন অথবা কাস্টমাইজেশন অনুরোধ পাঠান। আমাদের টিম পর্যালোচনা করে হালনাগাদ প্ল্যান পাঠাবে, যা পেমেন্টের আগে আপনি অনুমোদন করবেন।" },
   { q: "বুকিং বাতিল বা পরিবর্তন করা যায়?", a: "বুকিং পেজ থেকে বাতিল বা পরিবর্তনের অনুরোধ করতে পারেন। আমাদের টিম প্রতিটি ভেন্ডরের নীতি অনুযায়ী অনুরোধ পর্যালোচনা করে ড্যাশবোর্ডে উত্তর দেয়।" },
   { q: "ভেন্ডররা কি যাচাইকৃত?", a: "লিস্টিংয়ের আগে ভেন্ডরদের পর্যালোচনা করা হয়। 'ডেমো' চিহ্নিত লিস্টিংগুলো লঞ্চের প্রস্তুতিকালীন নমুনা তথ্য।" },
@@ -78,7 +78,7 @@ const FAQS_BN = [
 const STEPS_BN = [
   { n: "০১", title: "সার্ভিস খুঁজুন", body: "যাচাই করা সাজসজ্জা, খাবার, ফটোগ্রাফি ও সাউন্ড দেখুন — অথবা প্ল্যানার ক্যালকুলেটর দিয়ে তালিকা বানান।" },
   { n: "০২", title: "অনুষ্ঠান সাজান", body: "অপশন, পরিমাণ ও থিম বেছে নিন। পরিবর্তন চান? অনুরোধ পাঠিয়ে হালনাগাদ প্ল্যান অনুমোদন করুন।" },
-  { n: "০৩", title: "নিশ্চিত করুন ও পেমেন্ট দিন", body: "SSLCommerz-এর মাধ্যমে নিরাপদে পেমেন্ট দিন। ২% প্ল্যাটফর্ম ফি শুরুতেই দেখানো — কোনো চমক নেই।" },
+  { n: "০৩", title: "নিশ্চিত করুন ও পেমেন্ট দিন", body: "বিকাশ, নগদ, রকেট বা ভিসায় নিরাপদে পেমেন্ট দিন। ২% প্ল্যাটফর্ম ফি আগেই দেখানো হয় — কোনো চমক নেই।" },
   { n: "০৪", title: "মুহূর্তটি উপভোগ করুন", body: "মনিটরিং এজেন্ট সব ভেন্ডরের সমন্বয় করবেন, আর আপনি ড্যাশবোর্ড থেকে অগ্রগতি দেখবেন।" },
 ];
 

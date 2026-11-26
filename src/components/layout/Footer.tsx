@@ -19,7 +19,7 @@ export async function Footer() {
   const { t, lang } = await getT();
   const links: Array<[string, string]> = [["About", "/about"], ["Event Planner", "/event-planner"], ["Customize a plan", "/customize"], ["Search services", "/search"], ["My bookings", "/my-bookings"], ["FAQ", "/faq"], ["Contact", "/contact"]];
   return (
-    <footer className="relative mt-28 bg-ink text-paper/80">
+    <footer className="relative mt-28 bg-ink text-paper/80 pb-28 lg:pb-0">
       <div className="container-x grid gap-12 py-16 md:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1.2fr]">
         <div>
           <Logo light />

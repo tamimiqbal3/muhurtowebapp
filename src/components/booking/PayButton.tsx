@@ -44,7 +44,7 @@ export function PayButton({ bookingId, total, gatewayConfigured, sandbox, demo }
       <Button variant="accent" size="lg" className="w-full" disabled={busy || !enabled || !method} onClick={pay}>
         {busy ? <Spinner /> : <><Lock className="h-4 w-4" /> {t("Pay {amount} securely", { amount: formatBDT(total) })}</>}
       </Button>
-      <p className="text-center text-xs text-muted">{t("Secured by SSLCommerz. MUHURTO never sees your card or wallet PIN.")}</p>
+      <p className="text-center text-xs text-muted">{t("Encrypted payment. MUHURTO never sees your card number or wallet PIN.")}</p>
     </div>
   );
 }

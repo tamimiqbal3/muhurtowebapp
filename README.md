@@ -100,7 +100,7 @@ Flow: `/booking` creates a booking priced **only from the server catalogue** →
 - Fee: `platformFee = round(subtotal × 2%)`, `total = subtotal + fee` (৳100,000 → ৳2,000 → ৳1,02,000). The breakdown is stored on the booking and the payment record.
 - No double charging: a paid booking can't start a new session; older unfinished sessions are superseded; confirmation is an idempotent transaction; a second successful payment for the same booking is flagged `duplicate_refund_required` for admins instead of being applied.
 - Payments are never simulated. Without credentials the Pay button is disabled with an explanation.
-- **Method picker:** customers choose bKash, Nagad, Rocket, Visa or Mastercard at checkout. The choice is sent to SSLCommerz as `multi_card_name` (`bkash`, `dbblmobilebanking`, `visacard`, `mastercard`) so the gateway opens on that method; Nagad opens the full SSLCommerz page (enable Nagad on your store). The choice is saved on the payment record as `preferredMethod`.
+- **Method picker:** customers choose bKash, Nagad, Rocket or Visa at checkout. The choice is sent to SSLCommerz as `multi_card_name` (`bkash`, `dbblmobilebanking`, `visacard`) so the gateway opens on that method; Nagad opens the full SSLCommerz page (enable Nagad on your store). The choice is saved on the payment record as `preferredMethod`.
 
 ### Payment logos
 
@@ -112,9 +112,8 @@ Logos are loaded from `public/payments/` — **add the official files there** (t
 | `nagad.svg` or `nagad.png` | Nagad merchant brand assets |
 | `rocket.svg` or `rocket.png` | Dutch-Bangla Bank Rocket brand assets |
 | `visa.svg` | Visa brand guidelines (visa.com → brand) |
-| `mastercard.svg` | Mastercard Brand Center |
 
-Visa and Mastercard fall back to their Wikimedia Commons files until local copies are added. If a logo file is missing, a brand-coloured name tile is shown instead so the layout never breaks.
+Until local copies are added, bKash and Nagad load published copies of their marks (logotyp.us) and Visa loads its Wikimedia Commons file; Rocket needs the local file. If a logo file is missing, a brand-coloured name tile is shown instead so the layout never breaks.
 
 ---
 
@@ -166,7 +165,8 @@ English is the default. The toggle in the navbar (and the mobile menu) sets the 
 
 The site is edited like a motion-graphics film:
 
-- **Hero**: a storyboard. A light editorial title card (headline, short intro, key figures, actions and a portrait still) is followed by a reel of occasions; on desktop, scrolling down travels sideways through the scenes like a camera dolly, with each photo drifting inside its frame. On phones the reel is swipeable.
+- **Hero**: a contained feature frame that opens with an iris-style reveal, cross-fading photos with a slow push-in and pointer parallax, and a progress indicator per photo. Below it, occasion cards each loop through their own photos and tilt in 3D under the pointer; on phones they swipe.
+- **Navigation**: a floating glass capsule that tucks away while reading, a bottom dock on phones and tablets with a raised planner button, and a full-screen menu that opens with a circular reveal.
 - **Loading**: a MUHURTO delivery truck drives along a road at dusk (pure SVG + CSS) — on the first visit while the page loads, and on route loading.
 - **Scenes**: homepage sections push in from a tilted, smaller frame and settle back as they leave, so sections cut together like shots. Chapters are revealed by wipes with image drift against the scroll.
 - **Wedding**: palace doors swing open onto the wedding scene, light spills through the gap, and the doors close again at the end of the scene.

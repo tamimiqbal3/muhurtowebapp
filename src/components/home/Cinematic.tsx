@@ -77,22 +77,18 @@ export function AboutInvitation() {
           <Reveal variant="focus" delay={0.15}>
             <p className="mt-5 max-w-xl text-ink-soft">{t("MUHURTO is a Bangladeshi event marketplace. One place to explore trusted vendors, plan everything on one page, book securely — and hand the running of the day to a dedicated Monitoring Agent.")}</p>
           </Reveal>
-          <p className="mt-10 text-xs font-semibold tracking-[0.2em] text-muted uppercase">{t("What we plan")}</p>
-          <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-6">
-            {cats.map((c, i) => (
-              <Reveal as="li" key={c.slug} variant="deal" delay={0.08 * i} className={cn(i === 0 && "col-span-2", i < 3 ? "sm:col-span-2" : "sm:col-span-3")}>
-                <Link href={c.route} className="group relative block h-36 overflow-hidden rounded-2xl shadow-[var(--shadow-soft)] transition-transform duration-500 hover:-translate-y-1.5 hover:rotate-[-1deg]">
-                  <SafeImage src={c.card.src} alt="" fill sizes="(max-width: 640px) 50vw, 200px" className="object-cover transition-transform duration-[1.2s] group-hover:scale-110" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-ink/85 to-ink/5" />
-                  <span className="absolute left-0 top-0 h-1 w-full" style={{ background: c.accent }} />
-                  <span className="absolute bottom-3 left-3 right-3 flex items-end justify-between text-paper">
-                    <span className="font-display text-xl leading-tight">{c.name}</span>
-                    <ArrowUpRight className="h-4 w-4 opacity-70 transition group-hover:opacity-100" />
-                  </span>
-                </Link>
-              </Reveal>
+          <Reveal delay={0.2} className="mt-8 grid grid-cols-3 gap-4 border-t border-line pt-6">
+            {([["60+", t("Services")], ["5", t("Occasions")], ["1", t("Agent per event")]] as const).map(([v, l]) => (
+              <div key={l}>
+                <p className="font-display text-4xl leading-none text-ink">{v}</p>
+                <p className="mt-2 text-[0.62rem] font-semibold tracking-[0.16em] text-muted uppercase">{l}</p>
+              </div>
             ))}
-          </ul>
+          </Reveal>
+          <Reveal delay={0.3} className="mt-8 flex flex-wrap gap-3">
+            <ButtonLink href="/about" variant="outline">{t("Our story")}</ButtonLink>
+            <ButtonLink href="/event-planner" variant="accent">{t("Plan your event")}</ButtonLink>
+          </Reveal>
         </div>
       </div>
     </section>

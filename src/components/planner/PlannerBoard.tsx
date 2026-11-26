@@ -349,7 +349,7 @@ export function PlannerBoard({ services, aiEnabled }: { services: Service[]; aiE
       </div>
 
       {/* Mobile: total always in reach */}
-      <div className="fixed inset-x-3 bottom-3 z-40 lg:hidden">
+      <div className="fixed inset-x-3 bottom-[88px] z-40 lg:hidden">
         <a href="#plan-receipt" className="flex items-center justify-between rounded-2xl bg-ink/95 px-4 py-3 text-paper shadow-[0_12px_30px_-8px_rgb(1_95_255/.6)] backdrop-blur">
           <span className="text-xs">{t("{n} items", { n: lines.length })}</span>
           <RollingNumber value={formatBDT(est.total)} bangla={lang === "bn"} className="font-lcd text-xl text-sky" />
@@ -359,7 +359,7 @@ export function PlannerBoard({ services, aiEnabled }: { services: Service[]; aiE
 
       <AnimatePresence>
         {flash && (
-          <motion.div role="status" initial={{ opacity: 0, y: 30, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 20 }} className="fixed bottom-20 left-1/2 z-50 -translate-x-1/2 rounded-full bg-ink px-5 py-2.5 text-sm text-paper shadow-xl lg:bottom-8">
+          <motion.div role="status" initial={{ opacity: 0, y: 30, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 20 }} className="fixed bottom-40 left-1/2 z-[80] -translate-x-1/2 rounded-full bg-ink px-5 py-2.5 text-sm text-paper shadow-xl lg:bottom-8">
             {flash}
           </motion.div>
         )}
