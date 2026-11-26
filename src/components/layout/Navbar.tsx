@@ -72,7 +72,7 @@ export function Navbar() {
 
       {/* ── Top capsule ── */}
       <motion.header
-        className="fixed inset-x-0 top-0 z-[70] hidden px-5 pt-4 lg:block"
+        className="fixed inset-x-0 top-0 z-[70] px-3 pt-[max(10px,env(safe-area-inset-top))] sm:px-5 lg:pt-4"
         animate={{ y: hidden && !open ? -110 : 0 }}
         transition={{ duration: 0.45, ease: EASE }}
       >
@@ -88,8 +88,8 @@ export function Navbar() {
           <Link href="/" className="group flex min-w-0 items-center gap-2.5" aria-label="MUHURTO">
             <LogoMark light={!onLight || open} className="h-10 w-10" />
             <span className="flex min-w-0 flex-col leading-none">
-              <span className={cn("font-display text-[1.2rem] font-semibold tracking-[0.2em]", onLight && !open ? "text-ink" : "text-paper")}>MUHURTO</span>
-              <span className={cn("bn hidden text-[0.62rem] min-[380px]:block", onLight && !open ? "text-brand" : "text-sky")}>মুহূর্ত</span>
+              <span className={cn("font-display text-[1.35rem] font-semibold tracking-[0.04em]", onLight && !open ? "text-ink" : "text-paper")}>Muhūrto</span>
+              <span className={cn("bn hidden text-[0.62rem] sm:block", onLight && !open ? "text-brand" : "text-sky")}>মুহূর্ত</span>
             </span>
           </Link>
 
@@ -150,18 +150,6 @@ export function Navbar() {
         </nav>
       </motion.header>
 
-      {/* ── Phones & tablets: only the language switch sits at the top; navigation lives in the dock ── */}
-      <motion.div
-        className="fixed right-3 top-[max(12px,env(safe-area-inset-top))] z-[70] lg:hidden"
-        initial={{ opacity: 0, y: -16 }}
-        animate={{ opacity: hidden && !open ? 0 : 1, y: hidden && !open ? -60 : 0 }}
-        transition={{ duration: 0.45, ease: EASE }}
-      >
-        <div className="rounded-full border border-white/10 bg-[#070d1f]/75 p-1 shadow-[0_10px_30px_-12px_rgb(0_0_0/.6)] backdrop-blur-xl">
-          <LanguageToggle compact light />
-        </div>
-      </motion.div>
-
       {/* ── Full-screen menu: iris reveal ── */}
       <AnimatePresence>
         {open && (
@@ -178,7 +166,7 @@ export function Navbar() {
               <div className="flex items-center justify-between">
                 <Link href="/" className="flex items-center gap-2.5" aria-label="MUHURTO">
                   <LogoMark light className="h-10 w-10" />
-                  <span className="font-display text-lg font-semibold tracking-[0.2em] text-paper">MUHURTO</span>
+                  <span className="font-display text-xl font-semibold tracking-[0.04em] text-paper">Muhūrto</span>
                 </Link>
               </div>
               <p className="mt-8 text-[0.65rem] font-semibold tracking-[0.3em] text-paper/50 uppercase">{t("Menu")}</p>

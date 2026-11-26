@@ -16,7 +16,7 @@ export const CATEGORIES: Category[] = [
   {
     slug: "wedding",
     name: "Wedding",
-    nameBn: "বিয়ে",
+    nameBn: "বিবাহ",
     tagline: "Holud to Bou Bhat, designed as one story.",
     description: "From gaye holud marigolds to the reception stage, plan every wedding ritual with verified decorators, photographers and sound teams.",
     accent: "#015fff",

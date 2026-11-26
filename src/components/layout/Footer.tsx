@@ -23,7 +23,7 @@ export async function Footer() {
       <div className="container-x grid gap-12 py-16 md:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1.2fr]">
         <div>
           <Logo light />
-          <p className="mt-5 max-w-sm text-sm leading-relaxed text-paper/65">{t("MUHURTO is a Bangladeshi event marketplace for weddings, birthdays, corporate and family occasions — with transparent pricing and a dedicated Monitoring Agent for every confirmed event.")}</p>
+          <p className="mt-5 max-w-sm text-sm leading-relaxed text-paper/65">{t("Event management for weddings, birthdays, corporate and family occasions across Bangladesh.")}</p>
           <div className="mt-6 flex gap-2">
             {social.map((s) => (
               <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer" aria-label={s.label} className="grid h-9 w-9 place-items-center rounded-full border border-paper/15 text-paper/70 transition hover:border-gold hover:text-gold">

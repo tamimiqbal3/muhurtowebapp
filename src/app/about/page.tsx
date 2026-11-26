@@ -17,19 +17,19 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function AboutPage() {
   const { t } = await getT();
   const values = [
-    { t: t("Rooted in Bangladesh"), b: t("From gaye holud marigolds to mezban and tong-er cha, we design around the rituals and flavours families actually celebrate.") },
-    { t: t("Transparent by default"), b: t("Starting prices on every listing, a clear 2% platform fee at checkout, and no hidden charges.") },
-    { t: t("Someone on your side"), b: t("Every paid event gets a Monitoring Agent who coordinates vendors so hosts can be guests at their own celebration.") },
+    { t: t("Rooted in Bangladesh"), b: t("We plan around the traditions and cuisine of Bangladeshi celebrations.") },
+    { t: t("Transparent by default"), b: t("Published prices and a single 2% platform fee.") },
+    { t: t("Someone on your side"), b: t("Every confirmed event is assigned a Monitoring Agent.") },
   ];
   return (
     <>
-      <PageHero image={IMG.wVenueFloral} crumbs={[{ label: t("Home"), href: "/" }, { label: t("About") }]} eyebrow={t("About MUHURTO")} title={t("We plan the logistics. You keep the memories.")} description={t("MUHURTO means “moment”. We built a single place to discover, customise, book and monitor every part of an event in Bangladesh.")} />
+      <PageHero image={IMG.wVenueFloral} crumbs={[{ label: t("Home"), href: "/" }, { label: t("About") }]} eyebrow={t("About MUHURTO")} title={t("We plan the logistics. You keep the memories.")} description={t("MUHURTO means “moment”. One platform to plan, book and manage events in Bangladesh.")} />
       <section className="container-x grid items-center gap-12 pt-24 lg:grid-cols-2">
         <Reveal variant="slide">
-          <SectionHeading eyebrow={t("Our story")} title={t("Celebrations shouldn't require a project manager")} />
+          <SectionHeading eyebrow={t("Our story")} title={t("Events, managed end to end")} />
           <div className="mt-6 space-y-4 text-ink-soft">
-            <p>{t("Anyone who has organised a Bangladeshi wedding knows the reality: a dozen vendors, a hundred phone calls and a family WhatsApp group that never sleeps. Hosts spend the big day chasing decorators and caterers instead of being with their guests.")}</p>
-            <p>{t("MUHURTO brings décor, seating, lighting, photography, photo booths, sound and food into one marketplace — then assigns a Monitoring Agent after payment to oversee every vendor until the last guest leaves.")}</p>
+            <p>{t("Organising an event usually means coordinating many vendors separately. Hosts often spend the day managing logistics instead of attending to their guests.")}</p>
+            <p>{t("MUHURTO brings every service into one platform and assigns a Monitoring Agent to oversee each vendor on the day.")}</p>
           </div>
         </Reveal>
         <Reveal variant="swing" className="relative h-[420px] overflow-hidden rounded-[var(--radius-card)] lg:h-auto lg:min-h-[460px] lg:self-stretch">

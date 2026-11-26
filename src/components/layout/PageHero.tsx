@@ -28,7 +28,7 @@ export function Breadcrumbs({ items, light }: { items: Array<{ label: string; hr
 export function PageHero({ title, bn, eyebrow, description, image, crumbs, children, accent }: { title: ReactNode; bn?: string; eyebrow?: string; description?: ReactNode; image?: ImageRef; crumbs?: Array<{ label: string; href?: string }>; children?: ReactNode; accent?: string }) {
   // Every page opens on a title card: graded footage (or a deep navy plate), grain and a light streak.
   return (
-    <section className={cn("relative isolate overflow-hidden bg-[#050b1c] text-paper", image ? "pb-14 pt-24 sm:pb-20 sm:pt-32 lg:pt-44" : "pb-12 pt-20 sm:pt-28 lg:pt-36")}>
+    <section className={cn("relative isolate overflow-hidden bg-[#050b1c] text-paper", image ? "pb-14 pt-28 sm:pb-20 sm:pt-36 lg:pt-44" : "pb-12 pt-24 sm:pt-28 lg:pt-36")}>
       {image ? (
         <motion.div className="absolute inset-0 -z-20 overflow-hidden" initial={{ clipPath: "inset(0 0 0 100%)" }} animate={{ clipPath: "inset(0 0 0 0%)" }} transition={{ duration: 1.2, ease: [0.76, 0, 0.24, 1] }}>
           <SafeImage src={image.src} alt={image.alt} fill priority sizes="100vw" className="animate-kenburns object-cover" />

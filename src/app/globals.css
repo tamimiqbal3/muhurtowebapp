@@ -92,6 +92,16 @@
   img, svg, video {
     max-width: 100%;
   }
+  /* Grid and flex children may shrink below their content (tables, long words) instead of
+     widening the page — the usual cause of sideways overflow on phones. */
+  :where(.grid) > *,
+  :where(.flex) > * {
+    min-width: 0;
+  }
+  :where(.flex, .inline-flex) > svg,
+  :where(.flex, .inline-flex) > img {
+    flex-shrink: 0;
+  }
   body {
     @apply bg-ivory font-sans text-ink antialiased;
     max-width: 100%;
@@ -211,20 +221,32 @@
   cursor: grab;
 }
 
-/* ── Loading screen: setting the stage ── */
-.st-curtain { transform-box: view-box; animation: st-curtain 4.8s cubic-bezier(.76,0,.24,1) infinite; }
-.st-curtain-l { transform-origin: 0 0; }
-.st-curtain-r { transform-origin: 320px 0; }
-.st-beam { transform-box: view-box; opacity: 0; animation: st-beam 4.8s ease-in-out infinite; }
-.st-beam-l { transform-origin: 18px 0; --st-from: -14deg; --st-to: 10deg; }
-.st-beam-r { transform-origin: 302px 0; --st-from: 14deg; --st-to: -10deg; }
-.st-bulb { fill: #3a3320; animation: st-bulb 4.8s linear infinite; }
-.st-glow { animation: st-glow 4.8s ease-in-out infinite; }
-.st-confetti { transform-box: fill-box; transform-origin: center; opacity: 0; animation: st-confetti 2.4s linear infinite; }
-.st-dots::after { content: ""; display: inline-block; width: 1.2em; text-align: left; animation: st-dots 1.4s steps(4) infinite; }
-@keyframes st-curtain { 0%, 18% { transform: scaleX(1); } 42%, 82% { transform: scaleX(0.22); } 100% { transform: scaleX(1); } }
-@keyframes st-beam { 0%, 30% { opacity: 0; transform: rotate(var(--st-from)); } 40% { opacity: 1; } 60% { transform: rotate(var(--st-to)); } 75% { opacity: 1; transform: rotate(var(--st-from)); } 88%, 100% { opacity: 0; } }
-@keyframes st-bulb { 0% { fill: #3a3320; filter: none; } 8%, 85% { fill: #ffe08a; filter: drop-shadow(0 0 3px #ffc727); } 92%, 100% { fill: #3a3320; filter: none; } }
-@keyframes st-glow { 0%, 30% { opacity: .2; } 50%, 80% { opacity: 1; } 100% { opacity: .2; } }
-@keyframes st-confetti { 0% { opacity: 0; transform: translateY(0) rotate(0deg); } 10% { opacity: 1; } 100% { opacity: 0; transform: translateY(190px) rotate(540deg); } }
-@keyframes st-dots { 0% { content: ""; } 25% { content: "."; } 50% { content: ".."; } 75% { content: "..."; } }
+/* ── Loading screen: an event coming together (6s loop, four stages) ── */
+.ev-arc, .ev-chip, .ev-line, .ev-core { animation-duration: 6s; animation-iteration-count: infinite; animation-timing-function: cubic-bezier(.65,0,.35,1); }
+.ev-line { opacity: 0; }
+.ev-core { animation-name: ev-core; }
+@keyframes ev-core { 0%, 88% { scale: 1; } 93% { scale: 1.08; } 100% { scale: 1; } }
+.ev-arc-0 { animation-name: ev-arc-0; }
+@keyframes ev-arc-0 { 0%, 0% { stroke-dashoffset: 108; } 16%, 92% { stroke-dashoffset: 0; } 100% { stroke-dashoffset: 108; } }
+.ev-chip-0 { animation-name: ev-chip-0; }
+@keyframes ev-chip-0 { 0%, 14% { background: #fbfcff; color: #66728c; border-color: #d6e1f2; scale: 1; } 16% { scale: 1.15; } 19%, 92% { background: #015fff; color: #fbfcff; border-color: #015fff; scale: 1; } 100% { background: #fbfcff; color: #66728c; border-color: #d6e1f2; } }
+.ev-line-0 { animation-name: ev-line-0; }
+@keyframes ev-line-0 { 0%, 0% { opacity: 0; transform: translateY(6px); } 3%, 19% { opacity: 1; transform: translateY(0); } 22%, 100% { opacity: 0; transform: translateY(-6px); } }
+.ev-arc-1 { animation-name: ev-arc-1; }
+@keyframes ev-arc-1 { 0%, 22% { stroke-dashoffset: 108; } 38%, 92% { stroke-dashoffset: 0; } 100% { stroke-dashoffset: 108; } }
+.ev-chip-1 { animation-name: ev-chip-1; }
+@keyframes ev-chip-1 { 0%, 36% { background: #fbfcff; color: #66728c; border-color: #d6e1f2; scale: 1; } 38% { scale: 1.15; } 41%, 92% { background: #015fff; color: #fbfcff; border-color: #015fff; scale: 1; } 100% { background: #fbfcff; color: #66728c; border-color: #d6e1f2; } }
+.ev-line-1 { animation-name: ev-line-1; }
+@keyframes ev-line-1 { 0%, 21% { opacity: 0; transform: translateY(6px); } 25%, 41% { opacity: 1; transform: translateY(0); } 44%, 100% { opacity: 0; transform: translateY(-6px); } }
+.ev-arc-2 { animation-name: ev-arc-2; }
+@keyframes ev-arc-2 { 0%, 44% { stroke-dashoffset: 108; } 60%, 92% { stroke-dashoffset: 0; } 100% { stroke-dashoffset: 108; } }
+.ev-chip-2 { animation-name: ev-chip-2; }
+@keyframes ev-chip-2 { 0%, 58% { background: #fbfcff; color: #66728c; border-color: #d6e1f2; scale: 1; } 60% { scale: 1.15; } 63%, 92% { background: #015fff; color: #fbfcff; border-color: #015fff; scale: 1; } 100% { background: #fbfcff; color: #66728c; border-color: #d6e1f2; } }
+.ev-line-2 { animation-name: ev-line-2; }
+@keyframes ev-line-2 { 0%, 43% { opacity: 0; transform: translateY(6px); } 47%, 63% { opacity: 1; transform: translateY(0); } 66%, 100% { opacity: 0; transform: translateY(-6px); } }
+.ev-arc-3 { animation-name: ev-arc-3; }
+@keyframes ev-arc-3 { 0%, 66% { stroke-dashoffset: 108; } 82%, 92% { stroke-dashoffset: 0; } 100% { stroke-dashoffset: 108; } }
+.ev-chip-3 { animation-name: ev-chip-3; }
+@keyframes ev-chip-3 { 0%, 80% { background: #fbfcff; color: #66728c; border-color: #d6e1f2; scale: 1; } 82% { scale: 1.15; } 85%, 92% { background: #015fff; color: #fbfcff; border-color: #015fff; scale: 1; } 100% { background: #fbfcff; color: #66728c; border-color: #d6e1f2; } }
+.ev-line-3 { animation-name: ev-line-3; }
+@keyframes ev-line-3 { 0%, 65% { opacity: 0; transform: translateY(6px); } 69%, 89% { opacity: 1; transform: translateY(0); } 92%, 100% { opacity: 0; transform: translateY(-6px); } }

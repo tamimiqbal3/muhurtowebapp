@@ -19,18 +19,18 @@ export function CheckoutSummary({ booking, children }: { booking: Booking; child
   const { t, lang } = useLang();
   const cat = getCategory(booking.event.categorySlug);
   return (
-    <div className="grid gap-8 lg:grid-cols-[1fr_400px]">
-      <section className="card p-6">
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_400px] lg:gap-8">
+      <section className="card min-w-0 p-4 sm:p-6">
         <div className="mb-6 flex flex-wrap gap-x-6 gap-y-2 text-sm text-ink-soft">
           <span className="font-semibold text-ink">{cat ? localizeCategory(cat, lang).name : ""}</span>
           <span className="inline-flex items-center gap-1.5"><CalendarDays className="h-4 w-4" /> {formatDate(booking.event.date, undefined, lang)}</span>
-          <span className="inline-flex items-center gap-1.5"><MapPin className="h-4 w-4" /> {booking.event.venue}, {cityName(booking.event.city, lang)}</span>
+          <span className="inline-flex min-w-0 items-start gap-1.5 break-words"><MapPin className="mt-0.5 h-4 w-4 shrink-0" /> {booking.event.venue}, {cityName(booking.event.city, lang)}</span>
           <span className="inline-flex items-center gap-1.5"><Users className="h-4 w-4" /> {t("{n} guests", { n: booking.event.guests })}</span>
         </div>
         <PriceTable lines={booking.lines} pricing={booking.pricing} />
       </section>
-      <aside className="lg:sticky lg:top-28 lg:self-start">
-        <div className="card space-y-4 p-6">
+      <aside className="min-w-0 lg:sticky lg:top-28 lg:self-start">
+        <div className="card space-y-4 p-4 sm:p-6">
           <p className="eyebrow">{t("Total payable")}</p>
           <p className="font-display text-4xl font-semibold sm:text-5xl">{formatBDT(booking.pricing.total)}</p>
           <p className="text-xs text-muted">{t("Includes {fee} platform fee (2% of {sub}).", { fee: formatBDT(booking.pricing.platformFee), sub: formatBDT(booking.pricing.subtotal) })}</p>

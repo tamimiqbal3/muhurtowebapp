@@ -6,7 +6,7 @@ import { SERVICES_BN } from "./services.bn";
 export const CATEGORY_BN: Record<string, { tagline: string; description: string; subs: Record<string, string> }> = {
   wedding: {
     tagline: "গায়ে হলুদ থেকে বউভাত — একই গল্পে সাজানো।",
-    description: "গায়ে হলুদের গাঁদা ফুল থেকে রিসেপশনের মঞ্চ — যাচাই করা ডেকোরেটর, ফটোগ্রাফার ও সাউন্ড টিমের সাথে বিয়ের প্রতিটি আয়োজন পরিকল্পনা করুন।",
+    description: "গায়ে হলুদের গাঁদা ফুল থেকে রিসেপশনের মঞ্চ — যাচাই করা ডেকোরেটর, আলোকচিত্রী ও সাউন্ড দলের সাথে বিবাহের প্রতিটি আয়োজন পরিকল্পনা করুন।",
     subs: {},
   },
   birthday: {
@@ -34,8 +34,8 @@ export const CATEGORY_BN: Record<string, { tagline: string; description: string;
 export const SUB_DESC_BN: Record<string, string> = {
   decor: "মঞ্চ, ব্যাকড্রপ, ফুল ও থিমভিত্তিক সাজসজ্জা।",
   "sitting-area": "অতিথিদের বসার জায়গা, লাউঞ্জ, টেবিল ও লিনেন।",
-  lighting: "অ্যাম্বিয়েন্ট, মঞ্চ, ফেয়ারি ও স্থাপত্য আলোকসজ্জা।",
-  "photography-videography": "ফটোগ্রাফার, সিনেমাটোগ্রাফার ও ড্রোন কভারেজ।",
+  lighting: "অ্যাম্বিবাহন্ট, মঞ্চ, ফেয়ারি ও স্থাপত্য আলোকসজ্জা।",
+  "photography-videography": "আলোকচিত্রী, সিনেমাটোগ্রাফার ও ড্রোন কভারেজ।",
   "photo-booths": "থিম বুথ, তাৎক্ষণিক প্রিন্ট ও ৩৬০° ভিডিও।",
   sound: "পিএ সিস্টেম, ডিজে, মাইক্রোফোন ও লাইভ মিউজিক সাউন্ড।",
   platter: "ক্যাটারিং প্ল্যাটার, সেট মেনু ও বুফে।",
@@ -61,9 +61,9 @@ export const THEME_BN: Record<string, string> = {
 export const VENDOR_TAGLINE_BN: Record<string, string> = {
   "shapla-events": "বাঙালি আবহে কনের মঞ্চ",
   "nakshi-decor": "নকশিকাঁথা ও জামদানি অনুপ্রাণিত সাজ",
-  "rangdhanu-decor": "উত্তরবঙ্গের প্রিয় বিয়ের ডেকোরেটর",
+  "rangdhanu-decor": "উত্তরবঙ্গের প্রিয় বিবাহের ডেকোরেটর",
   "prodip-lighting": "স্মরণীয় রাতের উষ্ণ আলো",
-  "golpo-frames": "বিয়ের ডকুমেন্টারি ফিল্ম ও ছবি",
+  "golpo-frames": "বিবাহের ডকুমেন্টারি ফিল্ম ও ছবি",
   "moyna-photography": "সারা বাংলাদেশে ক্যান্ডিড গল্প",
   "chhobi-booth": "তাৎক্ষণিক প্রিন্ট, প্রপস ও ৩৬০° ভিডিও",
   "taal-sound": "সানাই থেকে ডিজে — পরিষ্কার সাউন্ড",

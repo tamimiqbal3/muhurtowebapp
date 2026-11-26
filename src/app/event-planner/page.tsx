@@ -9,7 +9,7 @@ import { Reveal } from "@/components/motion/Reveal";
 
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getT();
-  return { title: t("Event Planner"), description: t("Plan your whole event on one page: pick the occasion, details, services and food together and watch the total add up live.") };
+  return { title: t("Event Planner"), description: t("Plan your event on a single page and see the total as you choose.") };
 }
 export const dynamic = "force-dynamic";
 
@@ -24,7 +24,7 @@ export default async function EventPlannerPage() {
   ];
   return (
     <>
-      <PageHero crumbs={[{ label: t("Home"), href: "/" }, { label: t("Event Planner") }]} eyebrow={t("Event planner")} title={t("Your whole event, on one table")} description={t("Everything you can choose is laid out together — like spreading menus and brochures on a desk. Tap to pick, and the receipt adds it up as you go.")} />
+      <PageHero crumbs={[{ label: t("Home"), href: "/" }, { label: t("Event Planner") }]} eyebrow={t("Event planner")} title={t("Your whole event, on one table")} description={t("All options on one page. Select what you need and the total updates instantly.")} />
       <div className="container-x pt-12 pb-24 lg:pb-0">
         <ol className="mb-10 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {steps.map(([title, body], i) => (

@@ -1,7 +1,7 @@
 import { getT } from "@/lib/i18n/server";
-import { StageLoader } from "@/components/ui/StageLoader";
+import { EventLoader } from "@/components/ui/EventLoader";
 
 export default async function Loading() {
   const { t } = await getT();
-  return <StageLoader label={t("Setting the stage")} />;
+  return <EventLoader title={t("Preparing your event")} steps={[t("Arranging the décor"), t("Preparing the menu"), t("Setting up the lighting"), t("Booking the photographer")]} />;
 }

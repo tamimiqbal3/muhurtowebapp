@@ -62,7 +62,7 @@ export default async function ServicePage({ params }: Props) {
   };
 
   return (
-    <article className="pt-20 lg:pt-28">
+    <article className="pt-24 lg:pt-28">
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
       <div className="container-x">
         <Breadcrumbs items={[{ label: t("Home"), href: "/" }, { label: category.name, href: category.route }, { label: sub?.name ?? "", href: `/services/${category.slug}?sub=${service.subcategorySlug}` }, { label: service.name }]} />

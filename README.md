@@ -169,8 +169,8 @@ English is the default. The toggle in the navbar (and the mobile menu) sets the 
 The site is edited like a motion-graphics film:
 
 - **Hero**: a contained feature frame that opens with an iris-style reveal, cross-fading photos with a slow push-in and pointer parallax, and a progress indicator per photo. Below it, occasion cards each loop through their own photos and tilt in 3D under the pointer; on phones they swipe.
-- **Navigation**: on desktop a floating glass capsule that tucks away while reading; on phones and tablets only the language switch sits at the top and navigation lives in a bottom dock (logo/home, explore, raised planner button, plan, account) with a full-screen menu that opens with a circular reveal.
-- **Loading**: "Setting the stage" — garland lights switch on bulb by bulb, spotlights sweep, the curtains open on the MUHURTO mark and confetti falls (pure SVG + CSS); shown on the first visit while the page loads and on route loading.
+- **Navigation**: a floating glass header (logo, “Muhūrto”, language switch; full links on desktop) that tucks away while reading; on phones and tablets navigation lives in a bottom dock (logo/home, explore, raised planner button, plan, account) with a full-screen menu that opens with a circular reveal.
+- **Loading**: "Preparing your event" — a ring fills in four stages (décor, catering, lighting, photography); each service lights up as it is arranged, with a status line underneath (pure SVG + CSS). Shown on the first visit and on route loading.
 - **Scenes**: homepage sections push in from a tilted, smaller frame and settle back as they leave, so sections cut together like shots. Chapters are revealed by wipes with image drift against the scroll.
 - **Wedding**: palace doors swing open onto the wedding scene, light spills through the gap, and the doors close again at the end of the scene.
 - **Page transitions**: a film cut — the frame shutters to black and opens on the next page; every page opens on a graded title card with grain and a light streak.

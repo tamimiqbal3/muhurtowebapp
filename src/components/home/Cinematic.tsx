@@ -29,10 +29,10 @@ export function AboutInvitation() {
   const backY = useTransform(scrollYProgress, [0, 1], ["6%", "-6%"]);
   const frontY = useTransform(scrollYProgress, [0, 1], ["18%", "-14%"]);
   const points = [
-    { t: t("Verified vendors"), b: t("Every decorator, caterer, photographer and sound team is checked for quality, reliability and fair pricing before listing.") },
-    { t: t("Clear prices"), b: t("Starting prices on every service and one 2% platform fee at checkout — nothing hidden.") },
-    { t: t("One agent on the day"), b: t("After payment a Monitoring Agent coordinates every vendor, so you can be a guest at your own event.") },
-    { t: t("Help in Bangla or English"), b: t("Real people answer before, during and after your event.") },
+    { t: t("Verified vendors"), b: t("Each partner is reviewed for quality and fair pricing.") },
+    { t: t("Clear prices"), b: t("Published prices and a single 2% platform fee.") },
+    { t: t("One agent on the day"), b: t("A Monitoring Agent coordinates every vendor for you.") },
+    { t: t("Help in Bangla or English"), b: t("Dedicated support before, during and after your event.") },
   ];
   return (
     <section id="about" className="container-x scroll-mt-24 pt-20 sm:pt-24">
@@ -78,8 +78,8 @@ export function AboutInvitation() {
           <Reveal><p className="eyebrow">{t("About")}</p></Reveal>
           <h2 className="mt-3 text-4xl leading-[1.05] sm:text-5xl"><SplitWords text={t("Moments, managed with heart.")} /></h2>
           <Reveal delay={0.1}>
-            <p className="mt-5 text-ink-soft">{t("MUHURTO is a Bangladeshi event marketplace. One place to explore trusted vendors, plan everything on one page, book securely — and hand the running of the day to a dedicated Monitoring Agent.")}</p>
-            <p className="mt-3 text-ink-soft">{t("We plan weddings, gaye holud, birthdays, corporate events, family gatherings and food — from a small aqiqah at home to a 1,000-guest reception.")}</p>
+            <p className="mt-5 text-ink-soft">{t("MUHURTO is an event management platform for Bangladesh. Plan, book and pay in one place, with a dedicated Monitoring Agent on the day.")}</p>
+            <p className="mt-3 text-ink-soft">{t("We manage weddings, birthdays, corporate events, family occasions and catering of every size.")}</p>
           </Reveal>
           <ul className="mt-8 grid gap-x-8 gap-y-5 sm:grid-cols-2">
             {points.map((p, i) => (
@@ -103,9 +103,9 @@ export function AboutInvitation() {
 export function Polaroids() {
   const { t } = useLang();
   const items = [
-    { img: IMG.wStageVibrant, title: t("Discover"), body: t("Hand-picked decorators, caterers, photographers and sound teams across Bangladesh — with starting prices upfront.") },
-    { img: IMG.fuSpicy, title: t("Design"), body: t("Mix and match services, quantities, themes and add-ons. Ask our team for anything we don't list.") },
-    { img: IMG.fGarland, title: t("Relax"), body: t("After payment a Monitoring Agent runs vendor coordination while you follow progress live.") },
+    { img: IMG.wStageVibrant, title: t("Discover"), body: t("Verified décor, catering, photography and sound partners, with published prices.") },
+    { img: IMG.fuSpicy, title: t("Design"), body: t("Select services, quantities and add-ons to suit your event.") },
+    { img: IMG.fGarland, title: t("Relax"), body: t("Your Monitoring Agent manages the day while you follow progress online.") },
   ];
   return (
     <section className="relative mt-24 overflow-hidden bg-[#050b1c] py-24 text-paper">
@@ -239,7 +239,7 @@ export function PlannerTeaser() {
           <Reveal><p className="eyebrow">{t("Event planner")}</p></Reveal>
           <h2 className="mt-3 text-4xl leading-[1.08] sm:text-5xl"><SplitWords text={t("Pick it all in one place.")} /></h2>
           <Reveal variant="focus" delay={0.1}>
-            <p className="mt-5 max-w-lg text-ink-soft">{t("Choose the occasion, slide your guests and budget, then tap décor, photography, lighting and food from one page. The total adds up live like a calculator — or let us suggest the best plan for your budget.")}</p>
+            <p className="mt-5 max-w-lg text-ink-soft">{t("Select the occasion, guests and budget, then choose services on a single page. The total updates as you go.")}</p>
           </Reveal>
           <Reveal variant="rise" delay={0.2}>
             <div className="mt-8 flex flex-wrap gap-3">
@@ -321,7 +321,7 @@ export function WeddingDoors() {
           <motion.div style={{ opacity: reveal, y: contentY }} className="container-x relative flex h-full flex-col justify-center text-paper">
             <p className="eyebrow text-paper/70">{wedding.name}</p>
             <h2 className="mt-3 max-w-2xl text-5xl leading-[1.05] text-paper sm:text-6xl">{t("Weddings, the Bangladeshi way.")}</h2>
-            <p className="mt-5 max-w-xl text-paper/80">{t("Gaye holud marigolds, akdh, reception stages and bou bhat — décor, seating, lighting, photography, photo booths and sound, planned as one story and run by one agent.")}</p>
+            <p className="mt-5 max-w-xl text-paper/80">{t("Gaye holud, akdh, reception and bou bhat — planned together and managed by one agent.")}</p>
             <ul className="mt-6 flex max-w-xl flex-wrap gap-2">
               {wedding.subcategories.map((s) => <li key={s.slug} className="rounded-full border border-paper/25 bg-paper/10 px-3 py-1 text-xs backdrop-blur">{s.name}</li>)}
             </ul>
@@ -412,7 +412,7 @@ export function ClosingInvite() {
           <div>
             <p className="eyebrow text-paper/70">{t("Ready when you are")}</p>
             <h2 className="mt-3 text-4xl text-paper sm:text-5xl">{t("Let's plan your moment.")}</h2>
-            <p className="mt-4 max-w-xl text-paper/80">{t("Browse each category for full listings, reviews and prices, or start with the planner and let it suggest a combination.")}</p>
+            <p className="mt-4 max-w-xl text-paper/80">{t("Browse our services or use the planner to build your event.")}</p>
           </div>
           <div className="flex flex-wrap gap-3 lg:justify-end">
             <ButtonLink href="/event-planner" variant="light" size="lg">{t("Open the planner")}</ButtonLink>

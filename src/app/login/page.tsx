@@ -19,7 +19,7 @@ export default async function Page() {
         <div className="absolute inset-0 bg-gradient-to-t from-ink/80 via-ink/20 to-transparent" />
         <p className="absolute bottom-12 left-12 max-w-sm font-display text-4xl leading-tight text-paper">{t("Every moment deserves to be extraordinary.")}</p>
       </div>
-      <div className="flex items-center justify-center px-5 pb-16 pt-20 lg:pt-28">
+      <div className="flex items-center justify-center px-5 pb-16 pt-24 lg:pt-28">
         <Suspense fallback={null}><AuthForm mode="login" /></Suspense>
       </div>
     </div>

@@ -16,7 +16,7 @@ export function Shell({ title, subtitle, links, children }: { title: string; sub
   const pathname = usePathname();
   const t = useT();
   return (
-    <div className="container-x pt-20 lg:pt-28">
+    <div className="container-x pt-24 lg:pt-28">
       <div className="mb-8">
         <p className="eyebrow">{subtitle}</p>
         <h1 className="mt-1 text-4xl sm:text-5xl">{title}</h1>
