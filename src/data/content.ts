@@ -4,7 +4,7 @@ import { IMG } from "./images";
 
 // DEMO DATA — illustrative testimonials and reviews, clearly labelled in the UI.
 export const TESTIMONIALS = [
-  { name: "Nusrat & Tanvir", city: "Dhaka", event: "Wedding · 450 guests", quote: "We booked décor, kacchi and photography in one place, and our monitoring agent handled every vendor call on the day. Our families actually got to enjoy the holud." },
+  { name: "Nusrat & Tanvir", city: "Dhaka", event: "Wedding · 450 guests", quote: "We booked décor, kacchi and photography in one place, and our coordinator handled every vendor call on the day. Our families actually got to enjoy the holud." },
   { name: "Farhana Akter", city: "Uttara", event: "First birthday", quote: "The balloon setup and photo booth were exactly what we picked online. Seeing the vendor progress on the dashboard made the week before so much calmer." },
   { name: "Rezaul Karim", city: "Gulshan", event: "Corporate seminar · 220 people", quote: "Transparent pricing with the 2% fee shown upfront. Sound, seating and the cha station all arrived on time — our agent sent updates every hour." },
   { name: "Sharmin Sultana", city: "Bashundhara R/A", event: "Parents' 40th anniversary", quote: "The Rabindra Sangeet evening and the family film made my mother cry happy tears. Everything felt personal, not packaged." },
@@ -30,7 +30,7 @@ export const GALLERY = [
   { ...IMG.fuSpicy, label: "Live fuchka", span: "" },
   { ...IMG.wStageVibrant, label: "Mehendi décor", span: "" },
   { ...IMG.eStageBlue, label: "Conference stage", span: "wide" },
-  { ...IMG.chaPour, label: "Cha station", span: "" },
+  { ...IMG.dTableCandles, label: "Candlelit dinner", span: "" },
   { ...IMG.dPinkParty, label: "Birthday setup", span: "tall" },
   { ...IMG.dFairyCorridor, label: "Evening lights", span: "" },
   { ...IMG.dBanquetChandelier, label: "Banquet hall", span: "wide" },
@@ -38,7 +38,7 @@ export const GALLERY = [
 ] as const;
 
 export const FAQS = [
-  { q: "How does MUHURTO pricing work?", a: "Every service shows its price for 50 guests. Your total is the sum of the services you choose — each billed for every started block of 50 guests — plus a 2% platform fee shown before you pay." },
+  { q: "How does MUHURTO pricing work?", a: "Food and seating are priced per person. Décor, lighting, photography, photo booths and sound show a price for every 50 guests. Your total is the sum of the services you choose, plus a 2% platform fee shown before you pay." },
   { q: "Which areas do you serve?", a: "MUHURTO is based in Dhaka and works only within Dhaka. All our partners, venues and service providers are in Dhaka, and you can choose your event area from the list when booking." },
   { q: "Which payment methods are supported?", a: "All SSLCOMMERZ methods: bKash, Nagad, Rocket, Upay and other mobile wallets, Visa, Mastercard, American Express and UnionPay cards, and internet banking from major banks. You receive an invoice as soon as the payment is confirmed." },
   { q: "How does the Event Planner work?", a: "The Event Planner is a planning assistant. Tell it the occasion, number of guests, budget, date and area, choose the services you need, and it builds a priced plan from our catalogue that you can book in one step." },
@@ -49,7 +49,7 @@ export const FAQS = [
 ];
 
 export const STEPS = [
-  { n: "01", title: "Explore Services", body: "Browse verified Dhaka partners for décor, food, photography and sound, with prices for every 50 guests." },
+  { n: "01", title: "Explore Services", body: "Browse verified Dhaka partners for décor, food, photography and sound, with clear published prices." },
   { n: "02", title: "Plan Your Event", body: "Talk to our planning assistant or choose services yourself, with options and add-ons." },
   { n: "03", title: "Confirm & Pay", body: "Pay securely through SSLCOMMERZ by mobile banking, card or internet banking, and receive your invoice." },
   { n: "04", title: "Enjoy Your Moment", body: "A dedicated coordinator manages every vendor while you follow progress from your dashboard." },
@@ -65,7 +65,7 @@ const TESTIMONIALS_BN = [
 ];
 
 const FAQS_BN = [
-  { q: "মুহূর্তে মূল্য কীভাবে নির্ধারিত হয়?", a: "প্রতিটি সেবার মূল্য ৫০ জন অতিথির জন্য দেখানো থাকে। আপনার বেছে নেওয়া সেবাগুলোর মোট মূল্য — প্রতি ৫০ জনের প্রতিটি শুরু হওয়া ব্লক হিসেবে — এবং পেমেন্টের আগে দেখানো ২% প্ল্যাটফর্ম ফি মিলে মোট খরচ।" },
+  { q: "মুহূর্তে মূল্য কীভাবে নির্ধারিত হয়?", a: "খাবার ও আসনের মূল্য জনপ্রতি। সাজসজ্জা, আলোকসজ্জা, ফটোগ্রাফি, ফটো বুথ ও সাউন্ডের মূল্য প্রতি ৫০ জন অতিথির হিসাবে। আপনার বেছে নেওয়া সেবাগুলোর মোট মূল্য এবং পেমেন্টের আগে দেখানো ২% প্ল্যাটফর্ম ফি মিলে মোট খরচ।" },
   { q: "আপনারা কোন কোন এলাকায় সেবা দেন?", a: "মুহূর্ত ঢাকাভিত্তিক এবং শুধু ঢাকার মধ্যেই কাজ করে। আমাদের সব পার্টনার, ভেন্যু ও সেবাদাতা ঢাকায়; বুকিংয়ের সময় তালিকা থেকে অনুষ্ঠানের এলাকা বেছে নিতে পারবেন।" },
   { q: "কোন কোন পেমেন্ট পদ্ধতি চলে?", a: "এসএসএলকমার্জের সব পদ্ধতি: বিকাশ, নগদ, রকেট, উপায়সহ অন্যান্য মোবাইল ওয়ালেট; ভিসা, মাস্টারকার্ড, আমেরিকান এক্সপ্রেস ও ইউনিয়নপে কার্ড; এবং প্রধান ব্যাংকগুলোর ইন্টারনেট ব্যাংকিং। পেমেন্ট নিশ্চিত হওয়ামাত্র ইনভয়েস পাবেন।" },
   { q: "ইভেন্ট প্ল্যানার কীভাবে কাজ করে?", a: "ইভেন্ট প্ল্যানার একটি পরিকল্পনা সহকারী। অনুষ্ঠানের ধরন, অতিথির সংখ্যা, বাজেট, তারিখ ও এলাকা জানান, প্রয়োজনীয় সেবা বেছে নিন — এটি আমাদের ক্যাটালগ থেকে মূল্যসহ পরিকল্পনা তৈরি করবে, যা এক ধাপে বুক করা যায়।" },
@@ -76,7 +76,7 @@ const FAQS_BN = [
 ];
 
 const STEPS_BN = [
-  { n: "০১", title: "সেবা অনুসন্ধান করুন", body: "সাজসজ্জা, খাবার, ফটোগ্রাফি ও সাউন্ডের জন্য ঢাকার যাচাইকৃত পার্টনার দেখুন, প্রতি ৫০ জন অতিথির মূল্যসহ।" },
+  { n: "০১", title: "সেবা অনুসন্ধান করুন", body: "সাজসজ্জা, খাবার, ফটোগ্রাফি ও সাউন্ডের জন্য ঢাকার যাচাইকৃত পার্টনার দেখুন, স্পষ্ট প্রকাশিত মূল্যসহ।" },
   { n: "০২", title: "অনুষ্ঠান পরিকল্পনা করুন", body: "আমাদের পরিকল্পনা সহকারীর সঙ্গে কথা বলুন অথবা নিজেই অপশন ও অ্যাড-অনসহ সেবা বেছে নিন।" },
   { n: "০৩", title: "নিশ্চিত করুন ও পেমেন্ট দিন", body: "মোবাইল ব্যাংকিং, কার্ড বা ইন্টারনেট ব্যাংকিংয়ের মাধ্যমে এসএসএলকমার্জে নিরাপদে পেমেন্ট দিন এবং ইনভয়েস নিন।" },
   { n: "০৪", title: "মুহূর্তটি উপভোগ করুন", body: "একজন নিবেদিত সমন্বয়ক সব সেবাদাতা পরিচালনা করবেন, আর আপনি ড্যাশবোর্ড থেকে অগ্রগতি দেখবেন।" },
@@ -84,7 +84,7 @@ const STEPS_BN = [
 
 const GALLERY_LABEL_BN: Record<string, string> = {
   "Reception stage": "রিসেপশন মঞ্চ", "Mehendi décor": "মেহেদির সাজসজ্জা", "Conference stage": "কনফারেন্স মঞ্চ", "Birthday setup": "জন্মদিনের সাজ", "Evening lights": "সন্ধ্যার আলো", "Live fuchka": "লাইভ ফুচকা", "Mehendi details": "মেহেদির কারুকাজ", "Conference keynote": "কনফারেন্সের কিনোট",
-  "Cha station": "চায়ের স্টেশন", "Birthday sparkle": "জন্মদিনের ঝলক", "Family evening": "পারিবারিক সন্ধ্যা", "Banquet hall": "ব্যাংকুয়েট হল", "Wedding buffet": "বিবাহের বুফে",
+  "Candlelit dinner": "মোমবাতির আলোয় ডিনার", "Birthday sparkle": "জন্মদিনের ঝলক", "Family evening": "পারিবারিক সন্ধ্যা", "Banquet hall": "ব্যাংকুয়েট হল", "Wedding buffet": "বিবাহের বুফে",
 };
 
 export const getTestimonials = (lang: Lang) => (lang === "bn" ? TESTIMONIALS_BN : TESTIMONIALS);

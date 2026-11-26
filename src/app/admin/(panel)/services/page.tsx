@@ -36,7 +36,7 @@ export default function AdminServices() {
     const short = s.shortDescription.trim();
     upsert("services", {
       ...s, id, name: s.name.trim(), shortDescription: short, description: s.description.trim() || short,
-      descriptionBn: (s.descriptionBn ?? "").trim() || s.shortDescriptionBn, minQuantity: s.unit === "per50" ? 50 : Math.max(1, s.minQuantity),
+      descriptionBn: (s.descriptionBn ?? "").trim() || s.shortDescriptionBn, minQuantity: s.unit === "per50" ? 50 : s.unit === "guest" ? Math.max(1, s.minQuantity || 25) : Math.max(1, s.minQuantity),
       includes: lines(edit.inc), includesBn: lines(edit.incBn), tags: edit.tags.split(",").map((x) => x.trim()).filter(Boolean),
       options: s.options.filter((o) => o.label.trim()).map((o) => ({ ...o, id: o.id || uid("opt") })),
       images: s.images.filter((i) => i.src).slice(0, 1).map((i) => ({ src: i.src, alt: s.name })),
@@ -48,7 +48,7 @@ export default function AdminServices() {
   const editCat = edit ? catOf(edit.s.categorySlug) : undefined;
   return (
     <>
-      <PageHead title="Services & packages" subtitle={`${data.services.length} items · prices are per 50 guests unless set otherwise.`} actions={<Btn onClick={() => { const c = data.categories[0]; open(blank(cat || c?.slug || "", sub || c?.subcategories[0]?.slug || "", data.vendors[0]?.id ?? ""), true); }}><Plus className="h-4 w-4" /> New service</Btn>} />
+      <PageHead title="Services & packages" subtitle={`${data.services.length} items · food and seating are priced per person, other services per 50 guests.`} actions={<Btn onClick={() => { const c = data.categories[0]; open(blank(cat || c?.slug || "", sub || c?.subcategories[0]?.slug || "", data.vendors[0]?.id ?? ""), true); }}><Plus className="h-4 w-4" /> New service</Btn>} />
       <div className="mb-4 grid gap-3 sm:grid-cols-3">
         <select className="field" value={cat} onChange={(e) => { setCat(e.target.value); setSub(""); }}><option value="">All categories</option>{data.categories.map((c) => <option key={c.slug} value={c.slug}>{c.name}</option>)}</select>
         <select className="field" value={sub} onChange={(e) => setSub(e.target.value)} disabled={!cat}><option value="">All subcategories</option>{catOf(cat)?.subcategories.map((s) => <option key={s.slug} value={s.slug}>{s.name}</option>)}</select>
@@ -65,7 +65,7 @@ export default function AdminServices() {
                 <span className="min-w-0"><span className="block font-semibold">{s.name}</span><span className="block text-xs text-muted">{s.nameBn}</span></span>
               </div></td>
               <td className="px-4 py-3 text-xs">{c?.name ?? s.categorySlug}<br /><span className="text-muted">{c?.subcategories.find((x) => x.slug === s.subcategorySlug)?.name ?? s.subcategorySlug}</span></td>
-              <td className="px-4 py-3 whitespace-nowrap">{bdt(s.startingPrice)}<span className="block text-xs text-muted">{s.unit === "per50" ? "per 50 guests" : `per ${s.unit}`}</span></td>
+              <td className="px-4 py-3 whitespace-nowrap">{bdt(s.startingPrice)}<span className="block text-xs text-muted">{s.unit === "per50" ? "per 50 guests" : s.unit === "guest" ? "per person" : `per ${s.unit}`}</span></td>
               <td className="px-4 py-3"><button onClick={() => upsert("services", { ...s, active: s.active === false })}>{s.active === false ? <Pill>Hidden</Pill> : <Pill tone="success">Live</Pill>}</button>{s.featured && <span className="ml-1"><Pill tone="brand">Featured</Pill></span>}</td>
               <td className="px-4 py-3"><div className="flex justify-end gap-1">
                 <Btn variant="ghost" onClick={() => open(s, false)}><Pencil className="h-4 w-4" /></Btn>
@@ -87,7 +87,7 @@ export default function AdminServices() {
               <Field label="Name (English)"><input className="field" value={edit.s.name} onChange={(e) => setS({ name: e.target.value })} /></Field>
               <Field label="Name (Bangla)"><input className="field" value={edit.s.nameBn ?? ""} onChange={(e) => setS({ nameBn: e.target.value })} /></Field>
               <Field label="Price (৳)"><input className="field" type="number" min={1} value={edit.s.startingPrice} onChange={(e) => setS({ startingPrice: Math.max(0, Number(e.target.value)) })} /></Field>
-              <Field label="Pricing basis"><select className="field" value={edit.s.unit} onChange={(e) => setS({ unit: e.target.value as PriceUnit })}><option value="per50">Per 50 guests</option><option value="event">Per event (flat)</option></select></Field>
+              <Field label="Pricing basis"><select className="field" value={edit.s.unit} onChange={(e) => setS({ unit: e.target.value as PriceUnit })}><option value="guest">Per person</option><option value="per50">Per 50 guests</option><option value="event">Per event (flat)</option></select></Field>
               <Field label="Vendor"><select className="field" value={edit.s.vendorId} onChange={(e) => setS({ vendorId: e.target.value })}>{data.vendors.map((v) => <option key={v.id} value={v.id}>{v.name}</option>)}</select></Field>
               <Field label="Visibility"><div className="flex h-12 items-center gap-5 text-sm">
                 <label className="inline-flex items-center gap-2"><input type="checkbox" checked={edit.s.active !== false} onChange={(e) => setS({ active: e.target.checked })} /> Live</label>

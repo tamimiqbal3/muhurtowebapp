@@ -92,7 +92,7 @@ export function Invoice({ bookingId }: { bookingId: string }) {
                   <tr key={l.serviceId}>
                     <td className="py-3 pr-3"><p className="font-medium">{l.serviceName}</p>{l.optionLabels.length > 0 && <p className="text-xs text-muted">{l.optionLabels.join(", ")}</p>}</td>
                     <td className="py-3 pr-3">{l.quantity}</td>
-                    <td className="py-3 pr-3 text-right whitespace-nowrap">{formatBDT(l.unitPrice)}{l.unit === "per50" && <span className="block text-xs text-muted">× {blocksOf50(l.quantity)} · {t("per 50 guests")}</span>}</td>
+                    <td className="py-3 pr-3 text-right whitespace-nowrap">{formatBDT(l.unitPrice)}{l.unit === "per50" ? <span className="block text-xs text-muted">× {blocksOf50(l.quantity)} · {t("per 50 guests")}</span> : l.unit === "guest" ? <span className="block text-xs text-muted">{t("per person")}</span> : null}</td>
                     <td className="py-3 text-right font-medium whitespace-nowrap">{formatBDT(l.lineTotal)}</td>
                   </tr>
                 ))}

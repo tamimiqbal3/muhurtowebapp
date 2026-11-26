@@ -30,7 +30,7 @@ export function AboutInvitation() {
   const bn = lang === "bn";
   const points = [
     { t: t("Verified Dhaka partners"), b: t("Each partner is reviewed for quality and fair pricing.") },
-    { t: t("Prices for every 50 guests"), b: t("Clear, published prices and a single 2% platform fee.") },
+    { t: t("Clear, published prices"), b: t("Food and seating per person, other services per 50 guests, plus one 2% platform fee.") },
     { t: t("One coordinator on the day"), b: t("A dedicated coordinator manages every vendor for you.") },
     { t: t("Help in Bangla or English"), b: t("Dedicated support before, during and after your event.") },
   ];
@@ -76,7 +76,7 @@ export function Polaroids() {
   const { t } = useLang();
   const items = [
     { img: IMG.wStageVibrant, title: t("Discover"), body: t("Verified décor, catering, photography and sound partners, with published prices.") },
-    { img: IMG.dBanquetChandelier, title: t("Design"), body: t("Plan with our assistant or choose services yourself — prices are shown for every 50 guests.") },
+    { img: IMG.dBanquetChandelier, title: t("Design"), body: t("Plan with our assistant or choose services yourself, with clear published prices.") },
     { img: IMG.dReceptionFloral, title: t("Relax"), body: t("Your coordinator manages the day while you follow progress online.") },
   ];
   return (
@@ -217,7 +217,7 @@ export function PlannerTeaser() {
         </div>
         <div className="relative mx-auto w-full max-w-md [perspective:1400px]">
           <motion.div style={{ rotateX, y, scale, transformOrigin: "50% 100%" }} className="rounded-[28px] bg-paper p-5 shadow-[0_40px_70px_-30px_rgb(1_95_255/.55)] ring-1 ring-line">
-            <p className="font-display text-xl">{t("Your event, priced for every 50 guests")}</p>
+            <p className="font-display text-xl">{t("Your event, clearly priced")}</p>
             <ul className="mt-4 grid grid-cols-2 gap-2.5" aria-hidden>
               {demo.map((d, i) => {
                 const picked = i < on;
@@ -374,7 +374,7 @@ export function ClosingInvite() {
   const { t } = useLang();
   return (
     <section className="container-x pt-28">
-      <Reveal variant="unfold" className="relative overflow-hidden rounded-[2rem] bg-sindoor px-8 py-16 text-paper sm:px-14">
+      <div className="relative overflow-hidden rounded-[2rem] bg-brand-gradient px-8 py-14 text-paper sm:px-14">
         <div className="relative grid items-center gap-8 lg:grid-cols-[1.4fr_1fr]">
           <div>
             <p className="eyebrow text-paper/70">{t("Ready when you are")}</p>
@@ -386,7 +386,7 @@ export function ClosingInvite() {
             <ButtonLink href="/about" variant="outline" size="lg" className="border-paper/40 text-paper hover:border-paper hover:bg-paper hover:text-sindoor">{t("How it works")}</ButtonLink>
           </div>
         </div>
-      </Reveal>
+      </div>
     </section>
   );
 }

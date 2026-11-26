@@ -11,7 +11,7 @@ import { localizeCategory } from "@/data/i18n-data";
 import { emptyRequirements, parseRequirementsFallback } from "@/lib/planner/parse";
 import { recommendByRules } from "@/lib/planner/recommend";
 import { DEFAULT_SUBS, EVENT_SUBS, FOOD_SUBS, SUB_LABELS } from "@/lib/planner/constants";
-import { blocksOf50, computeBreakdown, lineAmount } from "@/lib/pricing";
+import { blocksOf50, computeBreakdown, lineAmount, priceSuffix } from "@/lib/pricing";
 import { formatBDT, formatDate } from "@/lib/format";
 import type { PlannerRequirements } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -80,7 +80,7 @@ export function PlannerChat() {
   function question(s: Step, d: Draft): string {
     switch (s) {
       case "occasion": return t("What are you celebrating?");
-      case "guests": return t("How many guests are you expecting? Prices are calculated for every 50 guests.");
+      case "guests": return t("How many guests are you expecting?");
       case "budget": return t("What is your overall budget? I will keep the plan within it.");
       case "date": return t("When is the event? Pick a date, or tell me if it is not decided yet.");
       case "area": return t("Which area of Dhaka will it be in?");
@@ -197,7 +197,7 @@ export function PlannerChat() {
   }
   function pickGuests(n: number) {
     userSays(t("{n} guests", { n }));
-    advance({ ...draft, guests: n }, t("{n} guests — that is {b} blocks of 50 for pricing.", { n, b: blocksOf50(n) }));
+    advance({ ...draft, guests: n }, t("{n} guests — noted.", { n }));
   }
   function pickBudget(label: string, v: number | null) {
     userSays(t(label));
@@ -311,7 +311,7 @@ export function PlannerChat() {
                 <li key={s.id} className="flex items-start gap-3 py-3">
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-semibold">{lang === "bn" ? s.nameBn || s.name : s.name}</p>
-                    <p className="text-xs text-muted">{subLabel(s.subcategorySlug)} · {formatBDT(s.startingPrice)} {t("per 50 guests")} × {blocksOf50(q)}</p>
+                    <p className="text-xs text-muted">{subLabel(s.subcategorySlug)} · {formatBDT(s.startingPrice)} {t(priceSuffix(s.unit))} × {s.unit === "per50" ? blocksOf50(q) : q}</p>
                   </div>
                   <p className="shrink-0 text-sm font-semibold">{formatBDT(total)}</p>
                   <button aria-label={t("Remove")} onClick={() => setLines((ls) => (ls ?? []).filter((x) => x.serviceId !== s.id))} className="grid h-7 w-7 shrink-0 place-items-center rounded-full text-muted hover:bg-sand hover:text-danger"><X className="h-4 w-4" /></button>

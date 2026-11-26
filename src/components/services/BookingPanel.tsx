@@ -28,7 +28,7 @@ export function BookingPanel({ service }: { service: Service }) {
       <p className="font-display text-4xl font-semibold">
         {formatBDT(service.startingPrice)} <span className="font-sans text-sm font-normal text-muted">{t(priceSuffix(service.unit))}</span>
       </p>
-      {service.unit === "per50" ? <p className="mt-1 text-xs text-muted">{t("Billed for every 50 guests (rounded up).")}</p> : service.minQuantity > 1 && <p className="mt-1 text-xs text-muted">{t("Minimum {n} {unit}", { n: service.minQuantity, unit: t(unitLabel(service.unit, service.minQuantity)) })}</p>}
+      {service.unit === "per50" ? <p className="mt-1 text-xs text-muted">{t("Billed for every 50 guests (rounded up).")}</p> : service.unit === "guest" ? <p className="mt-1 text-xs text-muted">{t("Priced per person — the total follows your guest count.")}</p> : service.minQuantity > 1 && <p className="mt-1 text-xs text-muted">{t("Minimum {n} {unit}", { n: service.minQuantity, unit: t(unitLabel(service.unit, service.minQuantity)) })}</p>}
 
       {service.options.length > 0 && (
         <fieldset className="mt-6">
@@ -50,7 +50,7 @@ export function BookingPanel({ service }: { service: Service }) {
       )}
 
       <div className="mt-6">
-        <p className="mb-2 text-sm font-semibold">{service.unit === "per50" ? t("Number of guests") : t("Quantity")}</p>
+        <p className="mb-2 text-sm font-semibold">{service.unit === "per50" || service.unit === "guest" ? t("Number of guests") : t("Quantity")}</p>
         <QuantityInput value={qty} min={service.minQuantity} unit={service.unit} onChange={setQty} />
       </div>
 

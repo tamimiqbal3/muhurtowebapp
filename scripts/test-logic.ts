@@ -76,13 +76,14 @@ test("prices from catalogue, ignores client prices, enforces min qty & options",
   assert.equal(r.lines[0].unitPrice, 32000 + 4000);
   assert.deepEqual(r.lines[0].optionIds, ["fresh-flowers"]);
   assert.equal(r.lines[0].quantity, 50, "min 50 guests enforced");
-  assert.equal(r.lines[1].quantity, 50, "min quantity enforced");
-  assert.equal(r.pricing.subtotal, 36000 + 35000);
+  assert.equal(r.lines[1].quantity, 25, "min quantity enforced");
+  assert.equal(r.pricing.subtotal, 36000 + 700 * 25);
   assert.equal(r.pricing.platformFee, Math.round(r.pricing.subtotal * 0.02));
   assert.equal(r.errors.length, 1);
 });
 test("per-50-guest pricing: quantity is the guest count, billed in blocks of 50", () => {
   assert.equal(suggestedQuantity(svc("food-cha-milk")!, 400), 400);
+  assert.equal(priceItems([{ serviceId: "food-platter-kacchi", quantity: 120, optionIds: [] }], svc, getVendor).lines[0].lineTotal, 700 * 120, "per person");
   assert.equal(suggestedQuantity(svc("wed-decor-rajkiya")!, 40), 50);
   const r = priceItems([{ serviceId: "wed-decor-rajkiya", quantity: 120, optionIds: [] }], svc, getVendor);
   assert.equal(r.lines[0].lineTotal, 32000 * 3, "120 guests = 3 blocks");
@@ -92,7 +93,9 @@ test("every subcategory has at least five items, all in Dhaka", () => {
     const n = SERVICES.filter((s) => s.categorySlug === c.slug && s.subcategorySlug === sub.slug).length;
     assert.ok(n >= 5, `${c.slug}/${sub.slug} has ${n}`);
   }
-  assert.ok(SERVICES.every((s) => s.city === "Dhaka" && s.unit === "per50" && s.images.length === 1));
+  assert.ok(SERVICES.every((s) => s.city === "Dhaka" && s.images.length === 1));
+  assert.ok(SERVICES.filter((s) => s.categorySlug === "food-culinary" || s.subcategorySlug === "sitting-area").every((s) => s.unit === "guest"), "food and seating per person");
+  assert.equal(svc("food-platter-kacchi")!.startingPrice, 700);
 });
 
 console.log("Search");

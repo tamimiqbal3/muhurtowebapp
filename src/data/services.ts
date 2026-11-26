@@ -3,7 +3,8 @@ import { IMG } from "./images";
 
 /*
  * MUHURTO launch catalogue — Dhaka only.
- * Every price is for 50 guests (unit "per50"): an event for 120 guests is billed as 3 × the listed price.
+ * Food and seating are priced per person (unit "guest"): 120 guests = 120 × the listed price.
+ * Everything else is priced for 50 guests (unit "per50"): 120 guests is billed as 3 × the listed price.
  * Price levels follow published Dhaka market ranges (catering ≈ Tk650–4,000 per person, décor packages from
  * Tk7,000, photography packages from Tk30,000 per event) and are kept at the affordable end.
  * Admins can edit, add or remove any item from Admin → Services.
@@ -44,22 +45,32 @@ type Row = [
 const DESC_EN = "Priced for every 50 guests and delivered by a verified Dhaka partner. Setup, on-site coordination and teardown are included.";
 const DESC_BN = "প্রতি ৫০ জন অতিথির জন্য মূল্য নির্ধারিত; ঢাকার যাচাইকৃত পার্টনার সেবাটি প্রদান করবে। সেটআপ, অনুষ্ঠানস্থলে সমন্বয় ও গুছিয়ে নেওয়া অন্তর্ভুক্ত।";
 
+const DESC_PP_EN = "Priced per person and delivered by a verified Dhaka partner. Setup, on-site coordination and teardown are included.";
+const DESC_PP_BN = "জনপ্রতি মূল্য নির্ধারিত; ঢাকার যাচাইকৃত পার্টনার সেবাটি প্রদান করবে। সেটআপ, অনুষ্ঠানস্থলে সমন্বয় ও গুছিয়ে নেওয়া অন্তর্ভুক্ত।";
+
+/** Food and stage/guest seating are charged per person; the table prices above are written for 50 guests. */
+const isPerPerson = (cat: string, sub: string) => cat === "food-culinary" || sub === "sitting-area";
+const pp = (n: number) => Math.max(10, Math.round(n / 50 / 5) * 5);
+
 const DHAKA_AREAS = ["Dhaka"];
 
 function build(cat: string, rows: Row[], seed: number): Service[] {
-  return rows.map(([id, sub, name, nameBn, short, shortBn, price, image, includes, includesBn, tags, featured, vendor], i) => ({
+  return rows.map(([id, sub, name, nameBn, short, shortBn, price, image, includes, includesBn, tags, featured, vendor], i) => {
+    const person = isPerPerson(cat, sub);
+    return {
     id, categorySlug: cat, subcategorySlug: sub,
     name, nameBn, shortDescription: short, shortDescriptionBn: shortBn,
-    description: `${short} ${DESC_EN}`, descriptionBn: `${shortBn} ${DESC_BN}`,
-    startingPrice: price, unit: "per50", minQuantity: 50,
+    description: `${short} ${person ? DESC_PP_EN : DESC_EN}`, descriptionBn: `${shortBn} ${person ? DESC_PP_BN : DESC_BN}`,
+    startingPrice: person ? pp(price) : price, unit: person ? ("guest" as const) : ("per50" as const), minQuantity: person ? 25 : 50,
     vendorId: vendor ?? VENDOR[cat][sub], city: "Dhaka", serviceAreas: DHAKA_AREAS,
     images: [image],
-    options: (OPTS[sub] ?? []).map(([oid, label, labelBn, priceDelta]) => ({ id: oid, label, labelBn, priceDelta })),
+    options: (OPTS[sub] ?? []).map(([oid, label, labelBn, priceDelta]) => ({ id: oid, label, labelBn, priceDelta: person ? pp(priceDelta) : priceDelta })),
     themes: [], includes, includesBn,
     rating: Math.round((4.5 + ((seed + i * 7) % 5) / 10) * 10) / 10,
     reviewCount: 18 + ((seed * 13 + i * 29) % 140),
     tags, featured: featured ?? false, active: true, isDemo: false,
-  }));
+  };
+  });
 }
 
 /* ═════════════ WEDDING ═════════════ */
@@ -72,8 +83,8 @@ const WEDDING: Row[] = [
   ["wed-decor-walima", "decor", "White & Gold Walima Stage", "সাদা-সোনালি ওয়ালিমা মঞ্চ", "An elegant white sofa stage with gold accents and fresh florals for the walima.", "ওয়ালিমার জন্য সোনালি ছোঁয়া ও তাজা ফুলসহ মার্জিত সাদা সোফা মঞ্চ।", 24000, IMG.wSofaWhite, ["Stage and sofa", "Gold backdrop", "Fresh florals", "Setup and teardown"], ["মঞ্চ ও সোফা", "সোনালি ব্যাকড্রপ", "তাজা ফুল", "সেটআপ ও গুছিয়ে নেওয়া"], ["walima", "white", "gold"]],
 
   ["wed-seat-royal", "sitting-area", "Royal Bridal Lounge", "রাজকীয় ব্রাইডাল লাউঞ্জ", "Carved seating and floral side tables for the couple and close family.", "বর-কনে ও কাছের পরিবারের জন্য কারুকাজ করা আসন ও ফুলেল সাইড টেবিল।", 9000, IMG.wSeatOrnate, ["Carved seating", "Side tables", "Cushions", "Delivery and setup"], ["কারুকাজ করা আসন", "সাইড টেবিল", "কুশন", "ডেলিভারি ও সেটআপ"], ["lounge", "bridal"], true],
-  ["wed-seat-chiavari", "sitting-area", "Chiavari Guest Seating", "শিয়াভারি অতিথি আসন", "Gold chiavari chairs with cushions arranged for the ceremony.", "অনুষ্ঠানের জন্য কুশনসহ সোনালি শিয়াভারি চেয়ার।", 5500, IMG.dCeremonyChairs, ["50 chairs", "Seat cushions", "Arrangement", "Delivery"], ["৫০টি চেয়ার", "আসনের কুশন", "বিন্যাস", "ডেলিভারি"], ["chairs", "ceremony"]],
-  ["wed-seat-banquet", "sitting-area", "Round Banquet Tables & Linen", "গোল ব্যাংকুয়েট টেবিল ও লিনেন", "Round tables with white linen and covered chairs for dinner service.", "ডিনার পরিবেশনের জন্য সাদা লিনেনসহ গোল টেবিল ও কভার করা চেয়ার।", 6500, IMG.dBanquetRound, ["6 round tables", "Linen and covers", "50 chairs", "Setup"], ["৬টি গোল টেবিল", "লিনেন ও কভার", "৫০টি চেয়ার", "সেটআপ"], ["banquet", "dinner", "tables"]],
+  ["wed-seat-chiavari", "sitting-area", "Chiavari Guest Seating", "শিয়াভারি অতিথি আসন", "Gold chiavari chairs with cushions arranged for the ceremony.", "অনুষ্ঠানের জন্য কুশনসহ সোনালি শিয়াভারি চেয়ার।", 5500, IMG.dCeremonyChairs, ["Chairs", "Seat cushions", "Arrangement", "Delivery"], ["চেয়ার", "আসনের কুশন", "বিন্যাস", "ডেলিভারি"], ["chairs", "ceremony"]],
+  ["wed-seat-banquet", "sitting-area", "Round Banquet Tables & Linen", "গোল ব্যাংকুয়েট টেবিল ও লিনেন", "Round tables with white linen and covered chairs for dinner service.", "ডিনার পরিবেশনের জন্য সাদা লিনেনসহ গোল টেবিল ও কভার করা চেয়ার।", 6500, IMG.dBanquetRound, ["Round tables", "Linen and covers", "Chairs", "Setup"], ["গোল টেবিল", "লিনেন ও কভার", "চেয়ার", "সেটআপ"], ["banquet", "dinner", "tables"]],
   ["wed-seat-garden", "sitting-area", "Garden Lounge Seating", "বাগান লাউঞ্জ আসন", "Sofa clusters and coffee tables styled with flowers for outdoor receptions.", "খোলা জায়গার রিসেপশনের জন্য ফুলে সাজানো সোফা ও কফি টেবিল।", 7500, IMG.wSeatingGarden, ["Sofa clusters", "Coffee tables", "Floral styling", "Delivery and setup"], ["সোফা সেট", "কফি টেবিল", "ফুলের সাজ", "ডেলিভারি ও সেটআপ"], ["lounge", "garden"]],
   ["wed-seat-baithak", "sitting-area", "Floor Baithak Seating", "ফ্লোর বৈঠক আসন", "Traditional floor seating with mattresses, bolsters and low tables.", "তোশক, কোলবালিশ ও নিচু টেবিলসহ ঐতিহ্যবাহী বৈঠকি আসন।", 4500, IMG.dFloralBackdrop, ["Floor mattresses", "Bolsters", "Low tables", "Setup"], ["ফ্লোর তোশক", "কোলবালিশ", "নিচু টেবিল", "সেটআপ"], ["baithak", "traditional"]],
 
@@ -150,7 +161,7 @@ const CORPORATE: Row[] = [
   ["corp-decor-award", "decor", "Award Night Stage", "অ্যাওয়ার্ড নাইট মঞ্চ", "An elegant stage for award ceremonies with a trophy table.", "ট্রফি টেবিলসহ অ্যাওয়ার্ড অনুষ্ঠানের মার্জিত মঞ্চ।", 22000, IMG.eStageMono, ["Stage", "Trophy table", "Backdrop"], ["মঞ্চ", "ট্রফি টেবিল", "ব্যাকড্রপ"], ["awards", "gala"]],
   ["corp-decor-expo", "decor", "Exhibition Booth", "প্রদর্শনী বুথ", "A 3×3 m branded booth with counter and lighting.", "কাউন্টার ও আলোসহ ৩×৩ মিটারের ব্র্যান্ডেড বুথ।", 15000, IMG.eWoodenHall, ["Booth structure", "Counter", "Graphics", "Lighting"], ["বুথ কাঠামো", "কাউন্টার", "গ্রাফিক্স", "আলো"], ["expo", "booth"]],
 
-  ["corp-seat-theatre", "sitting-area", "Theatre Seating", "থিয়েটার আসন", "Rows of cushioned chairs facing the stage.", "মঞ্চমুখী সারিবদ্ধ কুশন চেয়ার।", 3500, IMG.eChairsGrey, ["50 chairs", "Arrangement", "Aisle markers"], ["৫০টি চেয়ার", "বিন্যাস", "পথ নির্দেশক"], ["theatre"], true],
+  ["corp-seat-theatre", "sitting-area", "Theatre Seating", "থিয়েটার আসন", "Rows of cushioned chairs facing the stage.", "মঞ্চমুখী সারিবদ্ধ কুশন চেয়ার।", 3500, IMG.eChairsGrey, ["Chairs", "Arrangement", "Aisle markers"], ["চেয়ার", "বিন্যাস", "পথ নির্দেশক"], ["theatre"], true],
   ["corp-seat-classroom", "sitting-area", "Classroom Tables", "ক্লাসরুম টেবিল", "Tables with chairs for workshops and trainings.", "কর্মশালা ও প্রশিক্ষণের জন্য টেবিল ও চেয়ার।", 5000, IMG.cRoomBlack, ["Tables", "Chairs", "Table cloths"], ["টেবিল", "চেয়ার", "টেবিল ক্লথ"], ["workshop", "training"]],
   ["corp-seat-gala", "sitting-area", "Round Table Gala", "রাউন্ড টেবিল গালা", "Round tables with linen for dinners and award nights.", "ডিনার ও অ্যাওয়ার্ড নাইটের জন্য লিনেনসহ গোল টেবিল।", 6500, IMG.dBanquetRound, ["Round tables", "Linen", "Covered chairs"], ["গোল টেবিল", "লিনেন", "কভার করা চেয়ার"], ["gala", "dinner"]],
   ["corp-seat-boardroom", "sitting-area", "Boardroom U-Shape", "বোর্ডরুম ইউ-শেপ", "A U-shaped table layout with microphones and water service.", "মাইক্রোফোন ও পানির ব্যবস্থাসহ ইউ-আকৃতির টেবিল বিন্যাস।", 4500, IMG.cTablets, ["U-shape tables", "Chairs", "Water service"], ["ইউ-শেপ টেবিল", "চেয়ার", "পানির ব্যবস্থা"], ["boardroom", "meeting"]],
@@ -223,7 +234,7 @@ const FAMILY: Row[] = [
 
 /* ═════════════ FOOD & CULINARY ═════════════ */
 const FOOD: Row[] = [
-  ["food-platter-kacchi", "platter", "Dhakaiya Kacchi Biryani", "ঢাকাইয়া কাচ্চি বিরিয়ানি", "Mutton kacchi with aloo, borhani and salad for 50 guests.", "৫০ জন অতিথির জন্য আলু, বোরহানি ও সালাদসহ খাসির কাচ্চি।", 35000, IMG.pWeddingBuffet, ["Kacchi biryani", "Borhani", "Salad", "Serving staff"], ["কাচ্চি বিরিয়ানি", "বোরহানি", "সালাদ", "পরিবেশনকারী"], ["kacchi", "biryani"], true],
+  ["food-platter-kacchi", "platter", "Dhakaiya Kacchi Biryani", "ঢাকাইয়া কাচ্চি বিরিয়ানি", "Mutton kacchi with aloo, borhani and salad.", "আলু, বোরহানি ও সালাদসহ খাসির কাচ্চি।", 35000, IMG.pWeddingBuffet, ["Kacchi biryani", "Borhani", "Salad", "Serving staff"], ["কাচ্চি বিরিয়ানি", "বোরহানি", "সালাদ", "পরিবেশনকারী"], ["kacchi", "biryani"], true],
   ["food-platter-polao", "platter", "Morog Polao Menu", "মোরগ পোলাও মেনু", "Morog polao with roast, egg korma and firni.", "রোস্ট, ডিমের কোরমা ও ফিরনিসহ মোরগ পোলাও।", 27500, IMG.pDiverse, ["Morog polao", "Roast", "Egg korma", "Firni"], ["মোরগ পোলাও", "রোস্ট", "ডিমের কোরমা", "ফিরনি"], ["polao"]],
   ["food-platter-tehari", "platter", "Beef Tehari Menu", "গরুর তেহারি মেনু", "Old Dhaka beef tehari with salad and soft drinks.", "সালাদ ও কোমল পানীয়সহ পুরান ঢাকার গরুর তেহারি।", 22500, IMG.pBanquet, ["Beef tehari", "Salad", "Soft drinks"], ["গরুর তেহারি", "সালাদ", "কোমল পানীয়"], ["tehari"]],
   ["food-platter-mezban", "platter", "Mezban Beef Feast", "মেজবানি গরুর ভোজ", "Mezbani beef, dal and plain rice served in the traditional style.", "ঐতিহ্যবাহী ধারায় পরিবেশিত মেজবানি গরু, ডাল ও সাদা ভাত।", 30000, IMG.pGourmet, ["Mezbani beef", "Dal", "Rice"], ["মেজবানি গরু", "ডাল", "ভাত"], ["mezban"]],
@@ -236,9 +247,9 @@ const FOOD: Row[] = [
   ["food-fuchka-combo", "fuchka", "Fuchka & Chotpoti Combo", "ফুচকা ও চটপটি কম্বো", "Both counters together for larger gatherings.", "বড় আয়োজনের জন্য দুটি কাউন্টার একসঙ্গে।", 7000, IMG.fuClay, ["2 counters", "2 chefs", "Toppings"], ["২টি কাউন্টার", "২ জন শেফ", "টপিং"], ["combo"]],
   ["food-fuchka-jhalmuri", "fuchka", "Jhalmuri Cart", "ঝালমুড়ি কার্ট", "A jhalmuri cart with fresh mustard oil and chanachur.", "তাজা সরিষার তেল ও চানাচুরসহ ঝালমুড়ির গাড়ি।", 3000, IMG.fuBasket, ["Jhalmuri cart", "Vendor", "Paper cones"], ["ঝালমুড়ির গাড়ি", "বিক্রেতা", "কাগজের ঠোঙা"], ["jhalmuri"]],
 
-  ["food-cha-milk", "cha-coffee", "Milk Cha Station", "দুধ চা স্টেশন", "Fresh milk cha brewed on site, 50 cups.", "অনুষ্ঠানস্থলে তৈরি তাজা দুধ চা, ৫০ কাপ।", 2500, IMG.chaClay, ["Cha maker", "50 cups", "Sugar on the side"], ["চা প্রস্তুতকারী", "৫০ কাপ", "আলাদা চিনি"], ["cha", "milk tea"], true],
+  ["food-cha-milk", "cha-coffee", "Milk Cha Station", "দুধ চা স্টেশন", "Fresh milk cha brewed on site.", "অনুষ্ঠানস্থলে তৈরি তাজা দুধ চা।", 2500, IMG.chaClay, ["Cha maker", "Cups", "Sugar on the side"], ["চা প্রস্তুতকারী", "কাপ", "আলাদা চিনি"], ["cha", "milk tea"], true],
   ["food-cha-seven", "cha-coffee", "Seven-Layer Cha Bar", "সাত রঙের চা বার", "Seven-layer cha alongside masala and ginger cha.", "মসলা ও আদা চায়ের সঙ্গে সাত রঙের চা।", 4000, IMG.chaTray, ["Cha master", "3 varieties", "Glassware"], ["চা বিশেষজ্ঞ", "৩ ধরনের চা", "গ্লাস"], ["seven layer"]],
-  ["food-coffee-espresso", "cha-coffee", "Espresso Bar", "এসপ্রেসো বার", "A mobile espresso bar with a barista, 50 cups.", "বারিস্তাসহ ভ্রাম্যমাণ এসপ্রেসো বার, ৫০ কাপ।", 7500, IMG.coBrew, ["Barista", "Espresso machine", "Cups"], ["বারিস্তা", "এসপ্রেসো মেশিন", "কাপ"], ["coffee", "espresso"]],
+  ["food-coffee-espresso", "cha-coffee", "Espresso Bar", "এসপ্রেসো বার", "A mobile espresso bar with a barista.", "বারিস্তাসহ ভ্রাম্যমাণ এসপ্রেসো বার।", 7500, IMG.coBrew, ["Barista", "Espresso machine", "Cups"], ["বারিস্তা", "এসপ্রেসো মেশিন", "কাপ"], ["coffee", "espresso"]],
   ["food-coffee-station", "cha-coffee", "Self-Serve Tea & Coffee", "সেলফ-সার্ভ চা ও কফি", "Urns, tea bags, coffee and cookies for seminars.", "সেমিনারের জন্য আর্ন, টি ব্যাগ, কফি ও কুকিজ।", 2250, IMG.coStation, ["Urns", "Tea and coffee", "Cookies", "Attendant"], ["আর্ন", "চা ও কফি", "কুকিজ", "সহকারী"], ["tea break"]],
   ["food-cha-masala", "cha-coffee", "Lemon & Masala Cha", "লেবু ও মসলা চা", "Lemon cha and masala cha served hot.", "গরম গরম পরিবেশিত লেবু চা ও মসলা চা।", 3000, IMG.chaSun, ["Cha maker", "2 varieties", "Cups"], ["চা প্রস্তুতকারী", "২ ধরনের চা", "কাপ"], ["masala", "lemon"]],
 ];

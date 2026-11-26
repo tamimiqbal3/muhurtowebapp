@@ -25,7 +25,7 @@ export function unitLabel(unit: Service["unit"], qty = 1): string {
 
 /** Price suffix shown next to a listed price. */
 export function priceSuffix(unit: Service["unit"]): string {
-  return unit === "per50" ? "per 50 guests" : `per ${unitLabel(unit)}`;
+  return unit === "per50" ? "per 50 guests" : unit === "guest" ? "per person" : `per ${unitLabel(unit)}`;
 }
 
 /** Number of 50-guest blocks billed for a guest count. */

@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { ArrowRight } from "lucide-react";
 import { SafeImage } from "../ui/SafeImage";
 import { ButtonLink } from "../ui/Button";
+import { CategorySearch } from "./CategorySearch";
 import { localizeCategory } from "@/data/i18n-data";
 import { IMG } from "@/data/images";
 import type { ImageRef } from "@/lib/types";
@@ -68,7 +69,7 @@ export function Hero() {
             </motion.div>
           );
         })}
-        <div aria-hidden className="absolute inset-0 bg-[linear-gradient(180deg,rgb(5_11_28/.55)_0%,rgb(5_11_28/.15)_35%,rgb(5_11_28/.35)_60%,rgb(5_11_28/.92)_100%)]" />
+        <div aria-hidden className="absolute inset-0 bg-[linear-gradient(180deg,rgb(5_11_28/.45)_0%,rgb(5_11_28/.05)_30%,rgb(5_11_28/.25)_55%,rgb(5_11_28/.85)_100%)]" />
         <div aria-hidden className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_70%,rgb(1_95_255/.22),transparent_60%)]" />
 
         <div className="container-x relative flex h-full flex-col justify-end pb-32 pt-28 sm:pb-20">
@@ -84,16 +85,9 @@ export function Hero() {
             <ButtonLink href="#occasions" variant="light" size="lg">{t("Explore services")}</ButtonLink>
           </motion.div>
 
-          <div className="mt-10 flex flex-wrap items-center gap-x-5 gap-y-3">
-            <div className="flex gap-1.5" role="group" aria-label={t("Scenes")}>
-              {SCENES.map((s, i) => (
-                <button key={s.img.src} type="button" onClick={() => setShot(i)} aria-label={t(s.label)} aria-current={i === shot} className="relative h-[3px] w-5 overflow-hidden rounded-full bg-paper/25 sm:w-8">
-                  <span className={cn("absolute inset-0 origin-left rounded-full bg-paper transition-transform", i === shot ? "scale-x-100" : "scale-x-0")} style={{ transitionDuration: i === shot ? `${hold}ms` : "0ms", transitionTimingFunction: "linear" }} />
-                </button>
-              ))}
-            </div>
-            <span className="text-xs font-medium tracking-wide text-paper/75">{t(SCENES[shot].label)}</span>
-          </div>
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, delay: 0.8 }} className="mt-8 hidden max-w-3xl sm:block">
+            <CategorySearch compact />
+          </motion.div>
         </div>
       </div>
 
@@ -106,16 +100,18 @@ export function Hero() {
           </div>
           <Link href="/event-planner" className="hidden shrink-0 items-center gap-2 text-sm font-semibold text-brand hover:underline sm:inline-flex">{t("Plan with our assistant")} <ArrowRight className="h-4 w-4" /></Link>
         </div>
-        <ul className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-5">
-          {cats.map((c, i) => (
-            <li key={c.slug} className={cn(i === cats.length - 1 && cats.length % 2 === 1 && "col-span-2 sm:col-span-1")}>
-              <Link href={categoryRoute(c)} className="group relative block aspect-[4/5] overflow-hidden rounded-2xl bg-sand">
-                <SafeImage src={c.card.src} alt={c.card.alt} fill sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw" className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]" />
-                <span aria-hidden className="absolute inset-0 bg-[linear-gradient(180deg,transparent_40%,rgb(5_11_28/.85))]" />
-                <span className="absolute inset-x-0 bottom-0 p-4">
-                  <span className="block text-lg leading-tight font-medium text-paper sm:text-xl">{c.name}</span>
-                  <span className="mt-1 line-clamp-2 block text-xs text-paper/75">{c.tagline}</span>
+        <ul className="mt-8 grid grid-cols-2 gap-x-4 gap-y-7 sm:grid-cols-3 lg:grid-cols-5">
+          {cats.map((c) => (
+            <li key={c.slug}>
+              <Link href={categoryRoute(c)} className="group block">
+                <span className="relative block aspect-[4/3] overflow-hidden rounded-2xl bg-sand">
+                  <SafeImage src={c.card.src} alt={c.card.alt} fill sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw" quality={90} className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]" />
                 </span>
+                <span className="mt-3 flex items-center justify-between gap-2">
+                  <span className="text-lg leading-tight font-medium text-ink">{c.name}</span>
+                  <ArrowRight className="h-4 w-4 shrink-0 text-muted transition group-hover:translate-x-0.5 group-hover:text-brand" />
+                </span>
+                <span className="mt-1 line-clamp-2 block text-xs text-ink-soft">{c.tagline}</span>
               </Link>
             </li>
           ))}

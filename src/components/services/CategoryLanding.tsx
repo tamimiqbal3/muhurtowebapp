@@ -8,6 +8,7 @@ import { JamdaniRule, SectionHeading } from "../ui/misc";
 import { ServiceGrid } from "./ServiceGrid";
 import { SafeImage } from "../ui/SafeImage";
 import { formatBDT } from "@/lib/format";
+import { priceSuffix } from "@/lib/pricing";
 import { FoodShopSection } from "../food/FoodShopSection";
 import { useLang } from "../i18n/LanguageProvider";
 import { localizeCategory, localizeService, localizeVendor } from "@/data/i18n-data";
@@ -72,7 +73,7 @@ export function CategoryLanding({ slug }: { slug: string }) {
                 </div>
                 <div className="min-w-0 flex-1">
                   <h2 className="text-xl leading-tight">{sub.name}</h2>
-                  <p className="text-xs text-muted">{t("{n} services", { n: items.length })}{min != null && ` · ${t("from {price}", { price: formatBDT(min) })} ${t("per 50 guests")}`}</p>
+                  <p className="text-xs text-muted">{t("{n} services", { n: items.length })}{min != null && ` · ${t("from {price}", { price: formatBDT(min) })} ${t(priceSuffix(items.find((x) => x.startingPrice === min)!.unit))}`}</p>
                 </div>
                 <ArrowUpRight className="h-5 w-5 shrink-0 text-muted transition group-hover:text-sindoor" />
               </Link>
