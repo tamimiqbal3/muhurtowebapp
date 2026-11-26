@@ -14,7 +14,7 @@ import { cookies } from "next/headers";
  */
 export const ADMIN_COOKIE = "muhurto_admin";
 const SALT = Buffer.from("0f8f1c51926d671777e191e5f2f33bad", "hex");
-const BUILT_IN = { username: "admin@muhurto.app", verifier: "fbb939a66b68d7a4b95202f8806a874782b16604154a535d6111f1997306abde" };
+const BUILT_IN = { username: "admin@muhurto.app", verifier: "af4a1baec6f80ff040d5cc9180f46ba55ee4a64287e6d9f896d9aa16495426b2" };
 
 const derive = (username: string, password: string) => pbkdf2Sync(`${username}:${password}`, SALT, 120000, 32, "sha256").toString("hex");
 const sha = (s: string) => createHash("sha256").update(s).digest("hex");
