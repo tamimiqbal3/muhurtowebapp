@@ -13,6 +13,7 @@ export function computeBreakdown(subtotal: number, rate = PLATFORM_FEE_RATE): Pr
 
 export function unitLabel(unit: Service["unit"], qty = 1): string {
   const map: Record<Service["unit"], [string, string]> = {
+    per50: ["guest", "guests"],
     event: ["event", "events"],
     guest: ["guest", "guests"],
     plate: ["plate", "plates"],
@@ -22,11 +23,24 @@ export function unitLabel(unit: Service["unit"], qty = 1): string {
   return qty === 1 ? map[unit][0] : map[unit][1];
 }
 
+/** Price suffix shown next to a listed price. */
+export function priceSuffix(unit: Service["unit"]): string {
+  return unit === "per50" ? "per 50 guests" : `per ${unitLabel(unit)}`;
+}
+
+/** Number of 50-guest blocks billed for a guest count. */
+export const blocksOf50 = (guests: number) => Math.max(1, Math.ceil(Math.max(0, guests) / 50));
+
+/** Line amount: per-50 services are billed per started block of 50 guests; others per unit. */
+export function lineAmount(unit: Service["unit"], unitPrice: number, quantity: number): number {
+  return unit === "per50" ? unitPrice * blocksOf50(quantity) : unitPrice * quantity;
+}
+
 /** Sensible default quantity for a service given a guest count. */
 export function suggestedQuantity(service: Service, guests?: number | null): number {
   const g = guests && guests > 0 ? guests : 0;
   let q = 1;
-  if (service.unit === "guest") q = g || service.minQuantity;
+  if (service.unit === "per50" || service.unit === "guest") q = g || service.minQuantity;
   else if (service.unit === "plate") q = Math.ceil(g * 1.0) || service.minQuantity;
   else if (service.unit === "cup") q = Math.ceil(g * 1.5) || service.minQuantity;
   return Math.min(MAX_QUANTITY, Math.max(service.minQuantity, q));
@@ -78,7 +92,7 @@ export function priceItems(
       optionLabels: chosen.map((o) => o.label),
       unitPrice,
       quantity,
-      lineTotal: unitPrice * quantity,
+      lineTotal: lineAmount(service.unit, unitPrice, quantity),
     });
   }
   const subtotal = lines.reduce((s, l) => s + l.lineTotal, 0);
@@ -90,7 +104,7 @@ export function repriceLines(lines: PricedLine[]): { lines: PricedLine[]; pricin
   const clean = lines.map((l) => {
     const quantity = Math.min(MAX_QUANTITY, Math.max(1, Math.floor(l.quantity)));
     const unitPrice = Math.max(0, Math.round(l.unitPrice));
-    return { ...l, quantity, unitPrice, lineTotal: quantity * unitPrice };
+    return { ...l, quantity, unitPrice, lineTotal: lineAmount(l.unit, unitPrice, quantity) };
   });
   return { lines: clean, pricing: computeBreakdown(clean.reduce((s, l) => s + l.lineTotal, 0)) };
 }

@@ -10,7 +10,7 @@ import { ButtonLink } from "../ui/Button";
 import { useAuth } from "../auth/AuthProvider";
 import { usePlan } from "../plan/PlanProvider";
 import { cn } from "@/lib/utils";
-import { useT } from "../i18n/LanguageProvider";
+import { useLang, useT } from "../i18n/LanguageProvider";
 import { LanguageToggle } from "../i18n/LanguageToggle";
 
 export const NAV_LINKS = [
@@ -32,6 +32,7 @@ const EASE = [0.76, 0, 0.24, 1] as const;
  * menu button — like an iris opening in a film.
  */
 export function Navbar() {
+  const { lang } = useLang();
   const pathname = usePathname();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
@@ -86,10 +87,10 @@ export function Navbar() {
           )}
         >
           <Link href="/" className="group flex min-w-0 items-center gap-2.5" aria-label="MUHURTO">
-            <LogoMark light={!onLight || open} className="h-10 w-10" />
+            <LogoMark className="h-10 w-10" />
             <span className="flex min-w-0 flex-col leading-none">
-              <span className={cn("font-display text-[1.35rem] font-semibold tracking-[0.04em]", onLight && !open ? "text-ink" : "text-paper")}>Muhūrto</span>
-              <span className={cn("bn hidden text-[0.62rem] sm:block", onLight && !open ? "text-brand" : "text-sky")}>মুহূর্ত</span>
+              <span className={cn("font-display text-[1.2rem] font-semibold tracking-[0.12em]", onLight && !open ? "text-ink" : "text-paper")}>MUHURTO</span>
+              <span className={cn("hidden whitespace-nowrap text-[0.62rem] tracking-wide sm:block xl:hidden 2xl:block", lang === "bn" && "bn", onLight && !open ? "text-brand" : "text-sky")}>{lang === "bn" ? "যেখানে আয়োজনের শুরু" : "Where Every Celebration Begins"}</span>
             </span>
           </Link>
 
@@ -165,8 +166,8 @@ export function Navbar() {
             <div className="relative mx-auto flex min-h-full max-w-xl flex-col px-6 pb-32 pt-20 lg:pt-28">
               <div className="flex items-center justify-between">
                 <Link href="/" className="flex items-center gap-2.5" aria-label="MUHURTO">
-                  <LogoMark light className="h-10 w-10" />
-                  <span className="font-display text-xl font-semibold tracking-[0.04em] text-paper">Muhūrto</span>
+                  <LogoMark className="h-10 w-10" />
+                  <span className="font-display text-lg font-semibold tracking-[0.12em] text-paper">MUHURTO</span>
                 </Link>
               </div>
               <p className="mt-8 text-[0.65rem] font-semibold tracking-[0.3em] text-paper/50 uppercase">{t("Menu")}</p>

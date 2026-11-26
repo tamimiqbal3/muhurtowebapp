@@ -3,10 +3,8 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, useTransition } from "react";
 import { SlidersHorizontal, X, Search } from "lucide-react";
-import { CITIES } from "@/data/categories";
 import { cn } from "@/lib/utils";
 import { useLang } from "../i18n/LanguageProvider";
-import { cityName } from "@/data/i18n-data";
 
 export function FilterBar({ total, showQuery = true }: { total: number; showQuery?: boolean }) {
   const router = useRouter();
@@ -27,7 +25,7 @@ export function FilterBar({ total, showQuery = true }: { total: number; showQuer
     start(() => router.replace(`${pathname}${next.size ? `?${next}` : ""}`, { scroll: false }));
   }
 
-  const active = ["city", "min", "max", "rating", "q"].filter((k) => sp.get(k)).length;
+  const active = ["min", "max", "rating", "q"].filter((k) => sp.get(k)).length;
 
   return (
     <div className="space-y-3">
@@ -58,14 +56,7 @@ export function FilterBar({ total, showQuery = true }: { total: number; showQuer
         </label>
       </div>
       {open && (
-        <div className="card grid gap-4 p-5 sm:grid-cols-2 lg:grid-cols-4">
-          <label>
-            <span className="label">{t("City / service area")}</span>
-            <select className="field" value={sp.get("city") ?? ""} onChange={(e) => set({ city: e.target.value || null })}>
-              <option value="">{t("Anywhere in Bangladesh")}</option>
-              {CITIES.map((c) => <option key={c} value={c}>{cityName(c, lang)}</option>)}
-            </select>
-          </label>
+        <div className="card grid gap-4 p-5 sm:grid-cols-3">
           <label>
             <span className="label">{t("Min starting price (৳)")}</span>
             <input className="field" inputMode="numeric" defaultValue={sp.get("min") ?? ""} onBlur={(e) => set({ min: e.target.value.replace(/\D/g, "") || null })} placeholder="0" />

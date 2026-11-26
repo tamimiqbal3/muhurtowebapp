@@ -7,6 +7,14 @@ import { NextResponse, type NextRequest } from "next/server";
  * layout and API route using Firebase Admin.
  */
 export function proxy(req: NextRequest) {
+  const path = req.nextUrl.pathname;
+  if (path.startsWith("/admin")) {
+    if (path === "/admin/login" || req.cookies.get("muhurto_admin")?.value) return NextResponse.next();
+    const url = req.nextUrl.clone();
+    url.pathname = "/admin/login";
+    url.search = "";
+    return NextResponse.redirect(url);
+  }
   const hasSession = Boolean(req.cookies.get("__session")?.value || req.cookies.get("muhurto_demo")?.value);
   if (!hasSession) {
     const url = req.nextUrl.clone();
@@ -18,5 +26,5 @@ export function proxy(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/admin/:path*", "/agent/:path*", "/my-bookings", "/checkout", "/booking/:id+"],
+  matcher: ["/dashboard/:path*", "/admin", "/admin/:path*", "/agent/:path*", "/my-bookings", "/checkout", "/booking/:id+"],
 };

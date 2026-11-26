@@ -7,12 +7,13 @@ import { useT } from "../i18n/LanguageProvider";
 
 /**
  * First visit of a session: the stage is set while the page and its photos load,
- * then the frame shutters open onto the site. Later navigations use the route loader.
+ * then the frame shutters open onto the site. Later navigations show no loader.
  */
 export function Preloader() {
   const t = useT();
   const [show, setShow] = useState(true);
   useEffect(() => {
+    if (location.pathname.startsWith("/admin") || location.pathname.startsWith("/invoice")) { setShow(false); return; }
     try {
       if (sessionStorage.getItem("muhurto.loaded")) { setShow(false); return; }
       sessionStorage.setItem("muhurto.loaded", "1");
@@ -22,7 +23,7 @@ export function Preloader() {
     const finish = () => {
       if (done) return;
       done = true;
-      const wait = Math.max(0, 3000 - (performance.now() - started));
+      const wait = Math.max(0, 1800 - (performance.now() - started));
       setTimeout(() => setShow(false), wait);
     };
     if (document.readyState === "complete") finish();

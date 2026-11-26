@@ -1,6 +1,6 @@
 import { CATEGORIES } from "../data/categories";
+import type { Category } from "./types";
 import type { CategorySlug, Service, Vendor } from "./types";
-import { SERVICES_BN } from "../data/services.bn";
 import { CITY_BN } from "../data/i18n-data";
 
 export type SortKey = "relevance" | "price-asc" | "price-desc" | "rating";
@@ -48,8 +48,14 @@ export function tokenize(q: string): string[] {
     .filter((t) => t.length > 1 && !["the", "and", "for", "with", "in", "of", "a", "an", "to", "my"].includes(t));
 }
 
+let CATS: Category[] = CATEGORIES;
+/** Lets pages search against admin-edited categories. */
+export function setSearchCategories(c: Category[]) {
+  CATS = c;
+}
+
 function subName(cat: CategorySlug, sub: string) {
-  return CATEGORIES.find((c) => c.slug === cat)?.subcategories.find((s) => s.slug === sub)?.name ?? sub;
+  return CATS.find((c) => c.slug === cat)?.subcategories.find((s) => s.slug === sub)?.name ?? sub;
 }
 
 export function servesCity(service: Service, city?: string | null): boolean {
@@ -59,8 +65,8 @@ export function servesCity(service: Service, city?: string | null): boolean {
 }
 
 function haystack(s: Service, vendors: Map<string, Vendor>) {
-  const cat = CATEGORIES.find((c) => c.slug === s.categorySlug);
-  const bn = SERVICES_BN[s.id];
+  const cat = CATS.find((c) => c.slug === s.categorySlug);
+  const bn = { name: s.nameBn ?? "", short: s.shortDescriptionBn ?? "", desc: s.descriptionBn ?? "" };
   const subBn = cat?.subcategories.find((x) => x.slug === s.subcategorySlug)?.nameBn ?? "";
   return {
     name: `${s.name} ${bn?.name ?? ""}`.toLowerCase(),

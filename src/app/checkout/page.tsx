@@ -17,7 +17,7 @@ export default async function CheckoutPage({ searchParams }: { searchParams: Pro
   const { t } = await getT();
   const { booking: id } = await searchParams;
   const hero = (code?: string) => (
-    <PageHero crumbs={[{ label: t("Home"), href: "/" }, { label: t("My bookings"), href: "/my-bookings" }, { label: t("Checkout") }]} eyebrow={code ? t("Step 2 of 2 · Booking {code}", { code }) : t("Step 2 of 2")} title={t("Confirm & pay")} description={t("Review the final breakdown, choose bKash, Nagad, Rocket, Visa or Mastercard, and pay securely. The 2% platform fee is included once in the total.")} />
+    <PageHero crumbs={[{ label: t("Home"), href: "/" }, { label: t("My bookings"), href: "/my-bookings" }, { label: t("Checkout") }]} eyebrow={code ? t("Step 2 of 2 · Booking {code}", { code }) : t("Step 2 of 2")} title={t("Confirm & pay")} description={t("Review the final breakdown, choose mobile banking, a card or internet banking, and pay securely through SSLCOMMERZ.")} />
   );
   if (!isAdminConfigured()) {
     return (

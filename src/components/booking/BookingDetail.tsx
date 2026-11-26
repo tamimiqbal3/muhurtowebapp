@@ -117,6 +117,13 @@ export function BookingDetail({ id }: { id: string }) {
         </div>
       </div>
       <aside className="space-y-4 lg:sticky lg:top-28 lg:self-start">
+        {booking.paymentStatus === "paid" && (
+          <div className="card p-6">
+            <p className="eyebrow">{t("Paid")}</p>
+            <p className="mt-1 font-display text-3xl font-semibold">{formatBDT(booking.pricing.total)}</p>
+            <ButtonLink href={`/invoice/${booking.id}`} variant="accent" className="mt-4 w-full">{t("View invoice")}</ButtonLink>
+          </div>
+        )}
         {booking.status === "pending_payment" && (
           <div className="card p-6">
             <p className="eyebrow">{t("Payment due")}</p>

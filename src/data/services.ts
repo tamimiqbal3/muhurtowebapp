@@ -1,680 +1,255 @@
-import type { CategorySlug, ImageRef, PriceUnit, Service } from "../lib/types";
+import type { ImageRef, Service } from "../lib/types";
 import { IMG } from "./images";
 
-// DEMO DATA — sample listings for development. Prices are indicative
-// starting prices in BDT; ratings and review counts are illustrative.
-type Opt = [id: string, label: string, priceDelta: number];
+/*
+ * MUHURTO launch catalogue — Dhaka only.
+ * Every price is for 50 guests (unit "per50"): an event for 120 guests is billed as 3 × the listed price.
+ * Price levels follow published Dhaka market ranges (catering ≈ Tk650–4,000 per person, décor packages from
+ * Tk7,000, photography packages from Tk30,000 per event) and are kept at the affordable end.
+ * Admins can edit, add or remove any item from Admin → Services.
+ */
 
-interface Def {
-  id: string;
-  cat: CategorySlug;
-  sub: string;
-  name: string;
-  short: string;
-  desc: string;
-  price: number;
-  unit?: PriceUnit;
-  min?: number;
-  maxGuests?: number;
-  vendor: string;
-  city: string;
-  areas?: string[];
-  images: ImageRef[];
-  options: Opt[];
-  themes: string[];
-  includes: string[];
-  rating: number;
-  reviews: number;
-  tags: string[];
-  featured?: boolean;
-}
+type Opt = [id: string, en: string, bn: string, delta: number];
 
-const make = (d: Def): Service => ({
-  id: d.id,
-  categorySlug: d.cat,
-  subcategorySlug: d.sub,
-  name: d.name,
-  shortDescription: d.short,
-  description: d.desc,
-  startingPrice: d.price,
-  unit: d.unit ?? "event",
-  minQuantity: d.min ?? 1,
-  maxGuests: d.maxGuests,
-  vendorId: d.vendor,
-  city: d.city,
-  serviceAreas: d.areas ?? [d.city],
-  images: d.images,
-  options: d.options.map(([id, label, priceDelta]) => ({ id, label, priceDelta })),
-  themes: d.themes,
-  includes: d.includes,
-  rating: d.rating,
-  reviewCount: d.reviews,
-  tags: d.tags,
-  featured: d.featured ?? false,
-  active: true,
-  isDemo: true,
-});
+/** Upgrades offered with each kind of service (price per 50 guests). */
+const OPTS: Record<string, Opt[]> = {
+  decor: [["fresh-flowers", "Fresh flowers only", "শুধু তাজা ফুল", 4000], ["entry-gate", "Decorated entry gate", "সজ্জিত প্রবেশ গেট", 2500]],
+  "sitting-area": [["premium-linen", "Premium linen and covers", "প্রিমিয়াম লিনেন ও কভার", 1500], ["centrepieces", "Table centrepieces", "টেবিল সেন্টারপিস", 2000]],
+  lighting: [["extra-hours", "Two extra hours", "অতিরিক্ত দুই ঘণ্টা", 1500], ["generator", "Standby generator", "স্ট্যান্ডবাই জেনারেটর", 2500]],
+  "photography-videography": [["extra-crew", "One extra photographer", "একজন অতিরিক্ত ফটোগ্রাফার", 3000], ["express", "Delivery within 7 days", "৭ দিনের মধ্যে ডেলিভারি", 2000]],
+  "photo-booths": [["custom-frame", "Custom printed frame", "কাস্টম প্রিন্টেড ফ্রেম", 1200], ["digital-gallery", "Online photo gallery", "অনলাইন ফটো গ্যালারি", 1000]],
+  sound: [["extra-hours", "Two extra hours", "অতিরিক্ত দুই ঘণ্টা", 1500], ["extra-mics", "Two extra wireless mics", "আরও দুটি ওয়্যারলেস মাইক", 800]],
+  platter: [["dessert", "Firni or jorda dessert", "ফিরনি বা জর্দা ডেজার্ট", 3500], ["borhani", "Borhani and soft drinks", "বোরহানি ও কোমল পানীয়", 2500]],
+  fuchka: [["doi-topping", "Sweet doi topping", "মিষ্টি দই টপিং", 800], ["extra-chef", "Extra counter chef", "অতিরিক্ত কাউন্টার শেফ", 1200]],
+  "cha-coffee": [["clay-cups", "Clay bhar cups", "মাটির ভাঁড়ে পরিবেশন", 500], ["snacks", "Biscuits and singara", "বিস্কুট ও সিঙ্গারা", 1500]],
+};
 
-const NATIONWIDE = ["Nationwide"];
+const VENDOR: Record<string, Record<string, string>> = {
+  wedding: { decor: "shapla-events", "sitting-area": "shonar-seating", lighting: "prodip-lighting", "photography-videography": "golpo-frames", "photo-booths": "chhobi-booth", sound: "taal-sound" },
+  birthday: { decor: "utshob-party", "sitting-area": "shonar-seating", lighting: "prodip-lighting", "photography-videography": "moyna-photography", "photo-booths": "chhobi-booth", sound: "taal-sound" },
+  "corporate-events": { decor: "meghna-conference", "sitting-area": "shonar-seating", lighting: "padma-av", "photography-videography": "lens-and-ledger", "photo-booths": "chhobi-booth", sound: "padma-av" },
+  "family-events": { decor: "aangina-events", "sitting-area": "shonar-seating", lighting: "prodip-lighting", "photography-videography": "moyna-photography", "photo-booths": "chhobi-booth", sound: "taal-sound" },
+  "food-culinary": { platter: "puran-dhaka-kitchen", fuchka: "fuchka-junction", "cha-coffee": "cha-ghor" },
+};
 
-const DEFS: Def[] = [
-  /* ═════════════ WEDDING ═════════════ */
-  {
-    id: "wed-decor-rajkiya", cat: "wedding", sub: "decor", name: "Rajkiya Reception Stage",
-    short: "A 40-ft reception stage in deep red and gold with hanging marigold and rose installations.",
-    desc: "Our signature reception build: a tiered 40-ft stage with carved backdrop panels, hanging marigold and rose installations, a bridal throne and an aisle of floral pillars. Designed for community centres, banquet halls and outdoor shamianas.",
-    price: 285000, vendor: "shapla-events", city: "Dhaka", areas: ["Dhaka", "Gazipur", "Narayanganj", "Cumilla"],
-    images: [IMG.wRedGold, IMG.wStageWarm, IMG.wVenueOrnate],
-    options: [["fresh-flowers", "100% fresh flowers (no artificial)", 65000], ["entry-gate", "Floral entry gate", 28000], ["aisle-pillars", "Extra aisle pillars (10)", 18000]],
-    themes: ["Royal Red & Gold", "Classic Bengali"], includes: ["Stage & backdrop", "Bridal seating", "Floral installations", "Setup & teardown"],
-    rating: 4.9, reviews: 128, tags: ["reception", "stage", "marigold", "royal", "biye"], featured: true,
-  },
-  {
-    id: "wed-decor-holud", cat: "wedding", sub: "decor", name: "Gaye Holud Marigold Courtyard",
-    short: "Yellow-and-green holud setup with kula, pidi seating, genda phool curtains and alpona flooring.",
-    desc: "A joyful gaye holud décor built around marigold curtains, hand-painted alpona, bamboo and jute details, low pidi seating for the bride or groom and a decorated kula tray station. Works for rooftops, courtyards and halls.",
-    price: 95000, vendor: "nakshi-decor", city: "Dhaka", areas: ["Dhaka", "Gazipur", "Narayanganj"],
-    images: [IMG.wStageVibrant, IMG.wHenna, IMG.wStagePink],
-    options: [["alpona-floor", "Hand-painted alpona floor (20×20 ft)", 15000], ["umbrella-canopy", "Colourful umbrella canopy", 12000], ["kula-set", "Decorated kula & dala set", 6500]],
-    themes: ["Holud Yellow", "Rustic Jute"], includes: ["Holud stage", "Marigold curtains", "Pidi seating", "Kula station"],
-    rating: 4.8, reviews: 96, tags: ["holud", "gaye holud", "marigold", "alpona", "haldi"], featured: true,
-  },
-  {
-    id: "wed-decor-rajshahi", cat: "wedding", sub: "decor", name: "Padma Ivory Floral Stage",
-    short: "An ivory-and-blush floral stage for receptions and walimas in North Bengal.",
-    desc: "A soft ivory stage with blush roses, baby's breath and crystal accents, framed by draped fabric arches. Built and staffed by our Rajshahi team for venues across Rajshahi, Natore, Bogura and Pabna.",
-    price: 165000, vendor: "rangdhanu-decor", city: "Rajshahi", areas: ["Rajshahi", "Natore", "Bogura", "Pabna", "Chapainawabganj"],
-    images: [IMG.wStageSofa, IMG.wSofaWhite, IMG.wSeatRomantic],
-    options: [["crystal-ceiling", "Crystal ceiling drapes", 30000], ["mirror-aisle", "Mirror aisle runner", 14000], ["welcome-board", "Calligraphy welcome board", 4500]],
-    themes: ["Ivory & Blush", "Modern Minimal"], includes: ["Stage & backdrop", "Floral styling", "Couple sofa", "Setup crew"],
-    rating: 4.7, reviews: 54, tags: ["walima", "reception", "rajshahi", "ivory", "floral"],
-  },
-  /* sitting area */
-  {
-    id: "wed-sit-banquet", cat: "wedding", sub: "sitting-area", name: "Banquet Seating for 300+",
-    short: "Chiavari chairs, round tables, linen and centrepieces for large receptions.",
-    desc: "Full guest seating for receptions: gold Chiavari chairs with cushions, 10-seat round tables, ivory linen, charger plates and low floral centrepieces. Priced per guest; minimum 100 guests.",
-    price: 420, unit: "guest", min: 100, vendor: "shonar-seating", city: "Dhaka", areas: NATIONWIDE,
-    images: [IMG.wSeatingGarden, IMG.wSeatingOutdoor, IMG.wLightWarm],
-    options: [["velvet-cushion", "Velvet chair cushions", 40], ["tall-centrepiece", "Tall centrepieces", 90], ["family-lounge", "Family lounge corner", 25]],
-    themes: ["Royal Red & Gold", "Ivory & Blush", "Modern Minimal"], includes: ["Chairs & tables", "Linen", "Centrepieces", "Setup & teardown"],
-    rating: 4.7, reviews: 211, tags: ["seating", "chairs", "tables", "banquet", "guests"], featured: true,
-  },
-  {
-    id: "wed-sit-lounge", maxGuests: 120, cat: "wedding", sub: "sitting-area", name: "Heritage Lounge & Floor Seating",
-    short: "Low divans, gaddi cushions and brass details for holud and mehendi nights.",
-    desc: "Relaxed lounge seating inspired by old Dhaka bari courtyards: low divans, block-printed gaddi cushions, brass lanterns and jute rugs arranged into conversation pockets for up to 120 guests.",
-    price: 68000, vendor: "nakshi-decor", city: "Dhaka", areas: ["Dhaka", "Gazipur", "Narayanganj", "Munshiganj"],
-    images: [IMG.wSeatOrnate, IMG.wSeatRomantic],
-    options: [["extra-pocket", "Extra lounge pocket (20 guests)", 9000], ["brass-lanterns", "Brass lantern set", 7500]],
-    themes: ["Classic Bengali", "Rustic Jute", "Holud Yellow"], includes: ["Divans & cushions", "Rugs", "Side tables", "Styling"],
-    rating: 4.8, reviews: 73, tags: ["lounge", "mehendi", "holud", "floor seating"],
-  },
-  /* lighting */
-  {
-    id: "wed-light-fairy", cat: "wedding", sub: "lighting", name: "Fairy-Light Canopy & Venue Wash",
-    short: "Warm-white fairy canopy, uplighting and building facade lights.",
-    desc: "Thousands of warm-white fairy lights strung as a canopy over the dining area, amber uplights for the venue walls and a facade light-up for the house or hall — the classic Bangladeshi biye-bari glow.",
-    price: 58000, vendor: "prodip-lighting", city: "Dhaka", areas: ["Dhaka", "Gazipur", "Narayanganj", "Cumilla", "Mymensingh"],
-    images: [IMG.wLightCeiling, IMG.wChattogram, IMG.wLightWarm],
-    options: [["facade-full", "Full building facade (6 floors)", 22000], ["generator", "Standby generator", 15000], ["pixel-name", "LED couple-name sign", 8000]],
-    themes: ["Royal Red & Gold", "Ivory & Blush", "Classic Bengali"], includes: ["Fairy canopy", "Uplighting", "Technician on site"],
-    rating: 4.8, reviews: 142, tags: ["fairy lights", "lighting", "biye bari", "facade"],
-  },
-  {
-    id: "wed-light-chandelier", cat: "wedding", sub: "lighting", name: "Crystal Chandelier & Stage Spotlights",
-    short: "Hanging crystal chandeliers with moving-head spots for the reception stage.",
-    desc: "Statement crystal chandeliers suspended over the stage and aisle, paired with programmable moving-head spotlights for the couple's entry and cake moment. Includes a lighting operator throughout.",
-    price: 92000, vendor: "padma-av", city: "Dhaka", areas: ["Dhaka", "Chattogram", "Sylhet"],
-    images: [IMG.wLightChandelier, IMG.wStageArch],
-    options: [["entry-cue", "Choreographed entry light cue", 12000], ["haze", "Low-haze effect", 9000]],
-    themes: ["Royal Red & Gold", "Modern Minimal"], includes: ["Chandeliers", "Moving heads", "Operator", "Rigging"],
-    rating: 4.6, reviews: 61, tags: ["chandelier", "spotlight", "reception", "stage lighting"],
-  },
-  /* photography & videography */
-  {
-    id: "wed-photo-golpo", cat: "wedding", sub: "photography-videography", name: "Golpo Full-Day Wedding Story",
-    short: "Two photographers and a cinematographer, with a same-week teaser film.",
-    desc: "Documentary-style coverage of one wedding day: two photographers, one cinematographer, 500+ edited photos, a 3–5 minute cinematic film, a 60-second teaser within 7 days and an online gallery for family abroad.",
-    price: 120000, vendor: "golpo-frames", city: "Dhaka", areas: NATIONWIDE,
-    images: [IMG.wBdWedding1, IMG.wCouple, IMG.wBride],
-    options: [["drone", "Drone coverage", 18000], ["album", "Premium 40-page album", 22000], ["extra-day", "Additional event day", 65000]],
-    themes: ["Documentary", "Cinematic"], includes: ["2 photographers", "1 cinematographer", "Edited gallery", "Highlight film"],
-    rating: 4.9, reviews: 187, tags: ["photography", "videography", "cinematic", "wedding film", "drone"], featured: true,
-  },
-  {
-    id: "wed-photo-moyna", cat: "wedding", sub: "photography-videography", name: "Moyna Candid Coverage — Chattogram",
-    short: "Candid photography for holud, akdh and reception across Chattogram division.",
-    desc: "A lead photographer and assistant focused on candid family moments, rituals and portraits. 300+ edited photos per event day with a private online gallery.",
-    price: 48000, vendor: "moyna-photography", city: "Chattogram", areas: ["Chattogram", "Cox's Bazar", "Feni", "Cumilla"],
-    images: [IMG.wChattogram, IMG.wBdWedding2, IMG.wCandid],
-    options: [["video-reel", "Vertical reel edit", 8000], ["prewedding", "Pre-wedding shoot", 20000]],
-    themes: ["Documentary", "Candid"], includes: ["Lead photographer", "Assistant", "Edited photos", "Online gallery"],
-    rating: 4.8, reviews: 92, tags: ["candid", "photography", "chattogram", "akdh"],
-  },
-  /* photo booths */
-  {
-    id: "wed-booth-classic", cat: "wedding", sub: "photo-booths", name: "Bengali Wedding Photo Booth",
-    short: "Custom backdrop, props in Bangla and unlimited instant 4×6 prints.",
-    desc: "A styled booth with a custom couple backdrop, Bangla-language props, an attendant, a DSLR with studio light and unlimited instant prints for 4 hours. Digital copies are shared by QR code.",
-    price: 26000, vendor: "chhobi-booth", city: "Dhaka", areas: ["Dhaka", "Gazipur", "Narayanganj", "Chattogram"],
-    images: [IMG.wBoothProps, IMG.wToast],
-    options: [["guestbook", "Photo guestbook album", 5000], ["extra-hour", "Extra hour", 4500], ["custom-props", "Custom name props", 3000]],
-    themes: ["Classic Bengali", "Playful"], includes: ["Backdrop", "Props", "Unlimited prints (4 hrs)", "Attendant"],
-    rating: 4.7, reviews: 118, tags: ["photo booth", "prints", "props", "guestbook"],
-  },
-  /* sound */
-  {
-    id: "wed-sound-dj", cat: "wedding", sub: "sound", name: "Holud Night DJ & Dhol",
-    short: "A DJ set with live dhol players for holud and sangeet nights.",
-    desc: "Four hours of DJ performance mixing Bangla classics, folk and current hits, with two live dhol players for the entry and dance segments. Includes a 4 kW sound system and wireless microphones.",
-    price: 38000, vendor: "taal-sound", city: "Dhaka", areas: ["Dhaka", "Gazipur", "Narayanganj", "Cumilla"],
-    images: [IMG.wDjParty, IMG.wDjTurntable],
-    options: [["extra-dhol", "Two extra dhol players", 8000], ["led-floor", "LED dance floor", 25000], ["extra-hour", "Extra hour", 6000]],
-    themes: ["Holud Yellow", "Playful"], includes: ["DJ", "4 kW sound", "2 dhol players", "2 wireless mics"],
-    rating: 4.6, reviews: 84, tags: ["dj", "dhol", "holud", "sangeet", "music"],
-  },
-  {
-    id: "wed-sound-shehnai", cat: "wedding", sub: "sound", name: "Shehnai & Reception Sound",
-    short: "Clear reception sound with live shehnai for the bride's entry.",
-    desc: "A balanced PA for halls up to 800 guests with a live shehnai and tabla duo for the entry, followed by curated background music. Sound engineer on site throughout.",
-    price: 32000, vendor: "taal-sound", city: "Dhaka", areas: NATIONWIDE,
-    images: [IMG.wLightWarm, IMG.wVenueFloral],
-    options: [["tabla-duo", "Extended tabla & shehnai set", 9000], ["speech-mics", "Extra speech microphones", 2500]],
-    themes: ["Classic Bengali", "Royal Red & Gold"], includes: ["PA system", "Shehnai duo", "Sound engineer"],
-    rating: 4.7, reviews: 49, tags: ["shehnai", "sound", "reception", "live music"],
-  },
-
-  /* ═════════════ BIRTHDAY ═════════════ */
-  {
-    id: "bday-decor-balloon", cat: "birthday", sub: "decor", name: "Organic Balloon Garland Setup",
-    short: "Pastel or bold balloon garlands with a name backdrop and cake table.",
-    desc: "Hand-built organic balloon garlands framing a custom name backdrop, a styled cake table with stands and props, and a welcome sign. Ideal for homes, restaurants and rooftop parties.",
-    price: 18000, vendor: "balloon-bari", city: "Chattogram", areas: ["Chattogram", "Dhaka"],
-    images: [IMG.bFriends, IMG.bRoomSetup, IMG.bCandlesGirl],
-    options: [["neon-sign", "Neon 'Happy Birthday' sign", 3500], ["number-balloons", "Giant number balloons", 2500], ["ceiling", "Ceiling balloon fill", 4000]],
-    themes: ["Pastel Dream", "Bold & Bright", "Gold & Black"], includes: ["Balloon garland", "Backdrop", "Cake table styling"],
-    rating: 4.8, reviews: 156, tags: ["balloons", "kids", "backdrop", "cake table"], featured: true,
-  },
-  {
-    id: "bday-decor-dessert", cat: "birthday", sub: "decor", name: "Dessert Table & Theme Styling",
-    short: "A themed dessert table with tiered stands, florals and personalised signage.",
-    desc: "A fully styled dessert table — tiered stands, fresh flowers, themed toppers and personalised signage — designed around your theme. Cake and desserts can be added separately.",
-    price: 24000, vendor: "utshob-party", city: "Dhaka", areas: ["Dhaka", "Gazipur", "Narayanganj"],
-    images: [IMG.bDessertTable, IMG.bButterflyCake],
-    options: [["cake-3tier", "Three-tier themed cake", 9500], ["cupcakes", "48 themed cupcakes", 4800]],
-    themes: ["Pastel Dream", "Jungle Safari", "Under the Sea"], includes: ["Dessert table", "Stands", "Florals", "Signage"],
-    rating: 4.7, reviews: 88, tags: ["dessert table", "theme", "cake", "first birthday"],
-  },
-  {
-    id: "bday-sit-kids", maxGuests: 40, cat: "birthday", sub: "sitting-area", name: "Kids' Party Seating & Play Corner",
-    short: "Mini tables, colourful chairs and a soft-play corner for up to 40 children.",
-    desc: "Child-sized tables and chairs, themed tablecloths and a supervised soft-play corner with mats, blocks and a mini ball pit. Priced per child; minimum 15.",
-    price: 350, unit: "guest", min: 15, vendor: "utshob-party", city: "Dhaka", areas: ["Dhaka", "Gazipur"],
-    images: [IMG.bKidsIndoor, IMG.bKidsHats],
-    options: [["play-host", "Play host for games", 60], ["party-hats", "Party hats & favours", 120]],
-    themes: ["Jungle Safari", "Under the Sea", "Bold & Bright"], includes: ["Kids' tables & chairs", "Tablecloths", "Soft-play corner"],
-    rating: 4.6, reviews: 64, tags: ["kids", "seating", "play area", "first birthday"],
-  },
-  {
-    id: "bday-sit-rooftop", maxGuests: 90, cat: "birthday", sub: "sitting-area", name: "Rooftop Lounge Seating",
-    short: "Pallet sofas, floor cushions and low tables for adult birthdays.",
-    desc: "A relaxed rooftop lounge for 30–60 guests: pallet sofas, floor cushions, rugs, low tables and lanterns. Great for surprise parties and sunset celebrations.",
-    price: 16000, vendor: "shonar-seating", city: "Dhaka", areas: ["Dhaka"],
-    images: [IMG.bOutdoorKids, IMG.bLaughter],
-    options: [["extra-30", "Seating for 30 more guests", 7000], ["rugs", "Kilim rug upgrade", 3000]],
-    themes: ["Boho Sunset", "Gold & Black"], includes: ["Lounge seating", "Rugs", "Low tables", "Setup"],
-    rating: 4.5, reviews: 37, tags: ["rooftop", "lounge", "surprise party", "adults"],
-  },
-  {
-    id: "bday-light-sparkle", cat: "birthday", sub: "lighting", name: "Sparkle Cake Moment Lighting",
-    short: "Fairy lights, LED marquee letters and cold-spark fountains for the cake cut.",
-    desc: "Warm fairy-light curtains behind the cake table, LED marquee letters of the birthday name and two indoor-safe cold-spark fountains timed for the cake moment.",
-    price: 12000, vendor: "prodip-lighting", city: "Dhaka", areas: ["Dhaka", "Gazipur", "Narayanganj"],
-    images: [IMG.bSparklers, IMG.bSparkCake],
-    options: [["cold-spark-4", "Upgrade to 4 cold-spark fountains", 4000], ["marquee-age", "Marquee age numbers", 2500]],
-    themes: ["Gold & Black", "Pastel Dream"], includes: ["Fairy curtains", "Marquee letters", "2 cold-spark fountains", "Technician"],
-    rating: 4.7, reviews: 72, tags: ["lighting", "sparklers", "marquee", "cake cutting"],
-  },
-  {
-    id: "bday-light-candle", maxGuests: 60, cat: "birthday", sub: "lighting", name: "Candlelit Dinner Lighting",
-    short: "Candles, lanterns and amber pin-spots for intimate milestone birthdays.",
-    desc: "Flameless candles, glass lanterns and amber pin-spots for a warm, intimate dinner atmosphere — designed for 30th, 40th and 50th birthdays at home or in a private dining room.",
-    price: 9000, vendor: "aangina-events", city: "Sylhet", areas: ["Sylhet", "Moulvibazar", "Habiganj", "Dhaka"],
-    images: [IMG.bCandle, IMG.bFamilyCandles],
-    options: [["real-candles", "Real candle upgrade (venue permitting)", 2000], ["pinspots-extra", "4 extra pin-spots", 2500]],
-    themes: ["Boho Sunset", "Gold & Black"], includes: ["Flameless candles", "Lanterns", "Pin-spots"],
-    rating: 4.6, reviews: 29, tags: ["candles", "dinner", "milestone", "intimate"],
-  },
-  {
-    id: "bday-photo-story", cat: "birthday", sub: "photography-videography", name: "Birthday Story Photo & Reel",
-    short: "Three hours of candid photography and a 60-second vertical reel.",
-    desc: "A photographer for three hours capturing décor, guests and the cake moment, with 150+ edited photos and a 60-second reel ready for social media within 72 hours.",
-    price: 14000, vendor: "moyna-photography", city: "Chattogram", areas: ["Chattogram", "Dhaka"],
-    images: [IMG.bFamilyCandles, IMG.bChoco, IMG.bLaughter],
-    options: [["video-full", "Full event video (10 min)", 8000], ["prints", "20 printed photos", 2000]],
-    themes: ["Candid"], includes: ["Photographer (3 hrs)", "150+ edited photos", "60-sec reel"],
-    rating: 4.8, reviews: 95, tags: ["photography", "reel", "kids", "candid"], featured: true,
-  },
-  {
-    id: "bday-photo-first", cat: "birthday", sub: "photography-videography", name: "First Birthday Cake-Smash Session",
-    short: "A styled cake-smash and family portrait session for baby's first birthday.",
-    desc: "A gentle, baby-paced studio or home session with a styled cake-smash set, family portraits and 40 retouched images. Props and outfit changes included.",
-    price: 11000, vendor: "utshob-party", city: "Dhaka", areas: ["Dhaka"],
-    images: [IMG.bBaby, IMG.bButterflyCake],
-    options: [["album-mini", "Mini photo album", 3500], ["studio-setup", "Themed studio set", 2500]],
-    themes: ["Pastel Dream", "Under the Sea"], includes: ["Photographer", "Cake-smash set", "40 retouched images"],
-    rating: 4.9, reviews: 41, tags: ["first birthday", "cake smash", "baby", "portraits"],
-  },
-  {
-    id: "bday-booth-retro", cat: "birthday", sub: "photo-booths", name: "Retro Strip Photo Booth",
-    short: "Classic photo-strip booth with costume props and instant double strips.",
-    desc: "A retro-styled booth printing classic 2×6 photo strips (two copies per session), a costume rack of props and a digital gallery shared by QR code. Three hours.",
-    price: 15000, vendor: "chhobi-booth", city: "Dhaka", areas: ["Dhaka", "Gazipur", "Narayanganj", "Chattogram"],
-    images: [IMG.bRetroBooth, IMG.bProps],
-    options: [["gif", "Animated GIF mode", 2000], ["extra-hour", "Extra hour", 3500]],
-    themes: ["Bold & Bright", "Gold & Black"], includes: ["Booth", "Props", "Unlimited strips (3 hrs)", "Attendant"],
-    rating: 4.7, reviews: 77, tags: ["photo booth", "retro", "strips", "props"],
-  },
-  {
-    id: "bday-booth-360", cat: "birthday", sub: "photo-booths", name: "360° Video Booth",
-    short: "Slow-motion 360° videos shared to guests' phones instantly.",
-    desc: "A 360° rotating platform for up to four people that records slow-motion clips with music and branded overlays, delivered to guests by QR code on the spot.",
-    price: 22000, vendor: "chhobi-booth", city: "Dhaka", areas: ["Dhaka", "Chattogram", "Sylhet"],
-    images: [IMG.bBooth, IMG.bKidsHats],
-    options: [["overlay", "Custom animated overlay", 3000], ["extra-hour", "Extra hour", 5000]],
-    themes: ["Bold & Bright", "Gold & Black", "Pastel Dream"], includes: ["360° platform", "Operator", "Instant sharing"],
-    rating: 4.6, reviews: 53, tags: ["360 booth", "video", "slow motion", "teen party"],
-  },
-  {
-    id: "bday-sound-dj", cat: "birthday", sub: "sound", name: "Party DJ & Sound — 3 Hours",
-    short: "A party DJ with compact sound and lighting for up to 100 guests.",
-    desc: "Three hours of DJ performance with a compact 2 kW sound system, party lights and one wireless microphone for speeches and games.",
-    price: 15000, vendor: "taal-sound", city: "Dhaka", areas: ["Dhaka", "Gazipur", "Narayanganj"],
-    images: [IMG.bDjMixer, IMG.bDjEvent],
-    options: [["mc", "Party MC & games host", 6000], ["extra-hour", "Extra hour", 3500]],
-    themes: ["Bold & Bright", "Gold & Black"], includes: ["DJ", "2 kW sound", "Party lights", "1 wireless mic"],
-    rating: 4.5, reviews: 66, tags: ["dj", "music", "party", "games"],
-  },
-  {
-    id: "bday-sound-acoustic", maxGuests: 120, cat: "birthday", sub: "sound", name: "Acoustic Duo & PA",
-    short: "Live guitar-and-vocals duo performing Bangla and English favourites.",
-    desc: "A two-hour acoustic set by a guitar-and-vocals duo with a small PA, ideal for dinners and milestone birthdays. Song requests welcome in advance.",
-    price: 18000, vendor: "aangina-events", city: "Sylhet", areas: ["Sylhet", "Dhaka"],
-    images: [IMG.bCandle, IMG.bLaughter],
-    options: [["cajon", "Add a cajón player", 5000], ["extra-set", "Extra 45-minute set", 6000]],
-    themes: ["Boho Sunset"], includes: ["Acoustic duo", "PA system", "2-hour set"],
-    rating: 4.8, reviews: 22, tags: ["live music", "acoustic", "dinner", "band"],
-  },
-
-  /* ═════════════ CORPORATE EVENTS ═════════════ */
-  {
-    id: "corp-decor-stage", cat: "corporate-events", sub: "decor", name: "Conference Stage & Branding",
-    short: "Branded stage, podium, backdrop print and venue signage for conferences.",
-    desc: "A 32×16 ft conference stage with a printed brand backdrop, branded podium, directional signage, step-and-repeat media wall and registration counter wraps.",
-    price: 145000, vendor: "meghna-conference", city: "Dhaka", areas: ["Dhaka", "Chattogram", "Gazipur"],
-    images: [IMG.cStage, IMG.cAudience, IMG.cListening],
-    options: [["media-wall", "Extra step-and-repeat wall", 18000], ["led-backdrop", "LED wall instead of print (P3.9)", 95000], ["floral", "Stage floral accents", 12000]],
-    themes: ["Corporate Clean", "Tech Launch"], includes: ["Stage", "Printed backdrop", "Podium", "Signage"],
-    rating: 4.7, reviews: 58, tags: ["conference", "stage", "branding", "seminar", "launch"], featured: true,
-  },
-  {
-    id: "corp-decor-launch", cat: "corporate-events", sub: "decor", name: "Product Launch Experience Design",
-    short: "Reveal stage, experience zones and photo walls for brand launches.",
-    desc: "Concept-to-build launch design: a reveal stage with curtain or LED drop, product experience zones, branded photo walls and VIP lounge styling.",
-    price: 210000, vendor: "meghna-conference", city: "Dhaka", areas: ["Dhaka"],
-    images: [IMG.cPresentation, IMG.cPhones],
-    options: [["reveal-kabuki", "Kabuki curtain reveal", 35000], ["vip-lounge", "VIP lounge styling", 28000]],
-    themes: ["Tech Launch", "Corporate Clean"], includes: ["Concept design", "Reveal stage", "Experience zones"],
-    rating: 4.6, reviews: 19, tags: ["product launch", "brand", "activation", "reveal"],
-  },
-  {
-    id: "corp-sit-theatre", cat: "corporate-events", sub: "sitting-area", name: "Theatre & Classroom Seating",
-    short: "Padded conference chairs in theatre or classroom layouts with table skirting.",
-    desc: "Padded conference chairs arranged in theatre, classroom or U-shape layouts, with skirted tables, notepads, pens and water at every seat. Priced per attendee.",
-    price: 260, unit: "guest", min: 50, vendor: "shonar-seating", city: "Dhaka", areas: NATIONWIDE,
-    images: [IMG.cRoomBlack, IMG.cProjection, IMG.cPresentSetup],
-    options: [["writing-pads", "Branded notepads & pens", 60], ["vip-row", "VIP sofa front row", 30]],
-    themes: ["Corporate Clean"], includes: ["Chairs", "Tables & skirting", "Stationery", "Water"],
-    rating: 4.6, reviews: 102, tags: ["seating", "conference", "seminar", "training"],
-  },
-  {
-    id: "corp-sit-boardroom", maxGuests: 24, cat: "corporate-events", sub: "sitting-area", name: "Executive Boardroom Setup",
-    short: "Boardroom table, executive chairs, tablets and table microphones.",
-    desc: "A temporary executive boardroom for up to 24 people: boardroom tables, executive chairs, tablets for presentations and gooseneck table microphones.",
-    price: 48000, vendor: "meghna-conference", city: "Dhaka", areas: ["Dhaka", "Chattogram"],
-    images: [IMG.cTablets, IMG.cExecutives, IMG.cMeeting],
-    options: [["interpretation", "Interpretation headsets (24)", 18000], ["recording", "Meeting recording", 6000]],
-    themes: ["Corporate Clean"], includes: ["Boardroom tables", "Executive chairs", "Tablets", "Table mics"],
-    rating: 4.7, reviews: 26, tags: ["boardroom", "agm", "meeting", "executive"],
-  },
-  {
-    id: "corp-light-stage", cat: "corporate-events", sub: "lighting", name: "Stage Wash & Keynote Lighting",
-    short: "Even stage wash, speaker key-light and audience lighting for filming.",
-    desc: "Professional LED stage wash, key-light for speakers (camera-friendly colour temperature), audience fill for photography and a lighting desk operator.",
-    price: 55000, vendor: "padma-av", city: "Dhaka", areas: ["Dhaka", "Chattogram", "Sylhet", "Khulna"],
-    images: [IMG.cAudience, IMG.cListening],
-    options: [["truss", "Ground-support truss", 20000], ["gobo", "Logo gobo projection", 7000]],
-    themes: ["Corporate Clean", "Tech Launch"], includes: ["Stage wash", "Key light", "Audience fill", "Operator"],
-    rating: 4.7, reviews: 44, tags: ["stage lighting", "keynote", "conference", "broadcast"],
-  },
-  {
-    id: "corp-light-gala", cat: "corporate-events", sub: "lighting", name: "Annual Gala Ambient Lighting",
-    short: "Uplighting in brand colours, pin-spots and dance-floor effects.",
-    desc: "Transform a hotel ballroom for your annual dinner with uplighting in brand colours, pin-spots on tables, a logo gobo and moving-head effects for the after-party.",
-    price: 68000, vendor: "prodip-lighting", city: "Dhaka", areas: ["Dhaka", "Gazipur", "Chattogram"],
-    images: [IMG.cMeeting, IMG.cSeminar],
-    options: [["moving-heads", "8 extra moving heads", 24000], ["haze", "Haze machine", 6000]],
-    themes: ["Gala Night", "Corporate Clean"], includes: ["Uplighting", "Pin-spots", "Gobo", "Operator"],
-    rating: 4.5, reviews: 31, tags: ["gala", "annual dinner", "ambient", "ballroom"],
-  },
-  {
-    id: "corp-photo-coverage", cat: "corporate-events", sub: "photography-videography", name: "Conference Photo & Video Coverage",
-    short: "Speaker, audience and networking coverage with same-day highlights.",
-    desc: "Two photographers and a videographer covering speakers, audience and networking, with 20 same-day selects for social media and a 2-minute highlight video in 5 working days.",
-    price: 65000, vendor: "lens-and-ledger", city: "Dhaka", areas: NATIONWIDE,
-    images: [IMG.cPhones, IMG.cSeminar, IMG.cPresentation],
-    options: [["live-stream", "Two-camera live stream", 35000], ["headshots", "Headshot corner", 12000]],
-    themes: ["Corporate Clean"], includes: ["2 photographers", "1 videographer", "Same-day selects", "Highlight video"],
-    rating: 4.8, reviews: 67, tags: ["photography", "videography", "conference", "live stream"], featured: true,
-  },
-  {
-    id: "corp-photo-headshot", cat: "corporate-events", sub: "photography-videography", name: "Corporate Headshot Studio",
-    short: "On-site headshot studio with retouched images for up to 60 staff.",
-    desc: "A pop-up studio at your office or event with lighting, backdrop and a photographer. Up to 60 people, two retouched images each, delivered within 48 hours.",
-    price: 30000, vendor: "lens-and-ledger", city: "Dhaka", areas: ["Dhaka", "Chattogram"],
-    images: [IMG.cExecutives, IMG.cProgram],
-    options: [["extra-30", "30 more people", 12000], ["groomer", "Hair & make-up touch-ups", 8000]],
-    themes: ["Corporate Clean"], includes: ["Pop-up studio", "Photographer", "Retouching"],
-    rating: 4.7, reviews: 23, tags: ["headshots", "linkedin", "staff photos", "portraits"],
-  },
-  {
-    id: "corp-booth-brand", cat: "corporate-events", sub: "photo-booths", name: "Branded Photo Booth with Data Capture",
-    short: "Branded prints, social sharing and opt-in lead capture.",
-    desc: "A booth with branded print frames, instant social sharing and optional opt-in email capture for activations, with an analytics report after the event.",
-    price: 32000, vendor: "chhobi-booth", city: "Dhaka", areas: ["Dhaka", "Chattogram", "Sylhet"],
-    images: [IMG.cRegistration, IMG.cBadges],
-    options: [["analytics", "Engagement analytics report", 5000], ["extra-hour", "Extra hour", 5000]],
-    themes: ["Tech Launch", "Corporate Clean"], includes: ["Branded booth", "Prints", "Social sharing", "Attendant"],
-    rating: 4.6, reviews: 34, tags: ["photo booth", "activation", "brand", "leads"],
-  },
-  {
-    id: "corp-booth-registration", cat: "corporate-events", sub: "photo-booths", name: "Registration Desk & Badge Photo Booth",
-    short: "QR check-in with on-the-spot photo badges.",
-    desc: "A staffed registration desk with QR check-in and a photo station that prints personalised attendee badges on the spot, for up to 500 attendees.",
-    price: 40000, vendor: "meghna-conference", city: "Dhaka", areas: ["Dhaka", "Chattogram"],
-    images: [IMG.cBadges, IMG.cRegistration, IMG.cProgram],
-    options: [["lanyards", "Branded lanyards (500)", 15000], ["extra-desk", "Extra check-in desk", 9000]],
-    themes: ["Corporate Clean"], includes: ["Registration staff", "QR check-in", "Badge printing"],
-    rating: 4.5, reviews: 18, tags: ["registration", "badges", "check-in", "conference"],
-  },
-  {
-    id: "corp-sound-conference", cat: "corporate-events", sub: "sound", name: "Conference PA & Microphones",
-    short: "Line-array PA, lectern and wireless mics with a sound engineer.",
-    desc: "Speech-optimised line-array PA for up to 1,000 attendees, lectern and lapel microphones, eight wireless handhelds for Q&A and a dedicated sound engineer.",
-    price: 52000, vendor: "padma-av", city: "Dhaka", areas: NATIONWIDE,
-    images: [IMG.cMics, IMG.cConsole, IMG.cMonitors],
-    options: [["recording", "Multitrack recording", 8000], ["interpretation", "Simultaneous interpretation system", 45000]],
-    themes: ["Corporate Clean"], includes: ["Line-array PA", "Lectern & lapel mics", "8 wireless mics", "Engineer"],
-    rating: 4.8, reviews: 52, tags: ["sound", "pa system", "microphones", "conference"],
-  },
-  {
-    id: "corp-sound-band", cat: "corporate-events", sub: "sound", name: "Annual Dinner Band & Sound",
-    short: "A five-piece live band with full stage sound for company celebrations.",
-    desc: "A five-piece band playing Bangla rock, folk fusion and pop for 90 minutes, with full backline and stage sound.",
-    price: 110000, vendor: "taal-sound", city: "Dhaka", areas: ["Dhaka", "Chattogram"],
-    images: [IMG.cSeminar, IMG.cConsole],
-    options: [["extra-set", "Extra 45-minute set", 30000], ["dj-after", "DJ after-party (2 hrs)", 15000]],
-    themes: ["Gala Night"], includes: ["5-piece band", "Backline", "Stage sound", "Engineer"],
-    rating: 4.7, reviews: 15, tags: ["band", "annual dinner", "live music", "gala"],
-  },
-
-  /* ═════════════ FAMILY EVENTS ═════════════ */
-  {
-    id: "fam-decor-aqiqah", cat: "family-events", sub: "decor", name: "Aqiqah & Naming Ceremony Décor",
-    short: "Soft florals, a name backdrop and a styled family table at home or in a hall.",
-    desc: "Gentle décor for aqiqah and naming ceremonies: a floral name backdrop, styled family table, entrance garlands and a small cradle corner for photographs.",
-    price: 32000, vendor: "nakshi-decor", city: "Dhaka", areas: ["Dhaka", "Gazipur", "Narayanganj"],
-    images: [IMG.fElders, IMG.fGarland, IMG.fDiya],
-    options: [["cradle", "Decorated cradle corner", 6000], ["entrance-arch", "Floral entrance arch", 9000]],
-    themes: ["Classic Bengali", "Ivory & Blush"], includes: ["Name backdrop", "Family table styling", "Garlands"],
-    rating: 4.8, reviews: 61, tags: ["aqiqah", "naming", "baby", "home"], featured: true,
-  },
-  {
-    id: "fam-decor-mehendi", cat: "family-events", sub: "decor", name: "Mehendi Evening Styling",
-    short: "Colourful drapes, cushions and a henna artist station for family mehendi nights.",
-    desc: "Vibrant drapes, block-print cushions, hanging lanterns and a dedicated mehendi artist station with comfortable seating for an intimate family evening.",
-    price: 45000, vendor: "rupsha-events", city: "Khulna", areas: ["Khulna", "Jashore", "Satkhira", "Dhaka"],
-    images: [IMG.fMehndi, IMG.fHennaWoman, IMG.wHenna],
-    options: [["henna-artists", "Two mehendi artists (4 hrs)", 10000], ["swing", "Decorated jhula swing", 8000]],
-    themes: ["Holud Yellow", "Classic Bengali"], includes: ["Drapes", "Cushion seating", "Lanterns", "Artist station"],
-    rating: 4.7, reviews: 38, tags: ["mehendi", "henna", "family night", "engagement"],
-  },
-  {
-    id: "fam-sit-dinner", cat: "family-events", sub: "sitting-area", name: "Family Dinner Long-Table Seating",
-    short: "Long banquet tables with runners and candles for 20–120 guests.",
-    desc: "Long, family-style banquet tables with linen runners, comfortable chairs, candles and seasonal florals — perfect for anniversaries, Eid dinners and reunions. Priced per guest.",
-    price: 380, unit: "guest", min: 20, vendor: "shonar-seating", city: "Dhaka", areas: NATIONWIDE,
-    images: [IMG.fOutdoorDining, IMG.fHomeDinner, IMG.fCandles],
-    options: [["florals", "Fresh table florals", 80], ["name-cards", "Calligraphy name cards", 25]],
-    themes: ["Ivory & Blush", "Rustic Jute", "Classic Bengali"], includes: ["Tables", "Chairs", "Runners", "Candles"],
-    rating: 4.7, reviews: 83, tags: ["dinner", "anniversary", "eid", "reunion", "long table"],
-  },
-  {
-    id: "fam-sit-courtyard", maxGuests: 250, cat: "family-events", sub: "sitting-area", name: "Courtyard Shamiana & Seating",
-    short: "A shamiana with seating for courtyard or rooftop family gatherings.",
-    desc: "A printed shamiana tent with side walls, carpets, chairs, fans and a small elevated platform for elders — a reliable setup for milads, family get-togethers and homecomings.",
-    price: 42000, vendor: "aangina-events", city: "Sylhet", areas: ["Sylhet", "Moulvibazar", "Habiganj", "Sunamganj"],
-    images: [IMG.fBackyard, IMG.fDinnerParty],
-    options: [["fans", "Six pedestal fans", 3000], ["carpet-upgrade", "Carpet upgrade", 5000]],
-    themes: ["Classic Bengali"], includes: ["Shamiana", "Carpets", "Chairs", "Elders' platform"],
-    rating: 4.6, reviews: 45, tags: ["shamiana", "courtyard", "milad", "rooftop"],
-  },
-  {
-    id: "fam-light-string", cat: "family-events", sub: "lighting", name: "String Lights & Lanterns",
-    short: "Festoon bulbs and lanterns over a courtyard, garden or rooftop.",
-    desc: "Warm festoon bulbs zig-zagged overhead, paper and brass lanterns and soft path lighting, installed and removed by our crew.",
-    price: 15000, vendor: "prodip-lighting", city: "Dhaka", areas: ["Dhaka", "Gazipur", "Narayanganj", "Cumilla"],
-    images: [IMG.fStringLights, IMG.fForestLights],
-    options: [["path-lights", "Path lighting (20 stakes)", 3500], ["facade", "House facade lights", 9000]],
-    themes: ["Rustic Jute", "Boho Sunset"], includes: ["Festoon lights", "Lanterns", "Installation"],
-    rating: 4.7, reviews: 97, tags: ["string lights", "festoon", "rooftop", "garden"],
-  },
-  {
-    id: "fam-light-eid", cat: "family-events", sub: "lighting", name: "Eid & Festive House Lighting",
-    short: "Facade fairy lights and a lit entrance for Eid and family homecomings.",
-    desc: "Full-house facade fairy lights, a lit entrance arch and balcony lanterns for Eid, homecomings and wedding-season family gatherings. Includes standby technician on the first night.",
-    price: 22000, vendor: "rupsha-events", city: "Khulna", areas: ["Khulna", "Jashore", "Barishal", "Dhaka"],
-    images: [IMG.fDiya, IMG.fCandles],
-    options: [["extra-nights", "Keep lights 3 extra nights", 6000], ["led-crescent", "LED crescent & star motif", 4500]],
-    themes: ["Classic Bengali"], includes: ["Facade lights", "Entrance arch", "Lanterns", "Technician"],
-    rating: 4.5, reviews: 33, tags: ["eid", "facade", "house lighting", "festive"],
-  },
-  {
-    id: "fam-photo-reunion", cat: "family-events", sub: "photography-videography", name: "Family Gathering Photography",
-    short: "Candid coverage plus a formal three-generation family portrait.",
-    desc: "Four hours of candid photography with a lit setup for a formal multi-generation family portrait, 200+ edited images and an online album you can share with relatives abroad.",
-    price: 18000, vendor: "golpo-frames", city: "Dhaka", areas: NATIONWIDE,
-    images: [IMG.fEmbrace, IMG.fPartyHats, IMG.fBackyard],
-    options: [["video-highlight", "3-minute highlight video", 9000], ["framed-print", "Framed 16×24 family portrait", 4500]],
-    themes: ["Candid", "Documentary"], includes: ["Photographer (4 hrs)", "Family portrait setup", "200+ photos"],
-    rating: 4.9, reviews: 58, tags: ["family portrait", "reunion", "anniversary", "photography"], featured: true,
-  },
-  {
-    id: "fam-photo-anniversary", cat: "family-events", sub: "photography-videography", name: "Anniversary Film & Portraits",
-    short: "A short documentary film with family interviews and couple portraits.",
-    desc: "A heartfelt 5-minute film featuring short interviews with children and grandchildren, archival photo scans and a couple portrait session — ideal for 25th and 50th anniversaries.",
-    price: 35000, vendor: "moyna-photography", city: "Chattogram", areas: ["Chattogram", "Dhaka", "Sylhet"],
-    images: [IMG.fBrideHands, IMG.fLivelyDinner],
-    options: [["archival-scan", "Scan 100 archival photos", 5000], ["screening", "Projector screening at event", 7000]],
-    themes: ["Documentary", "Cinematic"], includes: ["Interviews", "5-min film", "Couple portraits"],
-    rating: 4.8, reviews: 21, tags: ["anniversary", "film", "documentary", "golden jubilee"],
-  },
-  {
-    id: "fam-booth-polaroid", maxGuests: 150, cat: "family-events", sub: "photo-booths", name: "Polaroid Guestbook Corner",
-    short: "An attendant with instant cameras and a guestbook for messages.",
-    desc: "An attendant photographs every family group on instant film, then guests paste their photo into a linen guestbook with a handwritten message. 60 instant photos included.",
-    price: 12000, vendor: "chhobi-booth", city: "Dhaka", areas: ["Dhaka", "Gazipur", "Chattogram"],
-    images: [IMG.fProps, IMG.fMasks],
-    options: [["extra-film", "40 more instant photos", 4000], ["linen-book", "Personalised linen guestbook", 2500]],
-    themes: ["Rustic Jute", "Playful"], includes: ["Attendant", "Instant cameras", "60 photos", "Guestbook"],
-    rating: 4.7, reviews: 27, tags: ["polaroid", "guestbook", "instant photos"],
-  },
-  {
-    id: "fam-booth-props", cat: "family-events", sub: "photo-booths", name: "Family Fun Props Booth",
-    short: "A themed backdrop with Bangla-humour props and unlimited prints.",
-    desc: "A light-hearted booth with a themed backdrop, Bangla-humour props for every age and unlimited 4×6 prints for three hours.",
-    price: 14000, vendor: "chhobi-booth", city: "Dhaka", areas: ["Dhaka", "Narayanganj"],
-    images: [IMG.fMasks, IMG.fPartyHats],
-    options: [["extra-hour", "Extra hour", 3500], ["magnet-prints", "Fridge-magnet prints", 3000]],
-    themes: ["Playful", "Classic Bengali"], includes: ["Backdrop", "Props", "Unlimited prints (3 hrs)"],
-    rating: 4.6, reviews: 19, tags: ["photo booth", "props", "family", "fun"],
-  },
-  {
-    id: "fam-sound-milad", cat: "family-events", sub: "sound", name: "Milad & Speech Sound System",
-    short: "Clear, gentle sound for milads, speeches and family programmes.",
-    desc: "A compact, speech-focused sound system with two wireless microphones and a lectern mic, set up discreetly and staffed by a technician.",
-    price: 8000, vendor: "aangina-events", city: "Sylhet", areas: ["Sylhet", "Moulvibazar", "Dhaka"],
-    images: [IMG.fDjOutdoor, IMG.fElders],
-    options: [["extra-mics", "Two extra wireless mics", 1500], ["outdoor-speakers", "Outdoor speaker pair", 3000]],
-    themes: ["Classic Bengali"], includes: ["Speech PA", "2 wireless mics", "Technician"],
-    rating: 4.6, reviews: 40, tags: ["milad", "speech", "sound", "microphone"],
-  },
-  {
-    id: "fam-sound-gaan", cat: "family-events", sub: "sound", name: "Gaaner Adda — Live Rabindra & Nazrul",
-    short: "Live Rabindra Sangeet and Nazrul Geeti with harmonium and tabla.",
-    desc: "An evening of live Rabindra Sangeet, Nazrul Geeti and folk with a vocalist, harmonium and tabla, plus a warm acoustic sound setup. Perfect for anniversaries and family reunions.",
-    price: 25000, vendor: "taal-sound", city: "Dhaka", areas: ["Dhaka", "Gazipur", "Narayanganj"],
-    images: [IMG.fDjLive, IMG.fLivelyDinner],
-    options: [["flute", "Add bansuri (flute)", 5000], ["extra-hour", "Extra hour", 6000]],
-    themes: ["Classic Bengali"], includes: ["Vocalist", "Harmonium & tabla", "Acoustic PA"],
-    rating: 4.9, reviews: 24, tags: ["rabindra sangeet", "nazrul geeti", "live music", "adda"],
-  },
-
-  /* ═════════════ FOOD & CULINARY ═════════════ */
-  {
-    id: "food-platter-kacchi", cat: "food-culinary", sub: "platter", name: "Kacchi Biryani Wedding Platter",
-    short: "Old Dhaka-style mutton kacchi with borhani, jali kabab and firni.",
-    desc: "A celebration platter per guest: mutton kacchi biryani, jali kabab, chicken roast, salad, borhani and firni in clay bowls, served by uniformed staff.",
-    price: 950, unit: "guest", min: 50, vendor: "dhaka-platters", city: "Dhaka", areas: ["Dhaka", "Gazipur", "Narayanganj", "Munshiganj"],
-    images: [IMG.pWeddingBuffet, IMG.pBanquet, IMG.pDiverse],
-    options: [["jorda", "Add jorda", 60], ["shahi-tukra", "Add shahi tukra", 90], ["waiter-upgrade", "Extra service staff", 40]],
-    themes: ["Classic Bengali", "Royal Red & Gold"], includes: ["Kacchi", "Kabab & roast", "Borhani", "Firni", "Service staff"],
-    rating: 4.9, reviews: 312, tags: ["kacchi", "biryani", "wedding food", "catering", "borhani"], featured: true,
-  },
-  {
-    id: "food-platter-mezban", cat: "food-culinary", sub: "platter", name: "Chattogram Mezban Platter",
-    short: "Mezbani beef, kala bhuna, chanar dal and white rice — the Chattogram classic.",
-    desc: "An authentic Chattogram mezban spread per guest: mezbani beef curry, kala bhuna, chanar dal, white rice and salad, cooked by mezban bawarchis.",
-    price: 720, unit: "guest", min: 80, vendor: "karnaphuli-catering", city: "Chattogram", areas: ["Chattogram", "Cox's Bazar", "Feni", "Dhaka"],
-    images: [IMG.pGourmet, IMG.pBanquet],
-    options: [["nalli", "Add nalli nihari", 110], ["doi", "Add mishti doi", 50]],
-    themes: ["Classic Bengali"], includes: ["Mezbani beef", "Kala bhuna", "Chanar dal", "Rice", "Service"],
-    rating: 4.8, reviews: 204, tags: ["mezban", "chattogram", "beef", "catering"],
-  },
-  {
-    id: "food-platter-rajshahi", cat: "food-culinary", sub: "platter", name: "Barind Heritage Platter",
-    short: "Rajshahi kalai roti, hash bhuna, mango chutney and polao.",
-    desc: "A North Bengal heritage menu per guest: chicken polao, hash (duck) bhuna, kalai roti with begun bhorta, mango chutney in season and Rajshahi sweets.",
-    price: 680, unit: "guest", min: 50, vendor: "barind-kitchen", city: "Rajshahi", areas: ["Rajshahi", "Natore", "Bogura", "Pabna", "Chapainawabganj"],
-    images: [IMG.pDiverse, IMG.pSalads],
-    options: [["kalai-live", "Live kalai roti counter", 45], ["sweets", "Premium Rajshahi sweets box", 70]],
-    themes: ["Classic Bengali", "Rustic Jute"], includes: ["Polao", "Hash bhuna", "Kalai roti", "Sweets"],
-    rating: 4.8, reviews: 88, tags: ["rajshahi", "kalai roti", "heritage", "catering", "polao"],
-  },
-  {
-    id: "food-platter-grazing", cat: "food-culinary", sub: "platter", name: "Modern Grazing & Canapé Table",
-    short: "Cheese, fruit, canapés and mini desserts for corporate and evening events.",
-    desc: "A styled grazing table per guest with local and imported cheese, seasonal fruit, canapés, finger sandwiches and mini desserts, with florals and labels.",
-    price: 850, unit: "guest", min: 30, vendor: "dhaka-platters", city: "Dhaka", areas: ["Dhaka", "Gazipur"],
-    images: [IMG.pCheese, IMG.pAppetizers, IMG.pFloral],
-    options: [["mocktails", "Mocktail bar", 150], ["dessert-upgrade", "Dessert upgrade", 120]],
-    themes: ["Modern Minimal", "Corporate Clean"], includes: ["Grazing table", "Canapés", "Mini desserts", "Styling"],
-    rating: 4.7, reviews: 76, tags: ["grazing", "canapes", "corporate", "cocktail"],
-  },
-  {
-    id: "food-fuchka-live", cat: "food-culinary", sub: "fuchka", name: "Live Fuchka Counter",
-    short: "Fresh fuchka with tetul tok, served live by two fuchka mamas.",
-    desc: "A decorated live counter with two fuchka makers serving crisp fuchka with spiced potato-dal filling, egg topping and three tok options — tetul, tok-jhal and dahi. Priced per plate (8 pieces).",
-    price: 90, unit: "plate", min: 100, vendor: "fuchka-junction", city: "Dhaka", areas: ["Dhaka", "Gazipur", "Narayanganj"],
-    images: [IMG.fuSpicy, IMG.fuTamarind, IMG.fuBasket],
-    options: [["dahi-fuchka", "Add dahi fuchka", 30], ["egg-topping", "Extra egg topping", 10]],
-    themes: ["Playful", "Classic Bengali"], includes: ["Decorated cart", "2 servers", "3 tok options", "Disposable plates"],
-    rating: 4.9, reviews: 266, tags: ["fuchka", "street food", "live counter", "tetul"], featured: true,
-  },
-  {
-    id: "food-fuchka-chotpoti", cat: "food-culinary", sub: "fuchka", name: "Fuchka & Chotpoti Combo Cart",
-    short: "Fuchka and hot chotpoti served from a rickshaw-art cart.",
-    desc: "A rickshaw-art painted cart serving fuchka and steaming chotpoti with egg, onion and tetul. Per plate pricing (half fuchka, half chotpoti).",
-    price: 110, unit: "plate", min: 100, vendor: "fuchka-junction", city: "Dhaka", areas: ["Dhaka", "Narayanganj"],
-    images: [IMG.fuTray, IMG.fuCrispy],
-    options: [["jhalmuri", "Add jhalmuri cone", 30], ["extra-server", "Extra server", 8]],
-    themes: ["Playful", "Holud Yellow"], includes: ["Rickshaw-art cart", "Fuchka & chotpoti", "Servers"],
-    rating: 4.8, reviews: 143, tags: ["chotpoti", "fuchka", "cart", "rickshaw art"],
-  },
-  {
-    id: "food-fuchka-premium", cat: "food-culinary", sub: "fuchka", name: "Gourmet Fuchka Shots",
-    short: "Plated fuchka shots with flavoured waters for weddings and corporate events.",
-    desc: "Elegant plated fuchka 'shots' with five flavoured waters — tetul, mint, green mango, borhani and jaljeera — served on trays by staff. Per plate (6 shots).",
-    price: 150, unit: "plate", min: 80, vendor: "dhaka-platters", city: "Dhaka", areas: ["Dhaka", "Gazipur"],
-    images: [IMG.fuClay, IMG.fuMacro],
-    options: [["borhani-water", "Borhani water upgrade", 15], ["tray-service", "Butler tray service", 20]],
-    themes: ["Modern Minimal", "Royal Red & Gold"], includes: ["5 flavoured waters", "Plated service", "Staff"],
-    rating: 4.7, reviews: 58, tags: ["gourmet", "fuchka shots", "plated", "wedding"],
-  },
-  {
-    id: "food-fuchka-rajshahi", cat: "food-culinary", sub: "fuchka", name: "North Bengal Fuchka Stall",
-    short: "Fuchka with doi and tamarind, Rajshahi-style, for outdoor events.",
-    desc: "An outdoor-ready fuchka stall run by our Rajshahi team, with doi-fuchka, tamarind water and a green chilli spice bar. Per plate (8 pieces).",
-    price: 75, unit: "plate", min: 100, vendor: "barind-kitchen", city: "Rajshahi", areas: ["Rajshahi", "Natore", "Bogura"],
-    images: [IMG.fuGolgappa, IMG.fuCrispy],
-    options: [["doi-extra", "Extra doi topping", 10], ["stall-branding", "Custom stall banner", 1500]],
-    themes: ["Playful", "Rustic Jute"], includes: ["Stall", "Servers", "Doi & tamarind"],
-    rating: 4.6, reviews: 47, tags: ["rajshahi", "fuchka", "outdoor", "doi fuchka"],
-  },
-  {
-    id: "food-cha-milk", cat: "food-culinary", sub: "cha-coffee", name: "Tong-er Milk Cha Station",
-    short: "Classic Bangladeshi milk cha brewed live in a kettle, served in clay cups.",
-    desc: "A tong-style cha station brewing strong milk cha live, served in clay bhar cups with biscuits. Priced per cup.",
-    price: 35, unit: "cup", min: 100, vendor: "cha-ghor", city: "Sylhet", areas: NATIONWIDE,
-    images: [IMG.chaPour, IMG.chaStall, IMG.chaClay],
-    options: [["clay-cups", "Clay bhar cups", 8], ["biscuits", "Bakery biscuits", 10]],
-    themes: ["Classic Bengali", "Rustic Jute"], includes: ["Cha maker", "Live brewing", "Cups"],
-    rating: 4.9, reviews: 178, tags: ["cha", "milk tea", "tong", "clay cup"], featured: true,
-  },
-  {
-    id: "food-cha-saat", cat: "food-culinary", sub: "cha-coffee", name: "Sreemangal Seven-Layer & Masala Cha Bar",
-    short: "The famous seven-layer cha plus masala, ginger and lemon cha.",
-    desc: "A showpiece cha bar serving Sreemangal-style seven-layer cha alongside masala, ginger, lemon and tulsi cha, brewed with Sylhet garden leaves. Priced per cup.",
-    price: 70, unit: "cup", min: 80, vendor: "cha-ghor", city: "Sylhet", areas: ["Sylhet", "Moulvibazar", "Dhaka", "Chattogram"],
-    images: [IMG.chaTray, IMG.chaSun],
-    options: [["seven-layer-only", "Seven-layer only menu", 25], ["takeaway-tea", "Tea leaf favour packs", 40]],
-    themes: ["Classic Bengali"], includes: ["Cha masters", "5 cha varieties", "Glassware"],
-    rating: 4.8, reviews: 64, tags: ["seven layer tea", "masala cha", "sreemangal", "sylhet"],
-  },
-  {
-    id: "food-coffee-espresso", cat: "food-culinary", sub: "cha-coffee", name: "Espresso Bar with Barista",
-    short: "Lattes, cappuccinos and cold brew from a mobile espresso bar.",
-    desc: "A mobile espresso bar with two baristas serving espresso, cappuccino, latte, hot chocolate and cold brew made with locally roasted beans. Priced per cup.",
-    price: 160, unit: "cup", min: 60, vendor: "brew-cart", city: "Dhaka", areas: ["Dhaka", "Gazipur", "Chattogram"],
-    images: [IMG.coBarista, IMG.coEspresso, IMG.coBrew],
-    options: [["latte-art", "Latte art & branded cups", 25], ["oat-milk", "Oat milk option", 30]],
-    themes: ["Modern Minimal", "Corporate Clean"], includes: ["2 baristas", "Espresso machine", "Cups & sleeves"],
-    rating: 4.8, reviews: 92, tags: ["coffee", "espresso", "barista", "latte", "corporate"],
-  },
-  {
-    id: "food-coffee-station", cat: "food-culinary", sub: "cha-coffee", name: "Self-Serve Cha & Coffee Station",
-    short: "Hot water urns, premium tea bags, instant coffee and snacks for seminars.",
-    desc: "A refilled self-serve station for seminars and workshops with hot water urns, premium tea bags, coffee, milk, sugar and cookies, attended by one staff member. Priced per cup.",
-    price: 45, unit: "cup", min: 100, vendor: "brew-cart", city: "Dhaka", areas: NATIONWIDE,
-    images: [IMG.coStation, IMG.chaStreet],
-    options: [["snacks", "Add samosa & singara", 35], ["branded-cups", "Branded cups", 6]],
-    themes: ["Corporate Clean"], includes: ["Urns & dispensers", "Tea & coffee", "Cookies", "Attendant"],
-    rating: 4.5, reviews: 51, tags: ["tea break", "coffee station", "seminar", "self serve"],
-  },
+type Row = [
+  id: string, sub: string,
+  name: string, nameBn: string,
+  short: string, shortBn: string,
+  price: number, image: ImageRef,
+  includes: string[], includesBn: string[],
+  tags: string[], featured?: boolean, vendor?: string,
 ];
 
-export const SERVICES: Service[] = DEFS.map(make);
+const DESC_EN = "Priced for every 50 guests and delivered by a verified Dhaka partner. Setup, on-site coordination and teardown are included.";
+const DESC_BN = "প্রতি ৫০ জন অতিথির জন্য মূল্য নির্ধারিত; ঢাকার যাচাইকৃত পার্টনার সেবাটি প্রদান করবে। সেটআপ, অনুষ্ঠানস্থলে সমন্বয় ও গুছিয়ে নেওয়া অন্তর্ভুক্ত।";
+
+const DHAKA_AREAS = ["Dhaka"];
+
+function build(cat: string, rows: Row[], seed: number): Service[] {
+  return rows.map(([id, sub, name, nameBn, short, shortBn, price, image, includes, includesBn, tags, featured, vendor], i) => ({
+    id, categorySlug: cat, subcategorySlug: sub,
+    name, nameBn, shortDescription: short, shortDescriptionBn: shortBn,
+    description: `${short} ${DESC_EN}`, descriptionBn: `${shortBn} ${DESC_BN}`,
+    startingPrice: price, unit: "per50", minQuantity: 50,
+    vendorId: vendor ?? VENDOR[cat][sub], city: "Dhaka", serviceAreas: DHAKA_AREAS,
+    images: [image],
+    options: (OPTS[sub] ?? []).map(([oid, label, labelBn, priceDelta]) => ({ id: oid, label, labelBn, priceDelta })),
+    themes: [], includes, includesBn,
+    rating: Math.round((4.5 + ((seed + i * 7) % 5) / 10) * 10) / 10,
+    reviewCount: 18 + ((seed * 13 + i * 29) % 140),
+    tags, featured: featured ?? false, active: true, isDemo: false,
+  }));
+}
+
+/* ═════════════ WEDDING ═════════════ */
+const WEDDING: Row[] = [
+  ["wed-decor-rajkiya", "decor", "Rajokiyo Reception Stage", "রাজকীয় রিসেপশন মঞ্চ", "A royal red-and-gold reception stage with marigold and rose installations under a floral canopy.", "ফুলের চাঁদোয়ার নিচে গাঁদা ও গোলাপে সাজানো লাল-সোনালি রাজকীয় রিসেপশন মঞ্চ।", 32000, IMG.wRedGold, ["Stage and backdrop", "Bridal seating", "Floral installations", "Setup and teardown"], ["মঞ্চ ও ব্যাকড্রপ", "বর-কনের আসন", "ফুলের ইনস্টলেশন", "সেটআপ ও গুছিয়ে নেওয়া"], ["reception", "royal", "stage", "biye"], true],
+  ["wed-decor-holud", "decor", "Gaye Holud Marigold Stage", "গায়ে হলুদ গাঁদা মঞ্চ", "A bright holud stage with marigold curtains, colourful umbrellas and low pidi seating.", "গাঁদা ফুলের পর্দা, রঙিন ছাতা ও পিঁড়ি আসনে সাজানো উজ্জ্বল হলুদ মঞ্চ।", 14000, IMG.wStagePink, ["Holud stage", "Marigold curtains", "Pidi seating", "Kula tray station"], ["হলুদ মঞ্চ", "গাঁদা ফুলের পর্দা", "পিঁড়ি আসন", "কুলা সাজানো"], ["holud", "marigold", "haldi"], true],
+  ["wed-decor-pastel", "decor", "Pastel Floral Akd Stage", "প্যাস্টেল ফুলের আকদ মঞ্চ", "A soft white-and-pastel stage with plush seating for akd and engagement ceremonies.", "আকদ ও এনগেজমেন্টের জন্য নরম আসনসহ সাদা-প্যাস্টেল ফুলের মঞ্চ।", 18000, IMG.wSeatRomantic, ["Floral stage", "Couple seating", "Aisle flowers", "Setup and teardown"], ["ফুলের মঞ্চ", "দম্পতির আসন", "পথের ফুলসজ্জা", "সেটআপ ও গুছিয়ে নেওয়া"], ["akd", "engagement", "pastel"]],
+  ["wed-decor-mehendi", "decor", "Mehendi Night Décor", "মেহেদি রাতের সাজসজ্জা", "Vibrant floral styling with drapes and floor cushions for a mehendi evening.", "মেহেদি সন্ধ্যার জন্য পর্দা, ফ্লোর কুশন ও রঙিন ফুলের সাজ।", 12000, IMG.wStageVibrant, ["Mehendi stage", "Floor cushions", "Floral drapes", "Setup and teardown"], ["মেহেদি মঞ্চ", "ফ্লোর কুশন", "ফুলের পর্দা", "সেটআপ ও গুছিয়ে নেওয়া"], ["mehendi", "henna", "colourful"]],
+  ["wed-decor-garden", "decor", "Garden Floral Canopy", "বাগানের ফুলেল চাঁদোয়া", "An open-air floral canopy and arch for garden and rooftop weddings.", "বাগান ও ছাদের বিয়ের জন্য খোলা আকাশের নিচে ফুলেল চাঁদোয়া ও তোরণ।", 20000, IMG.dOutdoorSetup, ["Floral canopy", "Entrance arch", "Seating décor", "Setup and teardown"], ["ফুলেল চাঁদোয়া", "প্রবেশ তোরণ", "আসন সজ্জা", "সেটআপ ও গুছিয়ে নেওয়া"], ["garden", "outdoor", "rooftop"]],
+  ["wed-decor-walima", "decor", "White & Gold Walima Stage", "সাদা-সোনালি ওয়ালিমা মঞ্চ", "An elegant white sofa stage with gold accents and fresh florals for the walima.", "ওয়ালিমার জন্য সোনালি ছোঁয়া ও তাজা ফুলসহ মার্জিত সাদা সোফা মঞ্চ।", 24000, IMG.wSofaWhite, ["Stage and sofa", "Gold backdrop", "Fresh florals", "Setup and teardown"], ["মঞ্চ ও সোফা", "সোনালি ব্যাকড্রপ", "তাজা ফুল", "সেটআপ ও গুছিয়ে নেওয়া"], ["walima", "white", "gold"]],
+
+  ["wed-seat-royal", "sitting-area", "Royal Bridal Lounge", "রাজকীয় ব্রাইডাল লাউঞ্জ", "Carved seating and floral side tables for the couple and close family.", "বর-কনে ও কাছের পরিবারের জন্য কারুকাজ করা আসন ও ফুলেল সাইড টেবিল।", 9000, IMG.wSeatOrnate, ["Carved seating", "Side tables", "Cushions", "Delivery and setup"], ["কারুকাজ করা আসন", "সাইড টেবিল", "কুশন", "ডেলিভারি ও সেটআপ"], ["lounge", "bridal"], true],
+  ["wed-seat-chiavari", "sitting-area", "Chiavari Guest Seating", "শিয়াভারি অতিথি আসন", "Gold chiavari chairs with cushions arranged for the ceremony.", "অনুষ্ঠানের জন্য কুশনসহ সোনালি শিয়াভারি চেয়ার।", 5500, IMG.dCeremonyChairs, ["50 chairs", "Seat cushions", "Arrangement", "Delivery"], ["৫০টি চেয়ার", "আসনের কুশন", "বিন্যাস", "ডেলিভারি"], ["chairs", "ceremony"]],
+  ["wed-seat-banquet", "sitting-area", "Round Banquet Tables & Linen", "গোল ব্যাংকুয়েট টেবিল ও লিনেন", "Round tables with white linen and covered chairs for dinner service.", "ডিনার পরিবেশনের জন্য সাদা লিনেনসহ গোল টেবিল ও কভার করা চেয়ার।", 6500, IMG.dBanquetRound, ["6 round tables", "Linen and covers", "50 chairs", "Setup"], ["৬টি গোল টেবিল", "লিনেন ও কভার", "৫০টি চেয়ার", "সেটআপ"], ["banquet", "dinner", "tables"]],
+  ["wed-seat-garden", "sitting-area", "Garden Lounge Seating", "বাগান লাউঞ্জ আসন", "Sofa clusters and coffee tables styled with flowers for outdoor receptions.", "খোলা জায়গার রিসেপশনের জন্য ফুলে সাজানো সোফা ও কফি টেবিল।", 7500, IMG.wSeatingGarden, ["Sofa clusters", "Coffee tables", "Floral styling", "Delivery and setup"], ["সোফা সেট", "কফি টেবিল", "ফুলের সাজ", "ডেলিভারি ও সেটআপ"], ["lounge", "garden"]],
+  ["wed-seat-baithak", "sitting-area", "Floor Baithak Seating", "ফ্লোর বৈঠক আসন", "Traditional floor seating with mattresses, bolsters and low tables.", "তোশক, কোলবালিশ ও নিচু টেবিলসহ ঐতিহ্যবাহী বৈঠকি আসন।", 4500, IMG.dFloralBackdrop, ["Floor mattresses", "Bolsters", "Low tables", "Setup"], ["ফ্লোর তোশক", "কোলবালিশ", "নিচু টেবিল", "সেটআপ"], ["baithak", "traditional"]],
+
+  ["wed-light-chandelier", "lighting", "Chandelier Canopy", "ঝাড়বাতি চাঁদোয়া", "Crystal chandeliers over the stage and dining area with warm fill light.", "মঞ্চ ও খাবারের জায়গার উপরে উষ্ণ আলোসহ স্ফটিকের ঝাড়বাতি।", 12000, IMG.wLightChandelier, ["Chandeliers", "Warm fill light", "Rigging", "Technician"], ["ঝাড়বাতি", "উষ্ণ আলো", "রিগিং", "টেকনিশিয়ান"], ["chandelier", "stage"], true],
+  ["wed-light-fairy", "lighting", "Fairy-Light Ceiling", "ফেয়ারি লাইট সিলিং", "Draped fairy-light ceiling that turns any hall into a starry night.", "যেকোনো হলকে তারাভরা রাতে বদলে দেওয়া ফেয়ারি লাইটের সিলিং।", 7000, IMG.dFairyCorridor, ["Fairy lights", "Drapes", "Installation", "Technician"], ["ফেয়ারি লাইট", "পর্দা", "স্থাপন", "টেকনিশিয়ান"], ["fairy lights", "ceiling"]],
+  ["wed-light-uplight", "lighting", "Warm Stage Uplighting", "উষ্ণ মঞ্চ আলোকসজ্জা", "Warm uplights and spotlights that bring out every detail of the stage.", "মঞ্চের প্রতিটি খুঁটিনাটি ফুটিয়ে তোলা উষ্ণ আপলাইট ও স্পটলাইট।", 6000, IMG.wLightWarm, ["Uplights", "Spotlights", "Dimmer control", "Technician"], ["আপলাইট", "স্পটলাইট", "ডিমার নিয়ন্ত্রণ", "টেকনিশিয়ান"], ["uplighting", "stage"]],
+  ["wed-light-floral", "lighting", "Floral Ceiling Glow", "ফুলেল সিলিং আলো", "Hanging floral ceiling lit from within for a soft, even glow.", "ভেতর থেকে আলোকিত ঝুলন্ত ফুলের সিলিং, কোমল ও সমান আলো।", 9000, IMG.wLightCeiling, ["Floral ceiling", "Hidden lighting", "Installation", "Technician"], ["ফুলের সিলিং", "লুকানো আলো", "স্থাপন", "টেকনিশিয়ান"], ["floral", "ceiling"]],
+  ["wed-light-lantern", "lighting", "Lantern Pathway", "লণ্ঠনের পথসজ্জা", "Lanterns and candle lights along the entrance and walkways.", "প্রবেশপথ ও হাঁটার পথে লণ্ঠন ও মোমবাতির আলো।", 4500, IMG.dStageWhite, ["Lanterns", "LED candles", "Placement", "Collection"], ["লণ্ঠন", "এলইডি মোমবাতি", "বিন্যাস", "ফেরত নেওয়া"], ["lantern", "pathway"]],
+
+  ["wed-photo-signature", "photography-videography", "Signature Photo & Cinema", "সিগনেচার ছবি ও সিনেমা", "Two photographers and a cinematographer covering the full ceremony and reception.", "পুরো অনুষ্ঠান ও রিসেপশন কাভার করবেন দুইজন ফটোগ্রাফার ও একজন সিনেমাটোগ্রাফার।", 16000, IMG.eFilmCamera, ["2 photographers", "1 cinematographer", "Edited photos", "Highlight film"], ["২ জন ফটোগ্রাফার", "১ জন সিনেমাটোগ্রাফার", "এডিট করা ছবি", "হাইলাইট ফিল্ম"], ["photography", "cinematography"], true],
+  ["wed-photo-candid", "photography-videography", "Candid Photography", "ক্যান্ডিড ফটোগ্রাফি", "Natural, unposed photographs of the moments that matter.", "গুরুত্বপূর্ণ মুহূর্তগুলোর স্বাভাবিক, অপোজড ছবি।", 9000, IMG.eDslr, ["Lead photographer", "Edited gallery", "Online delivery"], ["প্রধান ফটোগ্রাফার", "এডিট করা গ্যালারি", "অনলাইন ডেলিভারি"], ["candid", "photography"]],
+  ["wed-photo-film", "photography-videography", "Cinematic Highlight Film", "সিনেমাটিক হাইলাইট ফিল্ম", "A 4–6 minute cinematic film with music and colour grading.", "সংগীত ও কালার গ্রেডিংসহ ৪–৬ মিনিটের সিনেমাটিক ফিল্ম।", 12000, IMG.eVideoCamera, ["Cinematographer", "4K recording", "Highlight film", "Full video"], ["সিনেমাটোগ্রাফার", "৪কে রেকর্ডিং", "হাইলাইট ফিল্ম", "পূর্ণ ভিডিও"], ["film", "video"]],
+  ["wed-photo-drone", "photography-videography", "Drone Coverage", "ড্রোন কাভারেজ", "Licensed drone footage of the venue, décor and arrivals.", "ভেন্যু, সাজসজ্জা ও আগমনের লাইসেন্সপ্রাপ্ত ড্রোন ফুটেজ।", 5000, IMG.eCameraGimbal, ["Drone operator", "Aerial footage", "Edited clips"], ["ড্রোন অপারেটর", "আকাশ থেকে ফুটেজ", "এডিট করা ক্লিপ"], ["drone", "aerial"]],
+  ["wed-photo-album", "photography-videography", "Album & Print Set", "অ্যালবাম ও প্রিন্ট সেট", "A hand-finished album with printed portraits for the family.", "পরিবারের জন্য প্রিন্টেড পোর্ট্রেটসহ হাতে তৈরি অ্যালবাম।", 4500, IMG.eStudioGear, ["40-page album", "Printed portraits", "Design layout"], ["৪০ পৃষ্ঠার অ্যালবাম", "প্রিন্টেড পোর্ট্রেট", "ডিজাইন লেআউট"], ["album", "prints"]],
+
+  ["wed-booth-floral", "photo-booths", "Floral Frame Booth", "ফুলেল ফ্রেম বুথ", "A floral photo frame with props and an attendant.", "প্রপস ও একজন সহকারীসহ ফুলেল ফটো ফ্রেম।", 5000, IMG.wBoothProps, ["Floral frame", "Props", "Attendant"], ["ফুলেল ফ্রেম", "প্রপস", "সহকারী"], ["photo booth", "floral"], true],
+  ["wed-booth-360", "photo-booths", "360° Video Booth", "৩৬০° ভিডিও বুথ", "Slow-motion 360° clips shared instantly with guests.", "অতিথিদের সঙ্গে সঙ্গে শেয়ার করা স্লো-মোশন ৩৬০° ক্লিপ।", 8000, IMG.dGoldBalloons, ["360° platform", "Lighting", "Instant sharing", "Operator"], ["৩৬০° প্ল্যাটফর্ম", "আলো", "তাৎক্ষণিক শেয়ার", "অপারেটর"], ["360", "video booth"]],
+  ["wed-booth-print", "photo-booths", "Instant Print Booth", "ইনস্ট্যান্ট প্রিন্ট বুথ", "Unlimited instant prints with a custom wedding frame.", "কাস্টম বিয়ের ফ্রেমসহ সীমাহীন ইনস্ট্যান্ট প্রিন্ট।", 6000, IMG.dInstax, ["Camera and printer", "Custom frame", "Unlimited prints", "Operator"], ["ক্যামেরা ও প্রিন্টার", "কাস্টম ফ্রেম", "সীমাহীন প্রিন্ট", "অপারেটর"], ["prints", "photo booth"]],
+  ["wed-booth-mirror", "photo-booths", "Mirror Selfie Booth", "মিরর সেলফি বুথ", "A full-length interactive mirror booth with animations and prints.", "অ্যানিমেশন ও প্রিন্টসহ পূর্ণদৈর্ঘ্য ইন্টারঅ্যাকটিভ মিরর বুথ।", 7000, IMG.dPhotoStand, ["Mirror booth", "Prints", "Attendant"], ["মিরর বুথ", "প্রিন্ট", "সহকারী"], ["mirror booth", "selfie"]],
+  ["wed-booth-props", "photo-booths", "Props Corner", "প্রপস কর্নার", "A styled corner with themed props and a backdrop.", "থিমভিত্তিক প্রপস ও ব্যাকড্রপসহ সাজানো কর্নার।", 3000, IMG.bProps, ["Backdrop", "Themed props", "Setup"], ["ব্যাকড্রপ", "থিমভিত্তিক প্রপস", "সেটআপ"], ["props"]],
+
+  ["wed-sound-shehnai", "sound", "Shehnai & Instrumental", "সানাই ও যন্ত্রসংগীত", "Live shehnai and instrumental music for the bride's and groom's entry.", "বর-কনের আগমনে লাইভ সানাই ও যন্ত্রসংগীত।", 7000, IMG.eStageMono, ["Shehnai player", "Tabla", "Sound system"], ["সানাই বাদক", "তবলা", "সাউন্ড সিস্টেম"], ["shehnai", "live music"], true],
+  ["wed-sound-dj", "sound", "DJ & Dance Floor", "ডিজে ও ডান্স ফ্লোর", "A professional DJ with dance-floor lighting for the holud night.", "হলুদ রাতের জন্য ডান্স ফ্লোরের আলোসহ পেশাদার ডিজে।", 10000, IMG.bDjMixer, ["DJ", "Speakers", "Dance-floor lights"], ["ডিজে", "স্পিকার", "ডান্স ফ্লোরের আলো"], ["dj", "dance"]],
+  ["wed-sound-pa", "sound", "PA Sound System", "পিএ সাউন্ড সিস্টেম", "Clear sound for speeches, announcements and background music.", "বক্তৃতা, ঘোষণা ও ব্যাকগ্রাউন্ড মিউজিকের জন্য স্পষ্ট সাউন্ড।", 4500, IMG.eSpeaker, ["Speakers", "Mixer", "2 microphones", "Technician"], ["স্পিকার", "মিক্সার", "২টি মাইক্রোফোন", "টেকনিশিয়ান"], ["pa", "speakers"]],
+  ["wed-sound-band", "sound", "Live Band Sound", "লাইভ ব্যান্ড সাউন্ড", "Full band sound with monitors and a sound engineer.", "মনিটর ও সাউন্ড ইঞ্জিনিয়ারসহ পূর্ণ ব্যান্ড সাউন্ড।", 15000, IMG.cConsole, ["Mixing console", "Monitors", "Sound engineer"], ["মিক্সিং কনসোল", "মনিটর", "সাউন্ড ইঞ্জিনিয়ার"], ["band", "live"]],
+  ["wed-sound-mic", "sound", "Wireless Microphone Kit", "ওয়্যারলেস মাইক্রোফোন কিট", "Four wireless microphones with a compact speaker for the ceremony.", "অনুষ্ঠানের জন্য কমপ্যাক্ট স্পিকারসহ চারটি ওয়্যারলেস মাইক্রোফোন।", 2500, IMG.cMics, ["4 wireless mics", "Speaker", "Technician"], ["৪টি ওয়্যারলেস মাইক", "স্পিকার", "টেকনিশিয়ান"], ["microphone"]],
+];
+
+/* ═════════════ BIRTHDAY ═════════════ */
+const BIRTHDAY: Row[] = [
+  ["bday-decor-arch", "decor", "Balloon Arch Backdrop", "বেলুন আর্চ ব্যাকড্রপ", "An organic balloon arch with a name board and gift-table styling.", "নামফলক ও উপহার টেবিলের সাজসহ বেলুন আর্চ।", 6000, IMG.dBalloonArch, ["Balloon arch", "Name board", "Gift table", "Setup"], ["বেলুন আর্চ", "নামফলক", "উপহার টেবিল", "সেটআপ"], ["balloon", "arch"], true],
+  ["bday-decor-princess", "decor", "Pink Princess Theme", "পিংক প্রিন্সেস থিম", "Pink florals, balloon arches and a styled cake table.", "গোলাপি ফুল, বেলুন আর্চ ও সাজানো কেক টেবিল।", 9000, IMG.dPinkParty, ["Theme backdrop", "Balloon arches", "Cake table", "Setup"], ["থিম ব্যাকড্রপ", "বেলুন আর্চ", "কেক টেবিল", "সেটআপ"], ["pink", "princess", "girls"], true],
+  ["bday-decor-dessert", "decor", "Dessert Table Styling", "ডেজার্ট টেবিল সজ্জা", "A colourful dessert table with balloons, stands and signage.", "বেলুন, স্ট্যান্ড ও সাইনেজসহ রঙিন ডেজার্ট টেবিল।", 7000, IMG.bDessertTable, ["Dessert stands", "Balloons", "Signage", "Setup"], ["ডেজার্ট স্ট্যান্ড", "বেলুন", "সাইনেজ", "সেটআপ"], ["dessert", "table"]],
+  ["bday-decor-first", "decor", "First Birthday Setup", "প্রথম জন্মদিনের সাজ", "A gentle first-birthday setup with a banner, balloons and soft toys.", "ব্যানার, বেলুন ও সফট টয়সহ প্রথম জন্মদিনের কোমল সাজ।", 8000, IMG.dBirthdaySetup, ["Banner", "Balloons", "Soft toys", "Setup"], ["ব্যানার", "বেলুন", "সফট টয়", "সেটআপ"], ["first birthday", "baby"]],
+  ["bday-decor-green", "decor", "Jungle Green Theme", "জাঙ্গল গ্রিন থিম", "Green-and-white balloons with a birthday banner for a fresh theme.", "জন্মদিনের ব্যানারসহ সবুজ-সাদা বেলুনের সতেজ থিম।", 7500, IMG.dGreenBalloons, ["Balloon décor", "Banner", "Table styling", "Setup"], ["বেলুন সজ্জা", "ব্যানার", "টেবিল সজ্জা", "সেটআপ"], ["green", "jungle", "boys"]],
+  ["bday-decor-surprise", "decor", "Rose & Heart Surprise", "রোজ ও হার্ট সারপ্রাইজ", "Heart balloons and roses for a surprise birthday at home.", "বাসায় সারপ্রাইজ জন্মদিনের জন্য হার্ট বেলুন ও গোলাপ।", 6500, IMG.dHeartBalloons, ["Heart balloons", "Roses", "Cake stand", "Setup"], ["হার্ট বেলুন", "গোলাপ", "কেক স্ট্যান্ড", "সেটআপ"], ["surprise", "romantic"]],
+
+  ["bday-seat-kids", "sitting-area", "Kids Party Tables", "শিশুদের পার্টি টেবিল", "Child-height tables and chairs with themed covers.", "থিম কভারসহ শিশুদের উচ্চতার টেবিল ও চেয়ার।", 3500, IMG.dPolkaTable, ["Kids tables", "Kids chairs", "Themed covers"], ["শিশুদের টেবিল", "শিশুদের চেয়ার", "থিম কভার"], ["kids", "tables"]],
+  ["bday-seat-lounge", "sitting-area", "Lounge Sofa Corner", "লাউঞ্জ সোফা কর্নার", "A sofa corner for parents and older guests.", "অভিভাবক ও বয়োজ্যেষ্ঠ অতিথিদের জন্য সোফা কর্নার।", 5000, IMG.wSofaWhite, ["Sofas", "Coffee table", "Delivery"], ["সোফা", "কফি টেবিল", "ডেলিভারি"], ["lounge"]],
+  ["bday-seat-round", "sitting-area", "Round Tables & Covers", "গোল টেবিল ও কভার", "Round tables with covered chairs for dinner.", "ডিনারের জন্য কভার করা চেয়ারসহ গোল টেবিল।", 4000, IMG.dPartyRoom, ["Round tables", "Covered chairs", "Linen"], ["গোল টেবিল", "কভার করা চেয়ার", "লিনেন"], ["dinner"]],
+  ["bday-seat-cushion", "sitting-area", "Floor Cushion Zone", "ফ্লোর কুশন জোন", "Soft floor cushions and mats for a relaxed play area.", "আরামদায়ক খেলার জায়গার জন্য নরম ফ্লোর কুশন ও ম্যাট।", 3000, IMG.dConfetti, ["Cushions", "Play mats", "Setup"], ["কুশন", "খেলার ম্যাট", "সেটআপ"], ["kids", "play"]],
+  ["bday-seat-rooftop", "sitting-area", "Rooftop Party Seating", "ছাদের পার্টি আসন", "Long tables with linen and chairs for rooftop parties.", "ছাদের পার্টির জন্য লিনেনসহ লম্বা টেবিল ও চেয়ার।", 4500, IMG.dLongTables, ["Long tables", "Chairs", "Linen"], ["লম্বা টেবিল", "চেয়ার", "লিনেন"], ["rooftop"]],
+
+  ["bday-light-fairy", "lighting", "Fairy-Light Backdrop", "ফেয়ারি লাইট ব্যাকড্রপ", "A curtain of fairy lights behind the cake table.", "কেক টেবিলের পেছনে ফেয়ারি লাইটের পর্দা।", 3500, IMG.dFairyCorridor, ["Fairy-light curtain", "Installation"], ["ফেয়ারি লাইটের পর্দা", "স্থাপন"], ["fairy lights"], true],
+  ["bday-light-neon", "lighting", "Neon Name Sign", "নিয়ন নাম সাইন", "A custom neon sign with the birthday name.", "জন্মদিনের নামসহ কাস্টম নিয়ন সাইন।", 4000, IMG.dHeartBalloons, ["Custom neon sign", "Mounting"], ["কাস্টম নিয়ন সাইন", "স্থাপন"], ["neon", "sign"]],
+  ["bday-light-dance", "lighting", "LED Party Lights", "এলইডি পার্টি লাইট", "Colour-changing LED lights for the dance area.", "নাচের জায়গার জন্য রং বদলানো এলইডি আলো।", 5000, IMG.eStageBlue, ["LED lights", "Controller", "Technician"], ["এলইডি আলো", "কন্ট্রোলার", "টেকনিশিয়ান"], ["led", "party"]],
+  ["bday-light-bulbs", "lighting", "Warm Ceiling Bulbs", "উষ্ণ সিলিং বাল্ব", "Hanging warm bulbs for a cosy indoor party.", "আরামদায়ক ঘরোয়া পার্টির জন্য ঝুলন্ত উষ্ণ বাল্ব।", 3500, IMG.dBanquetPurple, ["Bulb strings", "Installation"], ["বাল্বের সারি", "স্থাপন"], ["bulbs"]],
+  ["bday-light-candle", "lighting", "Candle & Lantern Set", "মোমবাতি ও লণ্ঠন সেট", "LED candles and lanterns for tables and entrance.", "টেবিল ও প্রবেশপথের জন্য এলইডি মোমবাতি ও লণ্ঠন।", 3000, IMG.dTableCandles, ["LED candles", "Lanterns", "Placement"], ["এলইডি মোমবাতি", "লণ্ঠন", "বিন্যাস"], ["candles"]],
+
+  ["bday-photo-party", "photography-videography", "Party Photography", "পার্টি ফটোগ্রাফি", "A photographer for the cake cutting, games and family portraits.", "কেক কাটা, খেলাধুলা ও পারিবারিক ছবির জন্য একজন ফটোগ্রাফার।", 6000, IMG.eDslr, ["Photographer", "Edited photos", "Online gallery"], ["ফটোগ্রাফার", "এডিট করা ছবি", "অনলাইন গ্যালারি"], ["photography"], true],
+  ["bday-photo-video", "photography-videography", "Party Highlight Video", "পার্টি হাইলাইট ভিডিও", "A short highlight video with music.", "সংগীতসহ সংক্ষিপ্ত হাইলাইট ভিডিও।", 7000, IMG.eVideoCamera, ["Videographer", "Highlight video"], ["ভিডিওগ্রাফার", "হাইলাইট ভিডিও"], ["video"]],
+  ["bday-photo-combo", "photography-videography", "Photo + Video Combo", "ছবি + ভিডিও কম্বো", "Photography and video coverage together.", "একসঙ্গে ছবি ও ভিডিও কাভারেজ।", 11000, IMG.eTwinCameras, ["Photographer", "Videographer", "Edited photos", "Highlight video"], ["ফটোগ্রাফার", "ভিডিওগ্রাফার", "এডিট করা ছবি", "হাইলাইট ভিডিও"], ["combo"]],
+  ["bday-photo-cake", "photography-videography", "Cake-Cutting Coverage", "কেক কাটার কাভারেজ", "Two hours of coverage around the cake cutting.", "কেক কাটার সময় ঘিরে দুই ঘণ্টার কাভারেজ।", 3500, IMG.eCameraTripod, ["2 hours", "Edited photos"], ["২ ঘণ্টা", "এডিট করা ছবি"], ["short coverage"]],
+  ["bday-photo-album", "photography-videography", "Printed Mini Album", "প্রিন্টেড মিনি অ্যালবাম", "A 20-page printed album of the party.", "পার্টির ২০ পৃষ্ঠার প্রিন্টেড অ্যালবাম।", 3000, IMG.eStudioGear, ["20-page album", "Design"], ["২০ পৃষ্ঠার অ্যালবাম", "ডিজাইন"], ["album"]],
+
+  ["bday-booth-balloon", "photo-booths", "Balloon Photo Booth", "বেলুন ফটো বুথ", "A balloon wall booth with props.", "প্রপসসহ বেলুন দেয়ালের ফটো বুথ।", 3500, IMG.dConfetti, ["Balloon wall", "Props"], ["বেলুন দেয়াল", "প্রপস"], ["balloon", "booth"], true],
+  ["bday-booth-print", "photo-booths", "Instant Print Booth", "ইনস্ট্যান্ট প্রিন্ট বুথ", "Instant prints with a birthday frame.", "জন্মদিনের ফ্রেমসহ ইনস্ট্যান্ট প্রিন্ট।", 5000, IMG.dInstax, ["Camera and printer", "Birthday frame", "Operator"], ["ক্যামেরা ও প্রিন্টার", "জন্মদিনের ফ্রেম", "অপারেটর"], ["prints"]],
+  ["bday-booth-360", "photo-booths", "360° Party Booth", "৩৬০° পার্টি বুথ", "Slow-motion 360° clips for older kids and adults.", "বড় শিশু ও প্রাপ্তবয়স্কদের জন্য স্লো-মোশন ৩৬০° ক্লিপ।", 7000, IMG.dGoldBalloons, ["360° platform", "Instant sharing", "Operator"], ["৩৬০° প্ল্যাটফর্ম", "তাৎক্ষণিক শেয়ার", "অপারেটর"], ["360"]],
+  ["bday-booth-props", "photo-booths", "Props Corner", "প্রপস কর্নার", "Themed props and a small backdrop.", "থিমভিত্তিক প্রপস ও ছোট ব্যাকড্রপ।", 2500, IMG.bProps, ["Props", "Backdrop"], ["প্রপস", "ব্যাকড্রপ"], ["props"]],
+  ["bday-booth-frame", "photo-booths", "Theme Frame Booth", "থিম ফ্রেম বুথ", "A large printed frame in the party theme.", "পার্টির থিমে বড় প্রিন্টেড ফ্রেম।", 3500, IMG.dPhotoStand, ["Printed frame", "Stand"], ["প্রিন্টেড ফ্রেম", "স্ট্যান্ড"], ["frame"]],
+
+  ["bday-sound-dj", "sound", "Party DJ", "পার্টি ডিজে", "A DJ with a family-friendly playlist and party lights.", "পরিবার-বান্ধব প্লেলিস্ট ও পার্টি লাইটসহ ডিজে।", 6000, IMG.bDjMixer, ["DJ", "Speakers", "Party lights"], ["ডিজে", "স্পিকার", "পার্টি লাইট"], ["dj"], true],
+  ["bday-sound-host", "sound", "Kids Games Host & Music", "শিশুদের খেলা পরিচালনা ও সংগীত", "A host who runs games and music for children.", "শিশুদের জন্য খেলা ও সংগীত পরিচালনাকারী একজন হোস্ট।", 5000, IMG.eSpeaker, ["Host", "Games", "Speaker"], ["হোস্ট", "খেলা", "স্পিকার"], ["kids", "games"]],
+  ["bday-sound-pa", "sound", "Compact PA Speaker", "কমপ্যাক্ট পিএ স্পিকার", "A compact speaker with one microphone for small parties.", "ছোট পার্টির জন্য একটি মাইক্রোফোনসহ কমপ্যাক্ট স্পিকার।", 2500, IMG.eSpeaker, ["Speaker", "1 microphone"], ["স্পিকার", "১টি মাইক্রোফোন"], ["speaker"]],
+  ["bday-sound-karaoke", "sound", "Karaoke Kit", "কারাওকে কিট", "A karaoke system with screen and two microphones.", "স্ক্রিন ও দুটি মাইক্রোফোনসহ কারাওকে সিস্টেম।", 3500, IMG.cMics, ["Karaoke system", "Screen", "2 microphones"], ["কারাওকে সিস্টেম", "স্ক্রিন", "২টি মাইক্রোফোন"], ["karaoke"]],
+  ["bday-sound-announce", "sound", "Mic & Announcement Kit", "মাইক ও ঘোষণা কিট", "Two wireless microphones for speeches and announcements.", "বক্তৃতা ও ঘোষণার জন্য দুটি ওয়্যারলেস মাইক্রোফোন।", 2000, IMG.cMics, ["2 wireless mics", "Speaker"], ["২টি ওয়্যারলেস মাইক", "স্পিকার"], ["microphone"]],
+];
+
+/* ═════════════ CORPORATE ═════════════ */
+const CORPORATE: Row[] = [
+  ["corp-decor-conference", "decor", "Conference Stage & Branding", "কনফারেন্স মঞ্চ ও ব্র্যান্ডিং", "A branded stage with podium, backdrop and standees.", "পোডিয়াম, ব্যাকড্রপ ও স্ট্যান্ডিসহ ব্র্যান্ডেড মঞ্চ।", 18000, IMG.cStage, ["Stage", "Branded backdrop", "Podium", "Standees"], ["মঞ্চ", "ব্র্যান্ডেড ব্যাকড্রপ", "পোডিয়াম", "স্ট্যান্ডি"], ["conference", "stage"], true],
+  ["corp-decor-launch", "decor", "Product Launch Set", "প্রোডাক্ট লঞ্চ সেট", "A dramatic reveal stage with lighting cues and a launch backdrop.", "আলোর সংকেত ও লঞ্চ ব্যাকড্রপসহ নাটকীয় উন্মোচন মঞ্চ।", 25000, IMG.eStageBlue, ["Reveal stage", "Backdrop", "Lighting cues"], ["উন্মোচন মঞ্চ", "ব্যাকড্রপ", "আলোর সংকেত"], ["launch"]],
+  ["corp-decor-seminar", "decor", "Seminar Backdrop", "সেমিনার ব্যাকড্রপ", "A clean printed backdrop and registration desk for seminars.", "সেমিনারের জন্য পরিচ্ছন্ন প্রিন্টেড ব্যাকড্রপ ও রেজিস্ট্রেশন ডেস্ক।", 8000, IMG.eProjectorRoom, ["Printed backdrop", "Registration desk", "Signage"], ["প্রিন্টেড ব্যাকড্রপ", "রেজিস্ট্রেশন ডেস্ক", "সাইনেজ"], ["seminar"]],
+  ["corp-decor-award", "decor", "Award Night Stage", "অ্যাওয়ার্ড নাইট মঞ্চ", "An elegant stage for award ceremonies with a trophy table.", "ট্রফি টেবিলসহ অ্যাওয়ার্ড অনুষ্ঠানের মার্জিত মঞ্চ।", 22000, IMG.eStageMono, ["Stage", "Trophy table", "Backdrop"], ["মঞ্চ", "ট্রফি টেবিল", "ব্যাকড্রপ"], ["awards", "gala"]],
+  ["corp-decor-expo", "decor", "Exhibition Booth", "প্রদর্শনী বুথ", "A 3×3 m branded booth with counter and lighting.", "কাউন্টার ও আলোসহ ৩×৩ মিটারের ব্র্যান্ডেড বুথ।", 15000, IMG.eWoodenHall, ["Booth structure", "Counter", "Graphics", "Lighting"], ["বুথ কাঠামো", "কাউন্টার", "গ্রাফিক্স", "আলো"], ["expo", "booth"]],
+
+  ["corp-seat-theatre", "sitting-area", "Theatre Seating", "থিয়েটার আসন", "Rows of cushioned chairs facing the stage.", "মঞ্চমুখী সারিবদ্ধ কুশন চেয়ার।", 3500, IMG.eChairsGrey, ["50 chairs", "Arrangement", "Aisle markers"], ["৫০টি চেয়ার", "বিন্যাস", "পথ নির্দেশক"], ["theatre"], true],
+  ["corp-seat-classroom", "sitting-area", "Classroom Tables", "ক্লাসরুম টেবিল", "Tables with chairs for workshops and trainings.", "কর্মশালা ও প্রশিক্ষণের জন্য টেবিল ও চেয়ার।", 5000, IMG.cRoomBlack, ["Tables", "Chairs", "Table cloths"], ["টেবিল", "চেয়ার", "টেবিল ক্লথ"], ["workshop", "training"]],
+  ["corp-seat-gala", "sitting-area", "Round Table Gala", "রাউন্ড টেবিল গালা", "Round tables with linen for dinners and award nights.", "ডিনার ও অ্যাওয়ার্ড নাইটের জন্য লিনেনসহ গোল টেবিল।", 6500, IMG.dBanquetRound, ["Round tables", "Linen", "Covered chairs"], ["গোল টেবিল", "লিনেন", "কভার করা চেয়ার"], ["gala", "dinner"]],
+  ["corp-seat-boardroom", "sitting-area", "Boardroom U-Shape", "বোর্ডরুম ইউ-শেপ", "A U-shaped table layout with microphones and water service.", "মাইক্রোফোন ও পানির ব্যবস্থাসহ ইউ-আকৃতির টেবিল বিন্যাস।", 4500, IMG.cTablets, ["U-shape tables", "Chairs", "Water service"], ["ইউ-শেপ টেবিল", "চেয়ার", "পানির ব্যবস্থা"], ["boardroom", "meeting"]],
+  ["corp-seat-vip", "sitting-area", "VIP Lounge", "ভিআইপি লাউঞ্জ", "A lounge with sofas for guests of honour.", "সম্মানিত অতিথিদের জন্য সোফাসহ লাউঞ্জ।", 7000, IMG.dPartyRoom, ["Sofas", "Coffee tables", "Florals"], ["সোফা", "কফি টেবিল", "ফুল"], ["vip"]],
+
+  ["corp-light-stage", "lighting", "Stage Wash & Spots", "মঞ্চ ওয়াশ ও স্পট", "Even stage wash with follow spots for speakers.", "বক্তাদের জন্য ফলো স্পটসহ মঞ্চে সমান আলো।", 8000, IMG.eStageBlue, ["Wash lights", "Follow spots", "Technician"], ["ওয়াশ লাইট", "ফলো স্পট", "টেকনিশিয়ান"], ["stage lighting"], true],
+  ["corp-light-led", "lighting", "LED Wall Package", "এলইডি ওয়াল প্যাকেজ", "An LED video wall with operator for presentations.", "প্রেজেন্টেশনের জন্য অপারেটরসহ এলইডি ভিডিও ওয়াল।", 20000, IMG.cProjection, ["LED wall", "Processor", "Operator"], ["এলইডি ওয়াল", "প্রসেসর", "অপারেটর"], ["led wall", "screen"]],
+  ["corp-light-brand", "lighting", "Brand Colour Uplights", "ব্র্যান্ড রঙের আপলাইট", "Uplights in your brand colour around the hall.", "হলের চারপাশে আপনার ব্র্যান্ড রঙের আপলাইট।", 5000, IMG.eAuditoriumRed, ["Uplights", "Colour setup"], ["আপলাইট", "রং নির্ধারণ"], ["uplighting"]],
+  ["corp-light-gala", "lighting", "Gala Ambient Lighting", "গালা অ্যাম্বিয়েন্ট আলো", "Warm ambient lighting for dinners and award nights.", "ডিনার ও অ্যাওয়ার্ড নাইটের জন্য উষ্ণ পরিবেশ আলো।", 6000, IMG.dBanquetPurple, ["Ambient lights", "Pin spots", "Technician"], ["পরিবেশ আলো", "পিন স্পট", "টেকনিশিয়ান"], ["gala"]],
+  ["corp-light-beam", "lighting", "Moving Head Beams", "মুভিং হেড বিম", "Moving head lights for reveals and stage moments.", "উন্মোচন ও মঞ্চ মুহূর্তের জন্য মুভিং হেড লাইট।", 9000, IMG.eStageMono, ["Moving heads", "Haze machine", "Operator"], ["মুভিং হেড", "হেজ মেশিন", "অপারেটর"], ["beams"]],
+
+  ["corp-photo-event", "photography-videography", "Event Photography", "ইভেন্ট ফটোগ্রাফি", "Coverage of speakers, guests and branding.", "বক্তা, অতিথি ও ব্র্যান্ডিংয়ের ছবি কাভারেজ।", 7000, IMG.eDslr, ["Photographer", "Edited photos", "Next-day delivery"], ["ফটোগ্রাফার", "এডিট করা ছবি", "পরদিন ডেলিভারি"], ["photography"], true],
+  ["corp-photo-film", "photography-videography", "Corporate Event Film", "কর্পোরেট ইভেন্ট ফিল্ম", "A two-camera event film with interviews.", "সাক্ষাৎকারসহ দুই ক্যামেরার ইভেন্ট ফিল্ম।", 12000, IMG.eTwinCameras, ["2 cameras", "Interviews", "Edited film"], ["২টি ক্যামেরা", "সাক্ষাৎকার", "এডিট করা ফিল্ম"], ["film"]],
+  ["corp-photo-stream", "photography-videography", "Live Streaming", "লাইভ স্ট্রিমিং", "Multi-camera live streaming to Facebook or YouTube.", "ফেসবুক বা ইউটিউবে মাল্টি-ক্যামেরা লাইভ স্ট্রিমিং।", 14000, IMG.eVideoCamera, ["2 cameras", "Switcher", "Streaming"], ["২টি ক্যামেরা", "সুইচার", "স্ট্রিমিং"], ["live stream"]],
+  ["corp-photo-headshot", "photography-videography", "Headshot Studio", "হেডশট স্টুডিও", "An on-site studio for staff headshots.", "কর্মীদের হেডশটের জন্য অনুষ্ঠানস্থলে স্টুডিও।", 6000, IMG.eStudioGear, ["Studio lights", "Backdrop", "Retouched photos"], ["স্টুডিও লাইট", "ব্যাকড্রপ", "রিটাচ করা ছবি"], ["headshots"]],
+  ["corp-photo-sde", "photography-videography", "Same-Day Edit Video", "একই দিনে এডিট ভিডিও", "A short recap video shown before the event closes.", "অনুষ্ঠান শেষ হওয়ার আগেই দেখানো সংক্ষিপ্ত রিক্যাপ ভিডিও।", 9000, IMG.eCameraGimbal, ["Videographer", "On-site editor", "Recap video"], ["ভিডিওগ্রাফার", "অনুষ্ঠানস্থলে এডিটর", "রিক্যাপ ভিডিও"], ["recap"]],
+
+  ["corp-booth-wall", "photo-booths", "Branded Photo Wall", "ব্র্যান্ডেড ফটো ওয়াল", "A step-and-repeat wall with your logo.", "আপনার লোগোসহ স্টেপ-অ্যান্ড-রিপিট ওয়াল।", 6000, IMG.dPhotoStand, ["Printed wall", "Stand", "Lighting"], ["প্রিন্টেড ওয়াল", "স্ট্যান্ড", "আলো"], ["branding"], true],
+  ["corp-booth-360", "photo-booths", "360° Brand Booth", "৩৬০° ব্র্যান্ড বুথ", "360° clips with your brand overlay.", "আপনার ব্র্যান্ড ওভারলেসহ ৩৬০° ক্লিপ।", 9000, IMG.dGoldBalloons, ["360° platform", "Brand overlay", "Operator"], ["৩৬০° প্ল্যাটফর্ম", "ব্র্যান্ড ওভারলে", "অপারেটর"], ["360"]],
+  ["corp-booth-print", "photo-booths", "Instant Print with Logo", "লোগোসহ ইনস্ট্যান্ট প্রিন্ট", "Instant prints with a branded frame.", "ব্র্যান্ডেড ফ্রেমসহ ইনস্ট্যান্ট প্রিন্ট।", 6500, IMG.dInstax, ["Printer", "Branded frame", "Operator"], ["প্রিন্টার", "ব্র্যান্ডেড ফ্রেম", "অপারেটর"], ["prints"]],
+  ["corp-booth-gif", "photo-booths", "GIF Booth", "জিআইএফ বুথ", "Animated GIFs shared by QR code.", "কিউআর কোডে শেয়ার করা অ্যানিমেটেড জিআইএফ।", 5500, IMG.eCameraTripod, ["Camera", "QR sharing", "Operator"], ["ক্যামেরা", "কিউআর শেয়ার", "অপারেটর"], ["gif"]],
+  ["corp-booth-kiosk", "photo-booths", "Digital Sharing Kiosk", "ডিজিটাল শেয়ারিং কিয়স্ক", "A touchscreen kiosk to collect leads and share photos.", "লিড সংগ্রহ ও ছবি শেয়ারের জন্য টাচস্ক্রিন কিয়স্ক।", 5000, IMG.cMonitors, ["Touchscreen", "Lead capture", "Sharing"], ["টাচস্ক্রিন", "লিড সংগ্রহ", "শেয়ার"], ["kiosk"]],
+
+  ["corp-sound-pa", "sound", "Conference PA", "কনফারেন্স পিএ", "Speakers and mixer for halls up to 300 seats.", "৩০০ আসন পর্যন্ত হলের জন্য স্পিকার ও মিক্সার।", 5000, IMG.eSpeaker, ["Speakers", "Mixer", "Technician"], ["স্পিকার", "মিক্সার", "টেকনিশিয়ান"], ["pa"], true],
+  ["corp-sound-mics", "sound", "Wireless Mic Set", "ওয়্যারলেস মাইক সেট", "Handheld and lapel microphones for panels.", "প্যানেল আলোচনার জন্য হ্যান্ডহেল্ড ও ল্যাপেল মাইক্রোফোন।", 3000, IMG.cMics, ["4 handheld mics", "2 lapel mics"], ["৪টি হ্যান্ডহেল্ড মাইক", "২টি ল্যাপেল মাইক"], ["microphones"]],
+  ["corp-sound-interpret", "sound", "Interpretation System", "অনুবাদ ব্যবস্থা", "Booth and headsets for simultaneous interpretation.", "যুগপৎ অনুবাদের জন্য বুথ ও হেডসেট।", 15000, IMG.cTablets, ["Interpreter booth", "Headsets", "Technician"], ["অনুবাদক বুথ", "হেডসেট", "টেকনিশিয়ান"], ["interpretation"]],
+  ["corp-sound-array", "sound", "Line Array System", "লাইন অ্যারে সিস্টেম", "Line array speakers for large halls and outdoor events.", "বড় হল ও খোলা জায়গার অনুষ্ঠানের জন্য লাইন অ্যারে স্পিকার।", 12000, IMG.cConsole, ["Line array", "Mixing console", "Engineer"], ["লাইন অ্যারে", "মিক্সিং কনসোল", "ইঞ্জিনিয়ার"], ["line array"]],
+  ["corp-sound-record", "sound", "Audio Recording", "অডিও রেকর্ডিং", "Multi-track recording of every session.", "প্রতিটি সেশনের মাল্টি-ট্র্যাক রেকর্ডিং।", 6000, IMG.cMonitors, ["Recorder", "Edited audio"], ["রেকর্ডার", "এডিট করা অডিও"], ["recording"]],
+];
+
+/* ═════════════ FAMILY ═════════════ */
+const FAMILY: Row[] = [
+  ["fam-decor-aqiqah", "decor", "Aqiqah Décor", "আকিকা সাজসজ্জা", "A soft floral setup with a welcome board for an aqiqah.", "আকিকার জন্য স্বাগত বোর্ডসহ কোমল ফুলের সাজ।", 9000, IMG.dReceptionFloral, ["Floral setup", "Welcome board", "Setup"], ["ফুলের সাজ", "স্বাগত বোর্ড", "সেটআপ"], ["aqiqah"], true],
+  ["fam-decor-anniversary", "decor", "Anniversary Floral Table", "বার্ষিকী ফুলেল টেবিল", "Candlelit tables with fresh flowers for an anniversary dinner.", "বার্ষিকীর ডিনারের জন্য তাজা ফুল ও মোমবাতির আলোয় সাজানো টেবিল।", 7000, IMG.dTableCandles, ["Florals", "Candles", "Table styling"], ["ফুল", "মোমবাতি", "টেবিল সজ্জা"], ["anniversary"]],
+  ["fam-decor-milad", "decor", "Milad & Doa Setup", "মিলাদ ও দোয়ার আয়োজন", "A simple, respectful setup with seating and white linen.", "আসন ও সাদা লিনেনসহ সাধারণ ও মার্জিত আয়োজন।", 6000, IMG.dLongTables, ["Seating", "White linen", "Setup"], ["আসন", "সাদা লিনেন", "সেটআপ"], ["milad", "doa"]],
+  ["fam-decor-rooftop", "decor", "Rooftop Family Dinner", "ছাদে পারিবারিক ডিনার", "Bouquets, linen and lights for a rooftop dinner.", "ছাদের ডিনারের জন্য ফুলের তোড়া, লিনেন ও আলো।", 8000, IMG.dBouquetTable, ["Bouquets", "Linen", "Lights"], ["ফুলের তোড়া", "লিনেন", "আলো"], ["rooftop", "dinner"]],
+  ["fam-decor-eid", "decor", "Eid Get-together", "ঈদ পুনর্মিলনী", "Festive décor with chandeliers for an Eid gathering.", "ঈদ পুনর্মিলনীর জন্য ঝাড়বাতিসহ উৎসবমুখর সাজ।", 7500, IMG.dBanquetChandelier, ["Festive décor", "Chandeliers", "Setup"], ["উৎসবের সাজ", "ঝাড়বাতি", "সেটআপ"], ["eid"]],
+  ["fam-decor-home", "decor", "Housewarming Décor", "গৃহপ্রবেশের সাজ", "Floral entrance and living-room styling for a new home.", "নতুন বাসার জন্য ফুলেল প্রবেশপথ ও বসার ঘরের সাজ।", 6500, IMG.dFloralBackdrop, ["Floral entrance", "Room styling"], ["ফুলেল প্রবেশপথ", "ঘরের সাজ"], ["housewarming"]],
+
+  ["fam-seat-dinner", "sitting-area", "Family Dinner Tables", "পারিবারিক ডিনার টেবিল", "Long tables with linen for family dinners.", "পারিবারিক ডিনারের জন্য লিনেনসহ লম্বা টেবিল।", 5000, IMG.dLongTables, ["Long tables", "Chairs", "Linen"], ["লম্বা টেবিল", "চেয়ার", "লিনেন"], ["dinner"], true],
+  ["fam-seat-floor", "sitting-area", "Floor Seating with Cushions", "কুশনসহ ফ্লোর আসন", "Traditional floor seating for milad and gatherings.", "মিলাদ ও আসরের জন্য ঐতিহ্যবাহী ফ্লোর আসন।", 3500, IMG.dFloralBackdrop, ["Mattresses", "Cushions"], ["তোশক", "কুশন"], ["floor seating"]],
+  ["fam-seat-sofa", "sitting-area", "Lounge Sofa Set", "লাউঞ্জ সোফা সেট", "Sofa sets for elders and guests of honour.", "বয়োজ্যেষ্ঠ ও সম্মানিত অতিথিদের জন্য সোফা সেট।", 5500, IMG.wSofaWhite, ["Sofas", "Side tables"], ["সোফা", "সাইড টেবিল"], ["lounge"]],
+  ["fam-seat-round", "sitting-area", "Round Tables & Chairs", "গোল টেবিল ও চেয়ার", "Round tables with covered chairs.", "কভার করা চেয়ারসহ গোল টেবিল।", 4500, IMG.dBanquetRound, ["Round tables", "Covered chairs"], ["গোল টেবিল", "কভার করা চেয়ার"], ["tables"]],
+  ["fam-seat-shamiana", "sitting-area", "Shamiana with Seating", "শামিয়ানা ও আসন", "A decorated shamiana with chairs for courtyard events.", "উঠোনের অনুষ্ঠানের জন্য চেয়ারসহ সাজানো শামিয়ানা।", 8000, IMG.dOutdoorSetup, ["Shamiana", "Chairs", "Fans"], ["শামিয়ানা", "চেয়ার", "ফ্যান"], ["shamiana", "outdoor"]],
+
+  ["fam-light-string", "lighting", "Courtyard String Lights", "উঠোনের স্ট্রিং লাইট", "Warm string lights across the courtyard or rooftop.", "উঠোন বা ছাদজুড়ে উষ্ণ স্ট্রিং লাইট।", 4500, IMG.dFairyCorridor, ["String lights", "Installation"], ["স্ট্রিং লাইট", "স্থাপন"], ["string lights"], true],
+  ["fam-light-candle", "lighting", "Candlelit Tables", "মোমবাতির আলোয় টেবিল", "LED candles and holders for dinner tables.", "ডিনার টেবিলের জন্য এলইডি মোমবাতি ও হোল্ডার।", 3000, IMG.dTableCandles, ["LED candles", "Holders"], ["এলইডি মোমবাতি", "হোল্ডার"], ["candles"]],
+  ["fam-light-facade", "lighting", "House Façade Lighting", "বাড়ির সম্মুখ আলোকসজ্জা", "Traditional lighting across the front of the house.", "বাড়ির সম্মুখভাগজুড়ে ঐতিহ্যবাহী আলোকসজ্জা।", 7000, IMG.wLightWarm, ["Façade lights", "Installation", "Removal"], ["সম্মুখ আলো", "স্থাপন", "খুলে নেওয়া"], ["facade"]],
+  ["fam-light-hall", "lighting", "Warm Hall Lighting", "হলের উষ্ণ আলো", "Ambient lighting for community halls.", "কমিউনিটি হলের জন্য পরিবেশ আলো।", 5000, IMG.dBanquetPurple, ["Ambient lights", "Technician"], ["পরিবেশ আলো", "টেকনিশিয়ান"], ["hall"]],
+  ["fam-light-lantern", "lighting", "Lantern Garden", "লণ্ঠন বাগান", "Lanterns along garden paths and seating areas.", "বাগানের পথ ও বসার জায়গায় লণ্ঠন।", 4000, IMG.dStageWhite, ["Lanterns", "Placement"], ["লণ্ঠন", "বিন্যাস"], ["lanterns"]],
+
+  ["fam-photo-event", "photography-videography", "Family Event Photography", "পারিবারিক অনুষ্ঠানের ফটোগ্রাফি", "Photographs of guests, rituals and family portraits.", "অতিথি, আচার-অনুষ্ঠান ও পারিবারিক ছবি।", 6500, IMG.eDslr, ["Photographer", "Edited photos"], ["ফটোগ্রাফার", "এডিট করা ছবি"], ["photography"], true],
+  ["fam-photo-film", "photography-videography", "Family Film", "পারিবারিক ফিল্ম", "A short film of the gathering with music.", "সংগীতসহ অনুষ্ঠানের সংক্ষিপ্ত ফিল্ম।", 8000, IMG.eVideoCamera, ["Videographer", "Edited film"], ["ভিডিওগ্রাফার", "এডিট করা ফিল্ম"], ["film"]],
+  ["fam-photo-combo", "photography-videography", "Photo + Video Package", "ছবি + ভিডিও প্যাকেজ", "Photography and video together.", "একসঙ্গে ছবি ও ভিডিও।", 12000, IMG.eTwinCameras, ["Photographer", "Videographer"], ["ফটোগ্রাফার", "ভিডিওগ্রাফার"], ["combo"]],
+  ["fam-photo-portrait", "photography-videography", "Family Portrait Session", "পারিবারিক পোর্ট্রেট সেশন", "A portrait corner with studio lighting.", "স্টুডিও আলোসহ পোর্ট্রেট কর্নার।", 5000, IMG.eStudioGear, ["Studio lights", "Backdrop", "Prints"], ["স্টুডিও লাইট", "ব্যাকড্রপ", "প্রিন্ট"], ["portraits"]],
+  ["fam-photo-drone", "photography-videography", "Drone Coverage", "ড্রোন কাভারেজ", "Aerial shots of the house, venue and gathering.", "বাড়ি, ভেন্যু ও অনুষ্ঠানের আকাশ থেকে দৃশ্য।", 4500, IMG.eCameraGimbal, ["Drone operator", "Edited clips"], ["ড্রোন অপারেটর", "এডিট করা ক্লিপ"], ["drone"]],
+
+  ["fam-booth-frame", "photo-booths", "Family Frame Booth", "পারিবারিক ফ্রেম বুথ", "A printed family frame for group photos.", "দলগত ছবির জন্য প্রিন্টেড পারিবারিক ফ্রেম।", 3500, IMG.dPhotoStand, ["Printed frame", "Stand"], ["প্রিন্টেড ফ্রেম", "স্ট্যান্ড"], ["frame"], true],
+  ["fam-booth-print", "photo-booths", "Instant Print Booth", "ইনস্ট্যান্ট প্রিন্ট বুথ", "Instant prints for every guest to take home.", "প্রত্যেক অতিথির জন্য ইনস্ট্যান্ট প্রিন্ট।", 5000, IMG.dInstax, ["Printer", "Frame", "Operator"], ["প্রিন্টার", "ফ্রেম", "অপারেটর"], ["prints"]],
+  ["fam-booth-props", "photo-booths", "Props Corner", "প্রপস কর্নার", "Props and a backdrop for fun group photos.", "মজার দলগত ছবির জন্য প্রপস ও ব্যাকড্রপ।", 2500, IMG.bProps, ["Props", "Backdrop"], ["প্রপস", "ব্যাকড্রপ"], ["props"]],
+  ["fam-booth-floral", "photo-booths", "Floral Photo Booth", "ফুলেল ফটো বুথ", "A floral wall for portraits.", "পোর্ট্রেটের জন্য ফুলের দেয়াল।", 4500, IMG.wBoothProps, ["Floral wall", "Lighting"], ["ফুলের দেয়াল", "আলো"], ["floral"]],
+  ["fam-booth-360", "photo-booths", "360° Booth", "৩৬০° বুথ", "Slow-motion 360° clips for the family.", "পরিবারের জন্য স্লো-মোশন ৩৬০° ক্লিপ।", 7000, IMG.dGoldBalloons, ["360° platform", "Operator"], ["৩৬০° প্ল্যাটফর্ম", "অপারেটর"], ["360"]],
+
+  ["fam-sound-nasheed", "sound", "Nasheed & Qawwali Sound", "নাশিদ ও কাওয়ালি সাউন্ড", "Sound for nasheed or qawwali performers.", "নাশিদ বা কাওয়ালি শিল্পীদের জন্য সাউন্ড।", 5000, IMG.eStageMono, ["Speakers", "Mics", "Technician"], ["স্পিকার", "মাইক", "টেকনিশিয়ান"], ["nasheed", "qawwali"], true],
+  ["fam-sound-bg", "sound", "Background Music", "ব্যাকগ্রাউন্ড মিউজিক", "Soft background music with a curated playlist.", "বাছাই করা প্লেলিস্টসহ কোমল ব্যাকগ্রাউন্ড মিউজিক।", 3000, IMG.eSpeaker, ["Speakers", "Playlist"], ["স্পিকার", "প্লেলিস্ট"], ["background music"]],
+  ["fam-sound-dj", "sound", "Family DJ", "ফ্যামিলি ডিজে", "A DJ with music for all ages.", "সব বয়সীদের জন্য সংগীতসহ ডিজে।", 6000, IMG.bDjMixer, ["DJ", "Speakers"], ["ডিজে", "স্পিকার"], ["dj"]],
+  ["fam-sound-pa", "sound", "PA & Microphones", "পিএ ও মাইক্রোফোন", "A speaker with two microphones for speeches.", "বক্তৃতার জন্য দুটি মাইক্রোফোনসহ স্পিকার।", 2500, IMG.cMics, ["Speaker", "2 microphones"], ["স্পিকার", "২টি মাইক্রোফোন"], ["pa"]],
+  ["fam-sound-live", "sound", "Live Music Sound", "লাইভ সংগীতের সাউন্ড", "Sound for Rabindra or Nazrul sangeet performances.", "রবীন্দ্র বা নজরুল সংগীত পরিবেশনার জন্য সাউন্ড।", 8000, IMG.cConsole, ["Mixer", "Monitors", "Engineer"], ["মিক্সার", "মনিটর", "ইঞ্জিনিয়ার"], ["live music"]],
+];
+
+/* ═════════════ FOOD & CULINARY ═════════════ */
+const FOOD: Row[] = [
+  ["food-platter-kacchi", "platter", "Dhakaiya Kacchi Biryani", "ঢাকাইয়া কাচ্চি বিরিয়ানি", "Mutton kacchi with aloo, borhani and salad for 50 guests.", "৫০ জন অতিথির জন্য আলু, বোরহানি ও সালাদসহ খাসির কাচ্চি।", 35000, IMG.pWeddingBuffet, ["Kacchi biryani", "Borhani", "Salad", "Serving staff"], ["কাচ্চি বিরিয়ানি", "বোরহানি", "সালাদ", "পরিবেশনকারী"], ["kacchi", "biryani"], true],
+  ["food-platter-polao", "platter", "Morog Polao Menu", "মোরগ পোলাও মেনু", "Morog polao with roast, egg korma and firni.", "রোস্ট, ডিমের কোরমা ও ফিরনিসহ মোরগ পোলাও।", 27500, IMG.pDiverse, ["Morog polao", "Roast", "Egg korma", "Firni"], ["মোরগ পোলাও", "রোস্ট", "ডিমের কোরমা", "ফিরনি"], ["polao"]],
+  ["food-platter-tehari", "platter", "Beef Tehari Menu", "গরুর তেহারি মেনু", "Old Dhaka beef tehari with salad and soft drinks.", "সালাদ ও কোমল পানীয়সহ পুরান ঢাকার গরুর তেহারি।", 22500, IMG.pBanquet, ["Beef tehari", "Salad", "Soft drinks"], ["গরুর তেহারি", "সালাদ", "কোমল পানীয়"], ["tehari"]],
+  ["food-platter-mezban", "platter", "Mezban Beef Feast", "মেজবানি গরুর ভোজ", "Mezbani beef, dal and plain rice served in the traditional style.", "ঐতিহ্যবাহী ধারায় পরিবেশিত মেজবানি গরু, ডাল ও সাদা ভাত।", 30000, IMG.pGourmet, ["Mezbani beef", "Dal", "Rice"], ["মেজবানি গরু", "ডাল", "ভাত"], ["mezban"]],
+  ["food-platter-grazing", "platter", "Grazing Platter Table", "গ্রেজিং প্ল্যাটার টেবিল", "Finger food, cheeses, fruit and breads for receptions.", "রিসেপশনের জন্য ফিঙ্গার ফুড, পনির, ফল ও রুটি।", 25000, IMG.pCheese, ["Finger food", "Cheese", "Fruit", "Breads"], ["ফিঙ্গার ফুড", "পনির", "ফল", "রুটি"], ["grazing", "snacks"]],
+  ["food-platter-bbq", "platter", "Mixed Grill BBQ", "মিক্সড গ্রিল বারবিকিউ", "Chicken, beef and kebabs grilled live with naan and salads.", "নান ও সালাদসহ লাইভ গ্রিল করা মুরগি, গরু ও কাবাব।", 40000, IMG.pAppetizers, ["Live grill", "Kebabs", "Naan", "Salads"], ["লাইভ গ্রিল", "কাবাব", "নান", "সালাদ"], ["bbq", "grill"]],
+
+  ["food-fuchka-classic", "fuchka", "Classic Fuchka Counter", "ক্লাসিক ফুচকা কাউন্টার", "Live fuchka with tamarind water, served fresh at the counter.", "তেঁতুলের পানিসহ কাউন্টারে তাজা পরিবেশিত লাইভ ফুচকা।", 4500, IMG.fuSpicy, ["Fuchka chef", "Counter", "Tok and toppings"], ["ফুচকা শেফ", "কাউন্টার", "টক ও টপিং"], ["fuchka"], true],
+  ["food-fuchka-chotpoti", "fuchka", "Chotpoti Station", "চটপটি স্টেশন", "Hot chotpoti with egg, onion and tamarind.", "ডিম, পেঁয়াজ ও তেঁতুলসহ গরম চটপটি।", 4000, IMG.fuTamarind, ["Chotpoti chef", "Bowls", "Toppings"], ["চটপটি শেফ", "বাটি", "টপিং"], ["chotpoti"]],
+  ["food-fuchka-doi", "fuchka", "Doi Fuchka", "দই ফুচকা", "Fuchka topped with sweet doi and chutney.", "মিষ্টি দই ও চাটনি দিয়ে ফুচকা।", 5500, IMG.fuCrispy, ["Fuchka chef", "Sweet doi", "Chutney"], ["ফুচকা শেফ", "মিষ্টি দই", "চাটনি"], ["doi fuchka"]],
+  ["food-fuchka-combo", "fuchka", "Fuchka & Chotpoti Combo", "ফুচকা ও চটপটি কম্বো", "Both counters together for larger gatherings.", "বড় আয়োজনের জন্য দুটি কাউন্টার একসঙ্গে।", 7000, IMG.fuClay, ["2 counters", "2 chefs", "Toppings"], ["২টি কাউন্টার", "২ জন শেফ", "টপিং"], ["combo"]],
+  ["food-fuchka-jhalmuri", "fuchka", "Jhalmuri Cart", "ঝালমুড়ি কার্ট", "A jhalmuri cart with fresh mustard oil and chanachur.", "তাজা সরিষার তেল ও চানাচুরসহ ঝালমুড়ির গাড়ি।", 3000, IMG.fuBasket, ["Jhalmuri cart", "Vendor", "Paper cones"], ["ঝালমুড়ির গাড়ি", "বিক্রেতা", "কাগজের ঠোঙা"], ["jhalmuri"]],
+
+  ["food-cha-milk", "cha-coffee", "Milk Cha Station", "দুধ চা স্টেশন", "Fresh milk cha brewed on site, 50 cups.", "অনুষ্ঠানস্থলে তৈরি তাজা দুধ চা, ৫০ কাপ।", 2500, IMG.chaClay, ["Cha maker", "50 cups", "Sugar on the side"], ["চা প্রস্তুতকারী", "৫০ কাপ", "আলাদা চিনি"], ["cha", "milk tea"], true],
+  ["food-cha-seven", "cha-coffee", "Seven-Layer Cha Bar", "সাত রঙের চা বার", "Seven-layer cha alongside masala and ginger cha.", "মসলা ও আদা চায়ের সঙ্গে সাত রঙের চা।", 4000, IMG.chaTray, ["Cha master", "3 varieties", "Glassware"], ["চা বিশেষজ্ঞ", "৩ ধরনের চা", "গ্লাস"], ["seven layer"]],
+  ["food-coffee-espresso", "cha-coffee", "Espresso Bar", "এসপ্রেসো বার", "A mobile espresso bar with a barista, 50 cups.", "বারিস্তাসহ ভ্রাম্যমাণ এসপ্রেসো বার, ৫০ কাপ।", 7500, IMG.coBrew, ["Barista", "Espresso machine", "Cups"], ["বারিস্তা", "এসপ্রেসো মেশিন", "কাপ"], ["coffee", "espresso"]],
+  ["food-coffee-station", "cha-coffee", "Self-Serve Tea & Coffee", "সেলফ-সার্ভ চা ও কফি", "Urns, tea bags, coffee and cookies for seminars.", "সেমিনারের জন্য আর্ন, টি ব্যাগ, কফি ও কুকিজ।", 2250, IMG.coStation, ["Urns", "Tea and coffee", "Cookies", "Attendant"], ["আর্ন", "চা ও কফি", "কুকিজ", "সহকারী"], ["tea break"]],
+  ["food-cha-masala", "cha-coffee", "Lemon & Masala Cha", "লেবু ও মসলা চা", "Lemon cha and masala cha served hot.", "গরম গরম পরিবেশিত লেবু চা ও মসলা চা।", 3000, IMG.chaSun, ["Cha maker", "2 varieties", "Cups"], ["চা প্রস্তুতকারী", "২ ধরনের চা", "কাপ"], ["masala", "lemon"]],
+];
+
+export const SERVICES: Service[] = [
+  ...build("wedding", WEDDING, 1),
+  ...build("birthday", BIRTHDAY, 2),
+  ...build("corporate-events", CORPORATE, 3),
+  ...build("family-events", FAMILY, 4),
+  ...build("food-culinary", FOOD, 5),
+];
 
 export function getSeedService(id: string): Service | undefined {
   return SERVICES.find((s) => s.id === id);

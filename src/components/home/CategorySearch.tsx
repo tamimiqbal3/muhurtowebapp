@@ -4,18 +4,18 @@ import { useEffect, useId, useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Search, ChevronDown, ArrowUpRight, Loader2 } from "lucide-react";
-import { CATEGORIES } from "@/data/categories";
-import { SEARCH_SUGGESTIONS } from "@/lib/search";
+import { SEARCH_SUGGESTIONS, searchServices, setSearchCategories } from "@/lib/search";
+import { useCatalog } from "@/lib/store/catalog";
 import type { CategorySlug } from "@/lib/types";
 import { formatBDT } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { useLang } from "../i18n/LanguageProvider";
 import { cityName, localizeCategory } from "@/data/i18n-data";
-import { SERVICES_BN } from "@/data/services.bn";
 
 interface Hit {
   id: string;
   name: string;
+  nameBn?: string;
   subcategorySlug: string;
   categorySlug: CategorySlug;
   subcategory: string;
@@ -27,7 +27,8 @@ interface Hit {
 export function CategorySearch({ className, initialCategory = "", initialQuery = "", compact }: { className?: string; initialCategory?: string; initialQuery?: string; compact?: boolean }) {
   const router = useRouter();
   const { t, lang } = useLang();
-  const cats = CATEGORIES.map((c) => localizeCategory(c, lang));
+  const data = useCatalog();
+  const cats = data.categories.map((c) => localizeCategory(c, lang));
   const [category, setCategory] = useState(initialCategory);
   const [q, setQ] = useState(initialQuery);
   const [hits, setHits] = useState<Hit[] | null>(null);
@@ -42,27 +43,16 @@ export function CategorySearch({ className, initialCategory = "", initialQuery =
       setHits(null);
       return;
     }
-    const ctrl = new AbortController();
     setLoading(true);
-    const t = setTimeout(async () => {
-      try {
-        const params = new URLSearchParams({ q: q.trim(), limit: "6" });
-        if (category) params.set("category", category);
-        const res = await fetch(`/api/search?${params}`, { signal: ctrl.signal });
-        const data = (await res.json()) as { results: Hit[] };
-        setHits(data.results);
-        setActive(-1);
-      } catch {
-        /* aborted */
-      } finally {
-        setLoading(false);
-      }
-    }, 220);
-    return () => {
-      clearTimeout(t);
-      ctrl.abort();
-    };
-  }, [q, category]);
+    const timer = setTimeout(() => {
+      setSearchCategories(data.categories);
+      const found = searchServices(data.services, data.vendors, { q: q.trim(), category: category || undefined });
+      setHits(found.results.slice(0, 6).map((s) => ({ id: s.id, name: s.name, nameBn: s.nameBn, subcategorySlug: s.subcategorySlug, categorySlug: s.categorySlug, subcategory: s.subcategorySlug, startingPrice: s.startingPrice, image: s.images[0]?.src ?? "", city: "Dhaka" })));
+      setActive(-1);
+      setLoading(false);
+    }, 150);
+    return () => clearTimeout(timer);
+  }, [q, category, data]);
 
   useEffect(() => {
     const onDown = (e: MouseEvent) => {
@@ -142,7 +132,7 @@ export function CategorySearch({ className, initialCategory = "", initialQuery =
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={`${h.image}?auto=compress&cs=tinysrgb&w=120`} alt="" className="h-12 w-12 rounded-lg object-cover" loading="lazy" />
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-semibold">{lang === "bn" ? SERVICES_BN[h.id]?.name ?? h.name : h.name}</p>
+                      <p className="truncate text-sm font-semibold">{lang === "bn" ? h.nameBn || h.name : h.name}</p>
                       <p className="truncate text-xs text-muted">{cats.find((c) => c.slug === h.categorySlug)?.name} · {cats.find((c) => c.slug === h.categorySlug)?.subcategories.find((x) => x.slug === h.subcategorySlug)?.name ?? h.subcategory} · {cityName(h.city, lang)}</p>
                     </div>
                     <span className="text-xs font-semibold text-ink-soft">{t("from {price}", { price: formatBDT(h.startingPrice) })}</span>

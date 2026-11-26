@@ -30,11 +30,9 @@ npm run build                  # production build + type-check
 
 Nothing pretends to work: missing credentials produce an explicit notice, never a fake success.
 
-### Demo mode (no Firebase)
+### Local data mode (no Firebase)
 
-While Firebase isn't configured, login and registration still work for demonstrations: accounts (salted SHA-256 hashes), bookings, customisation requests and notifications live in the browser's `localStorage`, and a `muhurto_demo` cookie lets the proxy open `/dashboard`, `/booking` and `/checkout`. Every demo screen carries a “Demo mode” label, and checkout never takes or simulates a payment. As soon as the Firebase variables are set, the same UI switches to real Firebase Auth + Firestore with no code changes.
-
----
+Firebase is intentionally not connected yet. Everything is stored in the browser's local storage through one data layer (`src/lib/store/catalog.ts` for the catalogue, content and settings; `src/lib/demo/store.ts` for accounts, bookings, payments and invoices). Pages read only through `useCatalog()`, so connecting Firebase later means implementing the `CatalogRepository` interface — no page changes. Note: local data lives in each browser, so changes made in the admin panel are visible on the device where they were made.
 
 ## Environment variables
 
@@ -90,17 +88,13 @@ Documents reference each other by ID (`booking.customerId`, `service.vendorId`, 
 
 ---
 
-## Payments (SSLCommerz) & the 2% fee
+## Payments (SSLCOMMERZ) & invoices
 
-1. Register a sandbox store at <https://developer.sslcommerz.com/registration/> and set `SSLCOMMERZ_STORE_ID` / `SSLCOMMERZ_STORE_PASSWORD`.
-2. In the merchant panel set the **IPN URL** to `https://<your-domain>/api/payments/sslcommerz/ipn`.
+Checkout uses the SSLCOMMERZ hosted payment page through three stateless routes: `POST /api/pay/start` (creates the session), `/api/pay/return/[status]` (gateway callback) and `GET /api/pay/verify` (validates the transaction directly with SSLCOMMERZ before a booking is marked paid). After a validated payment the booking is confirmed and a formal invoice is issued at `/invoice/[bookingId]` with a randomly assigned support team member (manage the team in Admin → Website content).
 
-Flow: `/booking` creates a booking priced **only from the server catalogue** → `/checkout` shows the breakdown → `/api/payments/init` opens an SSLCommerz session → the gateway posts back to `/api/payments/sslcommerz/{success|fail|cancel}` and the IPN webhook → the server re-validates with SSLCommerz's validation API (status, `tran_id`, amount, currency) before confirming.
-
-- Fee: `platformFee = round(subtotal × 2%)`, `total = subtotal + fee` (৳100,000 → ৳2,000 → ৳1,02,000). The breakdown is stored on the booking and the payment record.
-- No double charging: a paid booking can't start a new session; older unfinished sessions are superseded; confirmation is an idempotent transaction; a second successful payment for the same booking is flagged `duplicate_refund_required` for admins instead of being applied.
-- Payments are never simulated. Without credentials the Pay button is disabled with an explanation.
-- **Method picker:** customers choose bKash, Nagad, Rocket, Upay, Visa, Mastercard, American Express, internet banking or bank transfer at checkout. Bank transfer is handled by the team (the customer gets account details by email/phone; the gateway is not used). The choice is sent to SSLCommerz as `multi_card_name` (`bkash`, `dbblmobilebanking`, `visacard`, `mastercard`, `amexcard`, `internetbank`) so the gateway opens on that method; Nagad opens the full SSLCommerz page (enable Nagad on your store). The choice is saved on the payment record as `preferredMethod`.
+- Without credentials, the public SSLCOMMERZ test store (`testbox`) is used, so the full flow can be tested with SSLCOMMERZ test wallets and cards — no real money moves.
+- To take real payments set `SSLCOMMERZ_STORE_ID`, `SSLCOMMERZ_STORE_PASSWORD` and `SSLCOMMERZ_SANDBOX=false` on Vercel.
+- Prices are per 50 guests (`unit: "per50"`): a line is billed per started block of 50 guests. A 2% platform fee is added once.
 
 ### Payment methods & logos
 
@@ -114,11 +108,11 @@ Only **official** logo artwork is shown. Each logo is looked up in this order:
 
 If none is available the provider's name is shown as plain text — logos are never redrawn. The "We accept" strip and checkout show only the methods ticked in Site settings, in the order set there.
 
-## Site settings (Admin → Site settings)
+## Admin panel
 
-Signed-in admins (emails listed in `ADMIN_EMAILS`) can change, without code: contact address/phone/email/hours (English and Bangla), social links, homepage slider speed, which payment methods are offered and in what order, payment logos, and bank-transfer instructions. Settings are stored in Firestore `settings/site` and apply to the live site immediately.
+Independent of the customer site at **`/admin`** (own sign-in at `/admin/login`, no customer header or footer). Every admin page is verified on the server; the default account's password is stored only as a one-way verifier. Set `ADMIN_USERNAME` and `ADMIN_PASSWORD` on Vercel to replace the built-in account.
 
----
+Sections: dashboard (revenue, bookings, average order, revenue by category, top services), bookings & orders (status, details, invoices), payments, categories & subcategories, services & packages (prices, images, descriptions, add-ons, visibility), vendors, Dhaka locations, customers, reviews, website content (homepage text, contact, social links, slider speed, support team, bank-transfer text) and payment methods (enable, order, upload official logos).
 
 ## Monitoring Agent workflow
 
@@ -129,15 +123,9 @@ Signed-in admins (emails listed in `ADMIN_EMAILS`) can change, without code: con
 
 ---
 
-## Event Planner
+## Event Planner (chat assistant)
 
-`/event-planner` lays the whole event out on one page, the way people spread brochures and menus on a table: occasion cards, guest and budget sliders with quick presets, date / city / theme, every service for that occasion (one pick per row) and the food counter (pick as many as you like). A receipt on the right totals live with the 2% fee, rolls its digits like a mechanical counter, shows a budget meter, and lets each line's quantity be adjusted. Picked items fly into the receipt. **Suggest the best plan** fills the table for you; a one-line note (“wedding in Rajshahi, 400 guests, 3 lakh”) fills in the details — parsed by Gemini (server-side) with a regex fallback. Recommendations:
-
-- Gemini only sees — and may only return — IDs of listings in the catalogue; anything else is discarded.
-- Prices and totals are always computed on the server from the catalogue; results are labelled as estimates.
-- Without a key (or if Gemini fails) a deterministic budget-aware recommender is used and labelled.
-
----
+`/event-planner` is a conversational assistant (`src/components/planner/PlannerChat.tsx`). It asks for the occasion, guests, budget, date, Dhaka area, venue, services and food, understands free text ("wedding for 200 guests in Gulshan, budget 5 lakh"), builds a priced plan from the catalogue with `recommendByRules`, and books it in one step.
 
 ## Deploying to Vercel
 
@@ -153,7 +141,7 @@ The Food & Culinary page (and the planner's food step) shows dishes like a shop 
 
 ## Brand
 
-Colours: primary `#015fff`, secondary `#00befe` (Tailwind tokens `brand`, `sky`, with `bg-brand-gradient`). The logo lives in `public/brand/` (`muhurto-logo.png` with a transparent background, the 192px version used in the header, and the original upload); `src/app/icon.png` and `apple-icon.png` are generated from it.
+Logo: `public/brand/muhurto-logo*.png` (transparent background). Tagline: “যেখানে আয়োজনের শুরু” / “Where Every Celebration Begins.” Fonts: Playfair Display (headings), Inter (text), Noto Serif/Sans Bengali (Bangla). Colours: #015fff and #00befe.
 
 ## Languages (English / বাংলা)
 
@@ -164,39 +152,9 @@ English is the default. The toggle in the navbar (and the mobile menu) sets the 
 - With Gemini enabled, planner notes and reasons are written in the selected language.
 - Not translated yet: the admin and agent workspaces' inner tables and forms (their navigation and headings are), and vendor-entered content.
 
-## Animations
+## Animations & loading
 
-The site is edited like a motion-graphics film:
-
-- **Hero**: a contained feature frame that opens with an iris-style reveal, cross-fading photos with a slow push-in and pointer parallax, and a progress indicator per photo. Below it, occasion cards each loop through their own photos and tilt in 3D under the pointer; on phones they swipe.
-- **Navigation**: a floating glass header (logo, “Muhūrto”, language switch; full links on desktop) that tucks away while reading; on phones and tablets navigation lives in a bottom dock (logo/home, explore, raised planner button, plan, account) with a full-screen menu that opens with a circular reveal.
-- **Loading**: "Preparing your event" — a ring fills in four stages (décor, catering, lighting, photography); each service lights up as it is arranged, with a status line underneath (pure SVG + CSS). Shown on the first visit and on route loading.
-- **Scenes**: homepage sections push in from a tilted, smaller frame and settle back as they leave, so sections cut together like shots. Chapters are revealed by wipes with image drift against the scroll.
-- **Wedding**: palace doors swing open onto the wedding scene, light spills through the gap, and the doors close again at the end of the scene.
-- **Page transitions**: a film cut — the frame shutters to black and opens on the next page; every page opens on a graded title card with grain and a light streak.
-- Lenis smooth scrolling on desktop. Motion plays for everyone by design (many Windows PCs have animation effects turned off, which froze every scene); to honour the OS reduced-motion setting again, see `src/components/motion/useReducedMotion.ts`.
-
-## Food counter
-
-The Food & Culinary page (and the planner's food step) shows dishes like a shop counter: a striped awning, a chalkboard sign, glass shelves for platters, fuchka counters and the cha/coffee bar, a plate and a hanging price tag for each item. Tap a dish to put it in your tray; the tray scales quantities to your guest count and totals as you pick.
-
-## Brand
-
-Colours: primary `#015fff`, secondary `#00befe` (Tailwind tokens `brand`, `sky`, with `bg-brand-gradient`). The logo lives in `public/brand/` (`muhurto-logo.png` with a transparent background, the 192px version used in the header, and the original upload); `src/app/icon.png` and `apple-icon.png` are generated from it.
-
-## Languages (English / বাংলা)
-
-English is the default. The toggle in the navbar (and the mobile menu) sets the `muhurto_lang` cookie and refreshes, so server-rendered and client pages switch together, including `<html lang>`, metadata, dates (`bn-BD`) and digits in translated strings.
-
-- Strings: English text is the key; Bangla lives in `src/lib/i18n/bn.ts`. Use `const { t } = await getT()` in server components and `useT()` / `useLang()` in client components. Missing keys fall back to English.
-- Catalogue: category / subsection / city / theme names and all 60 listings are translated in `src/data/i18n-data.ts` and `src/data/services.bn.ts`; data stays canonical English internally (pricing, search and booking snapshots), and is localised only for display. Search matches both languages.
-- With Gemini enabled, planner notes and reasons are written in the selected language.
-- Not translated yet: the admin and agent workspaces' inner tables and forms (their navigation and headings are), and vendor-entered content.
-
-## Animations
-
-Each homepage section uses its own motion idea: a velvet curtain and Ken Burns slideshow with mouse parallax in the hero, an envelope that opens on an invitation card (founder / About), polaroids that drop and settle, a split-flap board for stats, a calculator that rises from the desk for the planner intro, palace doors that open on scroll for weddings, and a fanned hand of cards for other services. Lenis provides smooth scrolling on desktop. Everything respects `prefers-reduced-motion` (and Lenis is disabled on touch devices).
-
+The loading screen plays once, when a visitor first enters the site. Page transitions, smooth-scroll hijacking and route loaders were removed. The homepage hero is a full-width sequence of décor and venue photographs (no people) that cross-dissolve with one slow, steady push-in per shot; its speed is set in Admin → Website content.
 
 ## Project structure
 

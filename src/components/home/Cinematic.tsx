@@ -8,6 +8,7 @@ import { ArrowRight, ArrowUpRight, Check } from "lucide-react";
 import { formatBDT } from "@/lib/format";
 import { RollingNumber } from "../motion/RollingNumber";
 import { CATEGORIES } from "@/data/categories";
+import { useCatalog } from "@/lib/store/catalog";
 import { IMG } from "@/data/images";
 import { localizeCategory } from "@/data/i18n-data";
 import { SafeImage } from "../ui/SafeImage";
@@ -23,76 +24,47 @@ const EASE = [0.22, 1, 0.36, 1] as const;
 /* ═════════ About: who we are, with a layered photo composition ═════════ */
 
 export function AboutInvitation() {
-  const { t } = useLang();
-  const ref = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
-  const backY = useTransform(scrollYProgress, [0, 1], ["6%", "-6%"]);
-  const frontY = useTransform(scrollYProgress, [0, 1], ["18%", "-14%"]);
+  const { t, lang } = useLang();
+  const data = useCatalog();
+  const { content } = data.settings;
+  const bn = lang === "bn";
   const points = [
-    { t: t("Verified vendors"), b: t("Each partner is reviewed for quality and fair pricing.") },
-    { t: t("Clear prices"), b: t("Published prices and a single 2% platform fee.") },
-    { t: t("One agent on the day"), b: t("A Monitoring Agent coordinates every vendor for you.") },
+    { t: t("Verified Dhaka partners"), b: t("Each partner is reviewed for quality and fair pricing.") },
+    { t: t("Prices for every 50 guests"), b: t("Clear, published prices and a single 2% platform fee.") },
+    { t: t("One coordinator on the day"), b: t("A dedicated coordinator manages every vendor for you.") },
     { t: t("Help in Bangla or English"), b: t("Dedicated support before, during and after your event.") },
   ];
   return (
     <section id="about" className="container-x scroll-mt-24 pt-20 sm:pt-24">
-      <div ref={ref} className="grid items-center gap-10 lg:grid-cols-[1fr_1.05fr] lg:gap-16">
-        {/* photo composition */}
+      <div className="grid items-center gap-10 lg:grid-cols-[1fr_1.05fr] lg:gap-16">
         <div className="relative mx-auto w-full max-w-[560px] pb-10 sm:pb-14">
-          <motion.div
-            style={{ y: backY }}
-            initial={{ clipPath: "inset(0 0 100% 0 round 24px)" }}
-            whileInView={{ clipPath: "inset(0 0 0% 0 round 24px)" }}
-            viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 1.2, ease: [0.76, 0, 0.24, 1] }}
-            className="relative aspect-[4/5] w-[82%] overflow-hidden rounded-[24px] bg-sand"
-          >
-            <motion.div className="absolute inset-0" initial={{ scale: 1.2 }} whileInView={{ scale: 1 }} viewport={{ once: true }} transition={{ duration: 2, ease: [0.22, 1, 0.36, 1] }}>
-              <SafeImage src={IMG.wVenueFloral.src} alt={IMG.wVenueFloral.alt} fill sizes="(max-width: 1024px) 80vw, 460px" className="object-cover" />
-            </motion.div>
-          </motion.div>
-          <motion.div
-            style={{ y: frontY }}
-            initial={{ opacity: 0, x: 40, rotate: 4 }}
-            whileInView={{ opacity: 1, x: 0, rotate: 0 }}
-            viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 1.1, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
-            className="absolute bottom-0 right-0 aspect-[4/5] w-[48%] overflow-hidden rounded-[20px] border-[6px] border-ivory bg-sand shadow-[0_30px_60px_-30px_rgb(10_22_51/.6)]"
-          >
+          <div className="relative aspect-[4/5] w-[82%] overflow-hidden rounded-[24px] bg-sand">
+            <SafeImage src={IMG.wVenueFloral.src} alt={IMG.wVenueFloral.alt} fill sizes="(max-width: 1024px) 80vw, 460px" className="object-cover" />
+          </div>
+          <div className="absolute bottom-0 right-0 aspect-[4/5] w-[48%] overflow-hidden rounded-[20px] border-[6px] border-ivory bg-sand shadow-[0_30px_60px_-30px_rgb(10_22_51/.6)]">
             <SafeImage src={IMG.wSeatingGarden.src} alt={IMG.wSeatingGarden.alt} fill sizes="(max-width: 1024px) 45vw, 260px" className="object-cover" />
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8, delay: 0.7 }}
-            className="absolute left-4 top-4 rounded-2xl bg-paper/90 px-4 py-3 shadow-[var(--shadow-soft)] backdrop-blur sm:left-6 sm:top-6"
-          >
-            <p className="font-display text-3xl leading-none text-ink">60+</p>
+          </div>
+          <div className="absolute left-4 top-4 rounded-2xl bg-paper/90 px-4 py-3 shadow-[var(--shadow-soft)] backdrop-blur sm:left-6 sm:top-6">
+            <p className="font-display text-3xl leading-none text-ink">{data.services.filter((x) => x.active !== false).length}+</p>
             <p className="mt-1 text-[0.6rem] font-semibold tracking-[0.18em] text-muted uppercase">{t("Services")}</p>
-          </motion.div>
+          </div>
         </div>
-
-        {/* words */}
         <div className="min-w-0">
-          <Reveal><p className="eyebrow">{t("About")}</p></Reveal>
-          <h2 className="mt-3 text-4xl leading-[1.05] sm:text-5xl"><SplitWords text={t("Moments, managed with heart.")} /></h2>
-          <Reveal delay={0.1}>
-            <p className="mt-5 text-ink-soft">{t("MUHURTO is an event management platform for Bangladesh. Plan, book and pay in one place, with a dedicated Monitoring Agent on the day.")}</p>
-            <p className="mt-3 text-ink-soft">{t("We manage weddings, birthdays, corporate events, family occasions and catering of every size.")}</p>
-          </Reveal>
+          <p className="eyebrow">{t("About")}</p>
+          <h2 className={cn("mt-3 text-4xl leading-[1.1] sm:text-5xl", bn && "bn")}>{bn ? content.aboutTitleBn : content.aboutTitle}</h2>
+          <p className="mt-5 text-ink-soft">{bn ? content.aboutBodyBn : content.aboutBody}</p>
           <ul className="mt-8 grid gap-x-8 gap-y-5 sm:grid-cols-2">
-            {points.map((p, i) => (
-              <Reveal as="li" key={p.t} variant="slide" delay={0.12 + i * 0.08} className="border-t border-line pt-4">
+            {points.map((p) => (
+              <li key={p.t} className="border-t border-line pt-4">
                 <p className="font-semibold text-ink">{p.t}</p>
                 <p className="mt-1.5 text-sm leading-relaxed text-ink-soft">{p.b}</p>
-              </Reveal>
+              </li>
             ))}
           </ul>
-          <Reveal delay={0.3} className="mt-8 flex flex-wrap gap-3">
+          <div className="mt-8 flex flex-wrap gap-3">
             <ButtonLink href="/about" variant="outline">{t("Our story")}</ButtonLink>
             <ButtonLink href="/event-planner" variant="accent">{t("Plan your event")}</ButtonLink>
-          </Reveal>
+          </div>
         </div>
       </div>
     </section>
@@ -104,8 +76,8 @@ export function Polaroids() {
   const { t } = useLang();
   const items = [
     { img: IMG.wStageVibrant, title: t("Discover"), body: t("Verified décor, catering, photography and sound partners, with published prices.") },
-    { img: IMG.fuSpicy, title: t("Design"), body: t("Select services, quantities and add-ons to suit your event.") },
-    { img: IMG.fGarland, title: t("Relax"), body: t("Your Monitoring Agent manages the day while you follow progress online.") },
+    { img: IMG.dBanquetChandelier, title: t("Design"), body: t("Plan with our assistant or choose services yourself — prices are shown for every 50 guests.") },
+    { img: IMG.dReceptionFloral, title: t("Relax"), body: t("Your coordinator manages the day while you follow progress online.") },
   ];
   return (
     <section className="relative mt-24 overflow-hidden bg-[#050b1c] py-20 text-paper sm:py-24">
@@ -132,22 +104,12 @@ export function Polaroids() {
 
 /** One chapter: a photo that drifts against the scroll, beside its number, title and line. */
 function Chapter({ i, img, title, body }: { i: number; img: { src: string; alt: string }; title: string; body: string }) {
-  const ref = useRef<HTMLLIElement>(null);
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
-  const drift = useTransform(scrollYProgress, [0, 1], ["-10%", "10%"]);
   return (
-    <motion.li
-      ref={ref}
-      initial={{ opacity: 0, y: 40 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.01, margin: "0px 0px -8% 0px" }}
-      transition={{ duration: 0.9, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
+    <li
       className="group grid overflow-hidden rounded-[20px] bg-white/[0.04] ring-1 ring-white/10 sm:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]"
     >
       <div className="relative aspect-[16/10] overflow-hidden sm:aspect-auto sm:min-h-[200px]">
-        <motion.div style={{ y: drift }} className="absolute -inset-y-[12%] inset-x-0">
-          <SafeImage src={img.src} alt={img.alt} fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 45vw, 28vw" className="object-cover transition-transform duration-[1.4s] group-hover:scale-105" />
-        </motion.div>
+        <SafeImage src={img.src} alt={img.alt} fill sizes="(max-width: 640px) 100vw, (max-width: 1024px) 45vw, 28vw" className="object-cover" />
       </div>
       <div className="flex flex-col justify-center p-6 sm:p-7">
         <span className="font-lcd text-xs tracking-[0.3em] text-sky">{String(i + 1).padStart(2, "0")} / 03</span>
@@ -155,7 +117,7 @@ function Chapter({ i, img, title, body }: { i: number; img: { src: string; alt: 
         <span className="mt-3 block h-px w-12 bg-sky" />
         <p className="mt-3 text-sm leading-relaxed text-paper/75">{body}</p>
       </div>
-    </motion.li>
+    </li>
   );
 }
 
@@ -189,7 +151,8 @@ function FlapChar({ char, delay }: { char: string; delay: number }) {
 
 export function SplitFlapStats() {
   const { t } = useLang();
-  const stats: Array<[string, string]> = [["60+", t("Services")], ["5", t("Categories")], ["30", t("Sections")], ["2%", t("Platform fee")], ["1", t("Agent per event")]];
+  const data = useCatalog();
+  const stats: Array<[string, string]> = [[`${data.services.filter((x) => x.active !== false).length}+`, t("Services")], [String(data.categories.length), t("Categories")], [String(data.locations.filter((l) => l.active).length), t("Dhaka areas")], ["2%", t("Platform fee")], ["50", t("Guests per price")]];
   return (
     <section className="bg-[#050b1c] py-20 text-paper">
       <div className="container-x">
@@ -241,20 +204,20 @@ export function PlannerTeaser() {
       <div className="grid items-center gap-16 lg:grid-cols-2">
         <div>
           <Reveal><p className="eyebrow">{t("Event planner")}</p></Reveal>
-          <h2 className="mt-3 text-4xl leading-[1.08] sm:text-5xl"><SplitWords text={t("Pick it all in one place.")} /></h2>
+          <h2 className="mt-3 text-4xl leading-[1.08] sm:text-5xl"><SplitWords text={t("Plan it in a conversation.")} /></h2>
           <Reveal variant="focus" delay={0.1}>
-            <p className="mt-5 max-w-lg text-ink-soft">{t("Select the occasion, guests and budget, then choose services on a single page. The total updates as you go.")}</p>
+            <p className="mt-5 max-w-lg text-ink-soft">{t("Tell our assistant the occasion, guests, budget and area in Dhaka. It suggests services, shows the total and books it in one step.")}</p>
           </Reveal>
           <Reveal variant="rise" delay={0.2}>
             <div className="mt-8 flex flex-wrap gap-3">
               <ButtonLink href="/event-planner" variant="accent" size="lg">{t("Start planning your event")} <ArrowRight className="h-4 w-4" /></ButtonLink>
-              <ButtonLink href="/customize" variant="outline" size="lg">{t("Build it yourself")}</ButtonLink>
+              <ButtonLink href="/search" variant="outline" size="lg">{t("Browse services")}</ButtonLink>
             </div>
           </Reveal>
         </div>
         <div className="relative mx-auto w-full max-w-md [perspective:1400px]">
           <motion.div style={{ rotateX, y, scale, transformOrigin: "50% 100%" }} className="rounded-[28px] bg-paper p-5 shadow-[0_40px_70px_-30px_rgb(1_95_255/.55)] ring-1 ring-line">
-            <p className="font-display text-xl">{t("Your whole event, on one table")}</p>
+            <p className="font-display text-xl">{t("Your event, priced for every 50 guests")}</p>
             <ul className="mt-4 grid grid-cols-2 gap-2.5" aria-hidden>
               {demo.map((d, i) => {
                 const picked = i < on;
@@ -298,7 +261,7 @@ export function WeddingDoors() {
   const beam = useTransform(p, [0.04, 0.14, 0.3, 0.7, 0.86, 0.96], [0, 1, 0, 0, 1, 0]);
   const push = useTransform(p, [0, 0.32, 0.68, 1], reduce ? [1, 1, 1, 1] : [0.94, 1.04, 1.04, 0.94]);
   const closedTitle = useTransform(p, [0, 0.08, 0.9, 1], reduce ? [0, 0, 0, 0] : [1, 0, 0, 1]);
-  const wedding = localizeCategory(CATEGORIES[0], lang);
+  const wedding = localizeCategory(useCatalog().categories.find((c) => c.slug === "wedding") ?? CATEGORIES[0], lang);
   const door = (side: "l" | "r") => (
     <div className={cn("relative h-full w-full overflow-hidden border-[#b9913f] bg-[linear-gradient(180deg,#0b1d4a,#061233)] shadow-[inset_0_0_60px_rgb(0_0_0/.6)]", side === "l" ? "border-r-[3px]" : "border-l-[3px]")}>
       <div className="absolute inset-0 opacity-[.07] [background:repeating-linear-gradient(90deg,#fff_0_1px,transparent_1px_9px)]" />
@@ -314,24 +277,24 @@ export function WeddingDoors() {
     </div>
   );
   return (
-    <section ref={ref} className="relative mt-24 h-[320vh]">
+    <section ref={ref} className="relative mt-24 h-[220vh]">
       <div className="sticky top-0 h-screen overflow-hidden bg-[#03081a]">
         <motion.div style={{ scale: push }} className="absolute inset-0">
           <motion.div style={{ scale: imgScale }} className="absolute inset-0">
-            <SafeImage src={IMG.wStageCouple.src} alt={IMG.wStageCouple.alt} fill sizes="100vw" className="object-cover" />
+            <SafeImage src={IMG.wRedGold.src} alt={IMG.wRedGold.alt} fill sizes="100vw" className="object-cover" />
           </motion.div>
           <div className="absolute inset-0 bg-[linear-gradient(90deg,rgb(5_11_28/.9),rgb(5_11_28/.5)_60%,rgb(5_11_28/.25))]" />
           <FilmGrain strength={0.07} />
           <motion.div style={{ opacity: reveal, y: contentY }} className="container-x relative flex h-full flex-col justify-center text-paper">
             <p className="eyebrow text-paper/70">{wedding.name}</p>
             <h2 className="mt-3 max-w-2xl text-5xl leading-[1.05] text-paper sm:text-6xl">{t("Weddings, the Bangladeshi way.")}</h2>
-            <p className="mt-5 max-w-xl text-paper/80">{t("Gaye holud, akdh, reception and bou bhat — planned together and managed by one agent.")}</p>
+            <p className="mt-5 max-w-xl text-paper/80">{t("Gaye holud, akd, reception and walima — planned together and managed by one coordinator.")}</p>
             <ul className="mt-6 flex max-w-xl flex-wrap gap-2">
               {wedding.subcategories.map((s) => <li key={s.slug} className="rounded-full border border-paper/25 bg-paper/10 px-3 py-1 text-xs backdrop-blur">{s.name}</li>)}
             </ul>
             <div className="mt-8 flex flex-wrap gap-3">
               <ButtonLink href="/wedding" variant="light" size="lg">{t("Explore weddings")}</ButtonLink>
-              <ButtonLink href="/customize?category=wedding" variant="accent" size="lg">{t("Plan a wedding")}</ButtonLink>
+              <ButtonLink href="/event-planner" variant="accent" size="lg">{t("Plan a wedding")}</ButtonLink>
             </div>
           </motion.div>
         </motion.div>
@@ -361,7 +324,7 @@ export function ServicesFan() {
   const ref = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "center center"] });
   const p = useSpring(scrollYProgress, { stiffness: 80, damping: 20 });
-  const others = CATEGORIES.slice(1).map((c) => localizeCategory(c, lang));
+  const others = useCatalog().categories.filter((c) => c.slug !== "wedding").map((c) => localizeCategory(c, lang));
   const spread = [-1.5, -0.5, 0.5, 1.5];
   const [wide, setWide] = useState(false);
   useEffect(() => {

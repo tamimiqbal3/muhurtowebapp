@@ -6,7 +6,7 @@
 import type { AppNotification, Booking, BookingRequest, ContactDetails, CustomizationRequest, EventDetails, PricedLine, PriceBreakdown } from "../types";
 
 export const DEMO_COOKIE = "muhurto_demo";
-const K = { users: "muhurto.demo.users", session: "muhurto.demo.session", bookings: "muhurto.demo.bookings", requests: "muhurto.demo.requests", notes: "muhurto.demo.notifications" };
+const K = { users: "muhurto.demo.users", session: "muhurto.demo.session", bookings: "muhurto.demo.bookings", requests: "muhurto.demo.requests", notes: "muhurto.demo.notifications", payments: "muhurto.local.payments" };
 
 export interface DemoUser {
   uid: string;
@@ -120,7 +120,7 @@ export function demoCreateBooking(uid: string, args: { contact: ContactDetails; 
     requests: [], customizationRequestId: null, createdAt: now(), updatedAt: now(),
   };
   write(K.bookings, [booking, ...read<Booking[]>(K.bookings, [])]);
-  demoNotify(uid, "Booking created", "Your booking is saved. Online payment opens once the payment gateway is connected.", `/booking/${id}`);
+  demoNotify(uid, "Booking created", "Your booking is saved. Complete the payment to confirm it.", `/checkout?booking=${id}`);
   return booking;
 }
 
@@ -144,7 +144,7 @@ export function demoRequests(uid: string): CustomizationRequest[] {
 export function demoCreateRequest(uid: string, req: Omit<CustomizationRequest, "id" | "customerId" | "status" | "messages" | "createdAt" | "updatedAt" | "revisedPlan" | "bookingId">) {
   const r: CustomizationRequest = { ...req, id: `demo-${rid()}`, customerId: uid, status: "submitted", messages: req.specialInstructions ? [{ from: "customer", text: req.specialInstructions, at: now() }] : [], revisedPlan: null, bookingId: null, createdAt: now(), updatedAt: now() };
   write(K.requests, [r, ...read<CustomizationRequest[]>(K.requests, [])]);
-  demoNotify(uid, "Customisation request saved", "In the live version our planning team replies here with an updated plan.", "/dashboard#customizations");
+  demoNotify(uid, "Customisation request saved", "Our planning team will review your request and reply here with an updated plan.", "/dashboard#customizations");
   return r;
 }
 
@@ -159,4 +159,70 @@ export function demoNotifications(uid: string): AppNotification[] {
 
 export function demoMarkRead(uid: string) {
   write(K.notes, read<AppNotification[]>(K.notes, []).map((n) => (n.userId === uid ? { ...n, read: true } : n)));
+}
+
+/* ─── Local payments & invoices ─────────────────────────────────────── */
+
+export interface LocalPayment {
+  id: string; // SSLCOMMERZ tran_id
+  bookingId: string;
+  bookingCode: string;
+  customerId: string;
+  customerName: string;
+  amount: number;
+  method: string;
+  cardType: string;
+  bankTranId: string;
+  valId: string;
+  status: "paid" | "failed" | "cancelled";
+  sandbox: boolean;
+  paidAt: string;
+  invoiceNo: string;
+  support: { name: string; email: string; phone: string };
+}
+
+export function localPayments(): LocalPayment[] {
+  return read<LocalPayment[]>(K.payments, []).sort((a, b) => b.paidAt.localeCompare(a.paidAt));
+}
+
+export function localPaymentForBooking(bookingId: string): LocalPayment | null {
+  return localPayments().find((p) => p.bookingId === bookingId && p.status === "paid") ?? null;
+}
+
+/** Records a gateway-validated payment, confirms the booking and issues an invoice. Idempotent per tran_id. */
+export function recordPayment(p: Omit<LocalPayment, "invoiceNo" | "customerId" | "customerName" | "bookingCode"> & { bookingCode?: string }): LocalPayment | null {
+  const all = read<LocalPayment[]>(K.payments, []);
+  const existing = all.find((x) => x.id === p.id);
+  if (existing) return existing;
+  const bookings = read<Booking[]>(K.bookings, []);
+  const b = bookings.find((x) => x.id === p.bookingId);
+  if (!b) return null;
+  const seq = String(all.filter((x) => x.status === "paid").length + 1).padStart(5, "0");
+  const rec: LocalPayment = { ...p, bookingCode: b.code, customerId: b.customerId, customerName: b.contact.name, invoiceNo: `INV-${new Date().getFullYear()}-${seq}` };
+  write(K.payments, [rec, ...all]);
+  if (p.status === "paid") {
+    b.status = "confirmed";
+    b.paymentStatus = "paid";
+    b.paidAt = p.paidAt;
+    b.monitoring = { ...b.monitoring, status: "pending_assignment" };
+    b.updatedAt = now();
+    write(K.bookings, bookings);
+    demoNotify(b.customerId, "Payment received", `Payment for ${b.code} is confirmed. Your invoice ${rec.invoiceNo} is ready.`, `/invoice/${b.id}`);
+  }
+  return rec;
+}
+
+/* ─── Admin helpers (same browser) ─────────────────────────────────── */
+
+export function localUsers(): DemoUser[] {
+  return Object.values(read<Record<string, DemoUser>>(K.users, {}));
+}
+
+export function updateLocalBooking(id: string, patch: Partial<Booking>) {
+  const all = read<Booking[]>(K.bookings, []);
+  write(K.bookings, all.map((b) => (b.id === id ? { ...b, ...patch, updatedAt: now() } : b)));
+}
+
+export function deleteLocalBooking(id: string) {
+  write(K.bookings, read<Booking[]>(K.bookings, []).filter((b) => b.id !== id));
 }

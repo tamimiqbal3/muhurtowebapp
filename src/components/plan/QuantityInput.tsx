@@ -10,7 +10,7 @@ export function QuantityInput({ value, min, unit, onChange, compact }: { value: 
   const t = useT();
   const [draft, setDraft] = useState(String(value));
   useEffect(() => setDraft(String(value)), [value]);
-  const step = unit === "event" || unit === "hour" ? 1 : value >= 200 ? 50 : 10;
+  const step = unit === "per50" ? 50 : unit === "event" || unit === "hour" ? 1 : value >= 200 ? 50 : 10;
   const commit = (n: number) => onChange(Math.max(min, Math.min(5000, Math.round(n) || min)));
   return (
     <div className="inline-flex items-center gap-2">

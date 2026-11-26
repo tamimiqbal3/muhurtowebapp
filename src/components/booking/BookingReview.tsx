@@ -12,12 +12,11 @@ import { useLang } from "../i18n/LanguageProvider";
 import { Button, ButtonLink } from "../ui/Button";
 import { EmptyState, Notice, Spinner } from "../ui/misc";
 import { SafeImage } from "../ui/SafeImage";
-import { WeAccept } from "../payments/WeAccept";
 import { formatBDT } from "@/lib/format";
-import { computeBreakdown } from "@/lib/pricing";
+import { computeBreakdown, lineAmount } from "@/lib/pricing";
 import { demoCreateBooking } from "@/lib/demo/store";
 import { bdPhone, email as emailV, futureDate, ValidationError } from "@/lib/validation";
-import { isCategorySlug } from "@/data/categories";
+import { getCatalogSnapshot } from "@/lib/store/catalog";
 import type { PricedLine } from "@/lib/types";
 
 export function BookingReview() {
@@ -42,9 +41,9 @@ export function BookingReview() {
   /** Demo mode: validate like the server does, then save the booking in this browser. */
   function createDemoBooking(uid: string) {
     const e = plan.event;
-    if (!e.categorySlug || !isCategorySlug(e.categorySlug)) throw new ValidationError("Event category is invalid.");
+    if (!e.categorySlug || !getCatalogSnapshot().categories.some((c) => c.slug === e.categorySlug)) throw new ValidationError("Event category is invalid.");
     const date = futureDate(e.date);
-    if (!e.city?.trim()) throw new ValidationError("City is required.");
+    if (!e.city?.trim() || !getCatalogSnapshot().locations.some((l) => l.active && l.name === e.city)) throw new ValidationError("Please choose an area in Dhaka.");
     if (!e.venue?.trim()) throw new ValidationError("Venue is required.");
     if (!e.guests || e.guests < 1) throw new ValidationError("Guests must be between 1 and 10000.");
     const c = { name: contact.name.trim(), phone: bdPhone(contact.phone), email: emailV(contact.email) };
@@ -55,7 +54,7 @@ export function BookingReview() {
       return {
         serviceId: i.serviceId, serviceName: i.snapshot.name, categorySlug: i.snapshot.categorySlug, subcategorySlug: i.snapshot.subcategorySlug,
         vendorId: "", vendorName: "", unit: i.snapshot.unit, basePrice: i.snapshot.price, optionIds: chosen.map((o) => o.id), optionLabels: chosen.map((o) => o.label),
-        unitPrice, quantity: i.quantity, lineTotal: unitPrice * i.quantity,
+        unitPrice, quantity: i.quantity, lineTotal: lineAmount(i.snapshot.unit, unitPrice, i.quantity),
       };
     });
     const pricing = computeBreakdown(lines.reduce((s, l) => s + l.lineTotal, 0));
@@ -152,7 +151,6 @@ export function BookingReview() {
             <ButtonLink href="/login?next=/booking" variant="primary" size="lg" className="mt-5 w-full"><LogIn className="h-4 w-4" /> {t("Sign in to book")}</ButtonLink>
           )}
           <p className="mt-4 flex items-center gap-2 text-xs text-muted"><ShieldCheck className="h-4 w-4 text-success" /> {t("You'll choose how to pay on the next step.")}</p>
-          <WeAccept title={false} className="mt-4 [&_ul]:justify-start [&_ul]:gap-x-4 [&_ul]:gap-y-3 [&_img]:h-4" />
         </div>
       </aside>
     </form>

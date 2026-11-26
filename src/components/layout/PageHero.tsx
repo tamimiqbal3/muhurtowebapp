@@ -31,7 +31,7 @@ export function PageHero({ title, bn, eyebrow, description, image, crumbs, child
     <section className={cn("relative isolate overflow-hidden bg-[#050b1c] text-paper", image ? "pb-14 pt-28 sm:pb-20 sm:pt-36 lg:pt-44" : "pb-12 pt-24 sm:pt-28 lg:pt-36")}>
       {image ? (
         <motion.div className="absolute inset-0 -z-20 overflow-hidden" initial={{ clipPath: "inset(0 0 0 100%)" }} animate={{ clipPath: "inset(0 0 0 0%)" }} transition={{ duration: 1.2, ease: [0.76, 0, 0.24, 1] }}>
-          <SafeImage src={image.src} alt={image.alt} fill priority sizes="100vw" className="animate-kenburns object-cover" />
+          <SafeImage src={image.src} alt={image.alt} fill priority sizes="100vw" className="object-cover" />
         </motion.div>
       ) : (
         <motion.div aria-hidden className="absolute -inset-[20%] -z-20 bg-[radial-gradient(40%_50%_at_75%_40%,rgb(1_95_255/.45),transparent_70%),radial-gradient(30%_40%_at_20%_80%,rgb(0_190_254/.22),transparent_70%)]" animate={{ x: ["0%", "-4%", "0%"], y: ["0%", "3%", "0%"] }} transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }} />

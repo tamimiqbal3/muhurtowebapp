@@ -33,7 +33,7 @@ export default async function AboutPage() {
           </div>
         </Reveal>
         <Reveal variant="swing" className="relative h-[420px] overflow-hidden rounded-[var(--radius-card)] lg:h-auto lg:min-h-[460px] lg:self-stretch">
-          <SafeImage src={IMG.fElders.src} alt={IMG.fElders.alt} fill sizes="(max-width: 1024px) 100vw, 50vw" className="animate-kenburns object-cover" />
+          <SafeImage src={IMG.dReceptionFloral.src} alt={IMG.dReceptionFloral.alt} fill sizes="(max-width: 1024px) 100vw, 50vw" className="object-cover" />
         </Reveal>
       </section>
       <section className="container-x pt-24">

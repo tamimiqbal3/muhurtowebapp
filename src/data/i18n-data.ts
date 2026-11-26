@@ -1,7 +1,6 @@
 import type { Category, Service, Vendor } from "../lib/types";
 import type { Lang } from "../lib/i18n/core";
 import { CATEGORIES } from "./categories";
-import { SERVICES_BN } from "./services.bn";
 
 export const CATEGORY_BN: Record<string, { tagline: string; description: string; subs: Record<string, string> }> = {
   wedding: {
@@ -95,10 +94,10 @@ export function localizeCategory(c: Category, lang: Lang): Category {
   const b = CATEGORY_BN[c.slug];
   return {
     ...c,
-    name: c.nameBn,
-    tagline: b?.tagline ?? c.tagline,
-    description: b?.description ?? c.description,
-    subcategories: c.subcategories.map((s) => ({ ...s, name: s.nameBn, description: SUB_DESC_BN[s.slug] ?? s.description })),
+    name: c.nameBn || c.name,
+    tagline: c.taglineBn || b?.tagline || c.tagline,
+    description: c.descriptionBn || b?.description || c.description,
+    subcategories: c.subcategories.map((s) => ({ ...s, name: s.nameBn || s.name, description: s.descriptionBn || SUB_DESC_BN[s.slug] || s.description })),
   };
 }
 
@@ -108,14 +107,13 @@ export function localizeCategories(lang: Lang): Category[] {
 
 export function localizeService(s: Service, lang: Lang): Service {
   if (lang !== "bn") return s;
-  const b = SERVICES_BN[s.id];
   return {
     ...s,
-    name: b?.name ?? s.name,
-    shortDescription: b?.short ?? s.shortDescription,
-    description: b?.desc ?? s.description,
-    includes: b?.includes ?? s.includes,
-    options: s.options.map((o) => ({ ...o, label: b?.options?.[o.id] ?? o.label })),
+    name: s.nameBn || s.name,
+    shortDescription: s.shortDescriptionBn || s.shortDescription,
+    description: s.descriptionBn || s.description,
+    includes: s.includesBn?.length ? s.includesBn : s.includes,
+    options: s.options.map((o) => ({ ...o, label: o.labelBn || o.label })),
   };
 }
 

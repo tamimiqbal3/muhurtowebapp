@@ -10,7 +10,7 @@ export function LiveCheckout({ booking, gatewayConfigured, sandbox }: { booking:
   return (
     <CheckoutSummary booking={booking}>
       {booking.status === "pending_payment" ? (
-        <PayButton bookingId={booking.id} total={booking.pricing.total} gatewayConfigured={gatewayConfigured} sandbox={sandbox} />
+        <PayButton booking={booking} />
       ) : (
         <p className="rounded-xl bg-sand p-4 text-sm">{t("This booking can't be paid in its current state.")}</p>
       )}

@@ -73,17 +73,26 @@ test("prices from catalogue, ignores client prices, enforces min qty & options",
     getVendor,
   );
   assert.equal(r.lines.length, 2);
-  assert.equal(r.lines[0].unitPrice, 285000 + 65000);
+  assert.equal(r.lines[0].unitPrice, 32000 + 4000);
   assert.deepEqual(r.lines[0].optionIds, ["fresh-flowers"]);
+  assert.equal(r.lines[0].quantity, 50, "min 50 guests enforced");
   assert.equal(r.lines[1].quantity, 50, "min quantity enforced");
-  assert.equal(r.pricing.subtotal, 350000 + 950 * 50);
+  assert.equal(r.pricing.subtotal, 36000 + 35000);
   assert.equal(r.pricing.platformFee, Math.round(r.pricing.subtotal * 0.02));
   assert.equal(r.errors.length, 1);
 });
-test("suggested quantities follow units", () => {
-  assert.equal(suggestedQuantity(svc("food-cha-milk")!, 400), 600);
-  assert.equal(suggestedQuantity(svc("wed-decor-rajkiya")!, 400), 1);
-  assert.equal(suggestedQuantity(svc("wed-sit-banquet")!, 40), 100);
+test("per-50-guest pricing: quantity is the guest count, billed in blocks of 50", () => {
+  assert.equal(suggestedQuantity(svc("food-cha-milk")!, 400), 400);
+  assert.equal(suggestedQuantity(svc("wed-decor-rajkiya")!, 40), 50);
+  const r = priceItems([{ serviceId: "wed-decor-rajkiya", quantity: 120, optionIds: [] }], svc, getVendor);
+  assert.equal(r.lines[0].lineTotal, 32000 * 3, "120 guests = 3 blocks");
+});
+test("every subcategory has at least five items, all in Dhaka", () => {
+  for (const c of CATEGORIES) for (const sub of c.subcategories) {
+    const n = SERVICES.filter((s) => s.categorySlug === c.slug && s.subcategorySlug === sub.slug).length;
+    assert.ok(n >= 5, `${c.slug}/${sub.slug} has ${n}`);
+  }
+  assert.ok(SERVICES.every((s) => s.city === "Dhaka" && s.unit === "per50" && s.images.length === 1));
 });
 
 console.log("Search");
@@ -96,9 +105,8 @@ test("synonyms (tea → cha, puchka → fuchka)", () => {
   assert.ok(searchServices(SERVICES, VENDORS, { q: "puchka" }).results.every((s) => s.subcategorySlug === "fuchka"));
 });
 test("city filter honours service areas", () => {
-  const r = searchServices(SERVICES, VENDORS, { city: "Rajshahi", category: "wedding" });
-  assert.ok(r.results.some((s) => s.id === "wed-decor-rajshahi"));
-  assert.ok(!r.results.some((s) => s.id === "wed-decor-rajkiya"));
+  assert.equal(searchServices(SERVICES, VENDORS, { city: "Rajshahi", category: "wedding" }).total, 0, "nothing outside Dhaka");
+  assert.ok(searchServices(SERVICES, VENDORS, { city: "Dhaka", category: "wedding" }).total >= 30);
 });
 test("no results → empty, loose fallback flagged", () => {
   assert.equal(searchServices(SERVICES, VENDORS, { q: "zzzzqqq" }).total, 0);
@@ -125,15 +133,14 @@ test("budget & date formats", () => {
   assert.equal(parseDate("15 January 2027"), "2027-01-15");
 });
 test("rule recommender returns real listings, serves city, respects budget where possible", () => {
-  const req = parseRequirementsFallback("wedding reception in Rajshahi, budget 300000 BDT, 400 guests");
+  const req = { ...parseRequirementsFallback("wedding reception in Gulshan, budget 300000 BDT, 400 guests"), city: "Dhaka" };
   const { items } = recommendByRules(req, SERVICES);
   assert.ok(items.length >= 2);
   for (const i of items) assert.ok(svc(i.serviceId));
   const priced = priceItems(items, svc, getVendor);
   console.log(`      → ${items.length} items, total ${priced.pricing.total}`);
   assert.ok(priced.pricing.total <= 300000, "fits budget");
-  const decor = items.map((i) => svc(i.serviceId)!).find((s) => s.subcategorySlug === "decor");
-  assert.equal(decor?.id, "wed-decor-rajshahi");
+  assert.ok(items.every((i) => svc(i.serviceId)!.city === "Dhaka"));
 });
 test("food-only planner", () => {
   const { items } = recommendByRules({ categorySlug: "food-culinary", city: "Dhaka", budget: 120000, guests: 150, theme: null, date: null, services: [], preferences: null }, SERVICES);

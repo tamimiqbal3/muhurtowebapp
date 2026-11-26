@@ -1,12 +1,12 @@
 "use client";
 
-import { createContext, useContext, type ReactNode } from "react";
-import { DEFAULT_SETTINGS, type SiteSettings } from "@/lib/site-settings";
+import type { ReactNode } from "react";
+import { useCatalog } from "@/lib/store/catalog";
+import type { SiteSettings } from "@/lib/site-settings";
 
-const Ctx = createContext<SiteSettings>(DEFAULT_SETTINGS);
-
-export function SiteSettingsProvider({ value, children }: { value: SiteSettings; children: ReactNode }) {
-  return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
+/** Kept for compatibility; settings now come from the local data store. */
+export function SiteSettingsProvider({ children }: { value?: SiteSettings; children: ReactNode }) {
+  return <>{children}</>;
 }
 
-export const useSiteSettings = () => useContext(Ctx);
+export const useSiteSettings = (): SiteSettings => useCatalog().settings;

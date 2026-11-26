@@ -1,4 +1,5 @@
-export type CategorySlug = "wedding" | "birthday" | "corporate-events" | "family-events" | "food-culinary";
+/** Category slugs are data-driven (admins can add categories). The five launch categories are listed in CORE_CATEGORY_SLUGS. */
+export type CategorySlug = string;
 
 export type Role = "customer" | "admin" | "agent";
 
@@ -12,6 +13,7 @@ export interface Subcategory {
   name: string;
   nameBn: string;
   description: string;
+  descriptionBn?: string;
 }
 
 export interface Category {
@@ -19,7 +21,9 @@ export interface Category {
   name: string;
   nameBn: string;
   tagline: string;
+  taglineBn?: string;
   description: string;
+  descriptionBn?: string;
   accent: string;
   route: string;
   hero: ImageRef;
@@ -27,11 +31,13 @@ export interface Category {
   subcategories: Subcategory[];
 }
 
-export type PriceUnit = "event" | "guest" | "plate" | "cup" | "hour";
+/** "per50" = price for every 50 guests (quantity is the guest count, billed in blocks of 50). */
+export type PriceUnit = "per50" | "event" | "guest" | "plate" | "cup" | "hour";
 
 export interface CustomizationOption {
   id: string;
   label: string;
+  labelBn?: string;
   /** Added to the unit price when selected. */
   priceDelta: number;
 }
@@ -56,8 +62,12 @@ export interface Service {
   categorySlug: CategorySlug;
   subcategorySlug: string;
   name: string;
+  nameBn?: string;
   shortDescription: string;
+  shortDescriptionBn?: string;
   description: string;
+  descriptionBn?: string;
+  includesBn?: string[];
   startingPrice: number;
   unit: PriceUnit;
   minQuantity: number;
@@ -349,4 +359,12 @@ export interface PlannerResult {
   budget: number | null;
   withinBudget: boolean | null;
   notes: string[];
+}
+
+/** A Dhaka area customers can choose for their event. */
+export interface Location {
+  id: string;
+  name: string;
+  nameBn: string;
+  active: boolean;
 }

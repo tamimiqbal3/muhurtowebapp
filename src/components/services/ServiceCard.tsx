@@ -4,11 +4,10 @@ import Link from "next/link";
 import { MapPin, BadgeCheck, SlidersHorizontal, Check } from "lucide-react";
 import type { Service } from "@/lib/types";
 import { formatBDT } from "@/lib/format";
-import { unitLabel } from "@/lib/pricing";
-import { getCategory, getSubcategory } from "@/data/categories";
+import { priceSuffix } from "@/lib/pricing";
+import { findCategory, useCatalog } from "@/lib/store/catalog";
 import { SafeImage } from "../ui/SafeImage";
 import { Badge, Rating } from "../ui/misc";
-import { Tilt } from "../motion/Tilt";
 import { usePlan } from "../plan/PlanProvider";
 import { cn } from "@/lib/utils";
 import { useLang } from "../i18n/LanguageProvider";
@@ -26,17 +25,18 @@ export function ServiceCard({ service, vendorName, vendorVerified, priority, cla
   const plan = usePlan();
   const inPlan = plan.hydrated && plan.has(service.id);
   const { t, lang } = useLang();
-  const rawCat = getCategory(service.categorySlug);
+  const data = useCatalog();
+  const rawCat = findCategory(data, service.categorySlug);
   const cat = rawCat ? localizeCategory(rawCat, lang) : undefined;
-  const sub = cat?.subcategories.find((x) => x.slug === service.subcategorySlug) ?? getSubcategory(service.categorySlug, service.subcategorySlug);
+  const sub = cat?.subcategories.find((x) => x.slug === service.subcategorySlug);
   const img = service.images[0];
 
   return (
-    <Tilt className={cn("h-full", className)} max={4}>
+    <div className={cn("h-full", className)}>
       <article className="group card flex h-full flex-col overflow-hidden transition-shadow duration-500 hover:shadow-[var(--shadow-lift)]">
         <Link href={`/service/${service.id}`} className="relative block aspect-[4/3] overflow-hidden bg-sand" aria-label={t("View {name}", { name: service.name })}>
           {img && (
-            <SafeImage src={img.src} alt={img.alt} fill priority={priority} sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" className="object-cover transition-transform duration-[1.2s] ease-out group-hover:scale-105" />
+            <SafeImage src={img.src} alt={img.alt} fill priority={priority} sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]" />
           )}
           <div className="absolute inset-x-0 top-0 flex items-start justify-between p-3">
             <span className="rounded-full bg-paper/90 px-2.5 py-1 text-[0.65rem] font-semibold tracking-wide backdrop-blur" style={{ color: cat?.accent }}>
@@ -49,7 +49,7 @@ export function ServiceCard({ service, vendorName, vendorVerified, priority, cla
             <Rating value={service.rating} count={service.reviewCount} />
             <span className="inline-flex min-w-0 items-center gap-1 text-xs text-muted">
               <MapPin className="h-3.5 w-3.5 shrink-0" />
-              <span className="truncate">{cityName(service.serviceAreas.includes("Nationwide") ? "Nationwide" : service.city, lang)}</span>
+              <span className="truncate">{cityName("Dhaka", lang)}</span>
             </span>
           </div>
           <h3 className="mt-3 text-[1.45rem] leading-tight">
@@ -73,7 +73,7 @@ export function ServiceCard({ service, vendorName, vendorVerified, priority, cla
                 <p className="text-[0.65rem] font-semibold tracking-[0.18em] text-muted uppercase">{t("Starting from")}</p>
                 <p className="font-display text-2xl font-semibold">
                   {formatBDT(service.startingPrice)}
-                  <span className="ml-1 font-sans text-xs font-normal text-muted">/ {t(unitLabel(service.unit))}</span>
+                  <span className="ml-1 font-sans text-xs font-normal text-muted">{t(priceSuffix(service.unit))}</span>
                 </p>
               </div>
             </div>
@@ -95,6 +95,6 @@ export function ServiceCard({ service, vendorName, vendorVerified, priority, cla
           </div>
         </div>
       </article>
-    </Tilt>
+    </div>
   );
 }

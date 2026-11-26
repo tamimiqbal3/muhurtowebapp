@@ -5,12 +5,13 @@ import { formatBDT } from "@/lib/format";
 import { unitLabel } from "@/lib/pricing";
 import { useT } from "../i18n/LanguageProvider";
 import { useLang } from "../i18n/LanguageProvider";
-import { SERVICES_BN } from "@/data/services.bn";
+import { findService, useCatalog } from "@/lib/store/catalog";
 
 export function PriceTable({ lines, pricing }: { lines: PricedLine[]; pricing: PriceBreakdown }) {
   const t = useT();
   const { lang } = useLang();
-  const nm = (l: PricedLine) => (lang === "bn" ? SERVICES_BN[l.serviceId]?.name ?? l.serviceName : l.serviceName);
+  const data = useCatalog();
+  const nm = (l: PricedLine) => (lang === "bn" ? findService(data, l.serviceId)?.nameBn ?? l.serviceName : l.serviceName);
   const totals = (
     <dl className="mt-4 space-y-1.5 border-t border-line pt-4 text-sm">
       <div className="flex justify-between gap-4"><dt className="text-ink-soft">{t("Service subtotal")}</dt><dd className="tabular-nums">{formatBDT(pricing.subtotal)}</dd></div>

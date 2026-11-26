@@ -21,7 +21,7 @@ export const CATEGORIES: Category[] = [
     description: "From gaye holud marigolds to the reception stage, plan every wedding ritual with verified decorators, photographers and sound teams.",
     accent: "#015fff",
     route: "/wedding",
-    hero: IMG.wStageCouple,
+    hero: IMG.wLightChandelier,
     card: IMG.wRedGold,
     subcategories: eventSubs("Photography and Videography", "Decor"),
   },
@@ -33,8 +33,8 @@ export const CATEGORIES: Category[] = [
     description: "Balloon styling, dessert tables, photo booths and sound for birthdays of every age — at home, on a rooftop or in a hall.",
     accent: "#f29a1d",
     route: "/birthday",
-    hero: IMG.bFriends,
-    card: IMG.bDessertTable,
+    hero: IMG.dPinkParty,
+    card: IMG.dBalloonArch,
     subcategories: eventSubs("Photo and Videography", "Décor"),
   },
   {
@@ -45,7 +45,7 @@ export const CATEGORIES: Category[] = [
     description: "Stages, seating plans, lighting rigs, AV and event coverage for conferences, product launches, seminars and company celebrations.",
     accent: "#1f3b4d",
     route: "/corporate-events",
-    hero: IMG.cAudience,
+    hero: IMG.eStageBlue,
     card: IMG.cStage,
     subcategories: eventSubs("Photography and Videography", "Décor"),
   },
@@ -57,8 +57,8 @@ export const CATEGORIES: Category[] = [
     description: "Warm, beautifully managed family occasions — aqiqah, anniversaries, Eid get-togethers, engagement dinners and reunions.",
     accent: "#4f6b3a",
     route: "/family-events",
-    hero: IMG.fGarland,
-    card: IMG.fHomeDinner,
+    hero: IMG.dReceptionFloral,
+    card: IMG.dTableCandles,
     subcategories: eventSubs("Photography and Videography", "Décor"),
   },
   {
@@ -93,4 +93,7 @@ export function isCategorySlug(v: unknown): v is CategorySlug {
   return typeof v === "string" && (CATEGORY_SLUGS as string[]).includes(v);
 }
 
-export const CITIES = ["Dhaka", "Chattogram", "Rajshahi", "Sylhet", "Khulna", "Barishal", "Rangpur", "Mymensingh", "Cumilla", "Cox's Bazar"];
+export const CITIES = ["Dhaka"];
+
+/** The five launch categories, which have their own landing pages. */
+export const CORE_CATEGORY_SLUGS = ["wedding", "birthday", "corporate-events", "family-events", "food-culinary"];

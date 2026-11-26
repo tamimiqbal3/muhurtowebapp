@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 @theme inline {
-  --font-display: var(--font-cormorant), "Cormorant Garamond", var(--font-bengali), Georgia, serif;
-  --font-sans: var(--font-manrope), "Manrope", var(--font-bengali-sans), system-ui, sans-serif;
+  --font-display: var(--font-cormorant), "Playfair Display", var(--font-bengali), Georgia, serif;
+  --font-sans: var(--font-manrope), "Inter", var(--font-bengali-sans), system-ui, sans-serif;
   --font-bangla: var(--font-bengali), "Noto Serif Bengali", serif;
   --font-lcd: var(--font-lcd-mono), "Share Tech Mono", ui-monospace, monospace;
 }

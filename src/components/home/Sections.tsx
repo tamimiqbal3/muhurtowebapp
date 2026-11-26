@@ -39,7 +39,7 @@ export async function WhyChoose() {
     <section className="container-x grid items-center gap-14 pt-28 lg:grid-cols-2">
       <Reveal variant="swing" className="relative order-2 h-[460px] lg:order-1 lg:h-[560px]">
         <div className="absolute left-0 top-0 h-[78%] w-[68%] overflow-hidden rounded-[var(--radius-card)] shadow-[var(--shadow-lift)]">
-          <SafeImage src={IMG.wChattogram.src} alt={IMG.wChattogram.alt} fill sizes="(max-width: 1024px) 70vw, 35vw" className="animate-kenburns object-cover" />
+          <SafeImage src={IMG.dStageGreen.src} alt={IMG.dStageGreen.alt} fill sizes="(max-width: 1024px) 70vw, 35vw" className="object-cover" />
         </div>
         <div className="absolute bottom-0 right-0 h-[56%] w-[54%] overflow-hidden rounded-[var(--radius-card)] border-8 border-ivory shadow-[var(--shadow-lift)]">
           <SafeImage src={IMG.chaPour.src} alt={IMG.chaPour.alt} fill sizes="(max-width: 1024px) 55vw, 28vw" className="object-cover" />
@@ -66,7 +66,7 @@ export async function Gallery() {
   const { t, lang } = await getT();
   return (
     <section className="container-x pt-28">
-      <SectionHeading align="center" eyebrow={t("Gallery")} title={t("Moments from across Bangladesh")} />
+      <SectionHeading align="center" eyebrow={t("Gallery")} title={t("Moments from Dhaka")} />
       <JamdaniRule className="mx-auto mt-6 max-w-xs" />
       <div className="mt-12 grid auto-rows-[180px] grid-cols-2 gap-3 sm:auto-rows-[220px] md:grid-cols-4">
         {getGallery(lang).map((g, i) => (

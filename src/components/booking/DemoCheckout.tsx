@@ -5,7 +5,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { CalendarDays, MapPin, Users } from "lucide-react";
 import type { Booking } from "@/lib/types";
 import { demoBooking } from "@/lib/demo/store";
-import { getCategory } from "@/data/categories";
+import { findCategory, useCatalog } from "@/lib/store/catalog";
 import { cityName, localizeCategory } from "@/data/i18n-data";
 import { formatBDT, formatDate } from "@/lib/format";
 import { useAuth } from "../auth/AuthProvider";
@@ -17,7 +17,7 @@ import { ButtonLink } from "../ui/Button";
 
 export function CheckoutSummary({ booking, children }: { booking: Booking; children: ReactNode }) {
   const { t, lang } = useLang();
-  const cat = getCategory(booking.event.categorySlug);
+  const cat = findCategory(useCatalog(), booking.event.categorySlug);
   return (
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_400px] lg:gap-8">
       <section className="card min-w-0 p-4 sm:p-6">
@@ -55,7 +55,7 @@ export function DemoCheckout({ id }: { id: string }) {
   if (!booking) return <EmptyState title={t("Booking not found")} body={t("This booking doesn't exist on this device.")} action={<ButtonLink href="/my-bookings" variant="accent">{t("My bookings")}</ButtonLink>} />;
   return (
     <CheckoutSummary booking={booking}>
-      {booking.status === "pending_payment" ? <PayButton bookingId={booking.id} total={booking.pricing.total} gatewayConfigured={false} sandbox demo /> : <p className="rounded-xl bg-sand p-4 text-sm">{t("This booking can't be paid in its current state.")}</p>}
+      {booking.paymentStatus === "paid" ? <ButtonLink href={`/invoice/${booking.id}`} variant="accent" className="w-full">{t("View invoice")}</ButtonLink> : booking.status === "pending_payment" ? <PayButton booking={booking} /> : <p className="rounded-xl bg-sand p-4 text-sm">{t("This booking can't be paid in its current state.")}</p>}
     </CheckoutSummary>
   );
 }
