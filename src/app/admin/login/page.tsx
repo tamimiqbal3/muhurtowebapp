@@ -3,7 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { Lock } from "lucide-react";
-import { LogoMark } from "@/components/layout/Logo";
+import { LogoMark, Wordmark } from "@/components/layout/Logo";
 
 export default function AdminLogin() {
   const router = useRouter();
@@ -34,7 +34,7 @@ export default function AdminLogin() {
         <div className="flex items-center gap-3">
           <LogoMark className="h-12 w-12" />
           <div>
-            <p className="font-display text-lg font-semibold tracking-[0.12em]">MUHURTO</p>
+            <p><Wordmark className="text-base" /></p>
             <p className="text-xs text-muted">Admin panel</p>
           </div>
         </div>

@@ -230,6 +230,7 @@ export const BN: Record<string, string> = {
   "Got it — press = to calculate": "তথ্য গ্রহণ করা হয়েছে",
   "Got it — your details are filled in": "আপনার তথ্য পূরণ করা হয়েছে",
   "Grazing table": "গ্রেজিং টেবিল",
+  "Chinese set menu": "চাইনিজ সেট মেনু",
   "Guests": "অতিথি",
   "Headshots": "হেডশট",
   "Hello, {name}": "হ্যালো, {name}",
@@ -885,4 +886,10 @@ export const BN: Record<string, string> = {
   "Planning an event?": "অনুষ্ঠানের পরিকল্পনা করছেন?",
   "Plan with our assistant or choose services yourself, with clear published prices.": "সহকারীর সঙ্গে পরিকল্পনা করুন অথবা স্পষ্ট প্রকাশিত মূল্যে নিজেই সেবা বেছে নিন।",
   "Your event, clearly priced": "স্পষ্ট মূল্যে আপনার অনুষ্ঠান",
+  "Verified Dhaka vendors": "যাচাইকৃত ঢাকার ভেন্ডর",
+  "Clear published prices": "স্পষ্ট প্রকাশিত মূল্য",
+  "Secure SSLCOMMERZ payments": "নিরাপদ SSLCOMMERZ পেমেন্ট",
+  "Invoices sent instantly": "সঙ্গে সঙ্গে ইনভয়েস",
+  "Support in Bangla and English": "বাংলা ও ইংরেজিতে সহায়তা",
+  "Why MUHURTO": "কেন MUHURTO",
 };

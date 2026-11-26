@@ -84,6 +84,14 @@ export const IMG = {
   eDslr: px(28499449, "Professional camera on a tripod"),
 
   pBiryani: px(33430560, "Biryani garnished with fried onions and cashews"),
+  pTehari: px(12737917, "Rice and curry bowl with fresh garnish"),
+  pMezban: px(19781599, "Beef curry with rice in bowls"),
+  pChinese: px(12916867, "Fried chicken with fried rice and vegetables"),
+  pKebab: px(36890239, "Grilled kebab with roasted vegetables and salad"),
+  fuFuchka: px(34270741, "Plate of crunchy fuchka with garnishes"),
+  fuDoi: px(13063312, "Fuchka with filling and tamarind water"),
+  chaDhaka: px(15440309, "Cup of tea with biscuits, Dhaka"),
+  chaGlass: px(17536089, "Glass of hot tea, Dhaka"),
   // ── Birthday ──
   bFriends: px(30682919, "Birthday party with balloons and festive decorations"),
   bDessertTable: px(16220888, "Birthday dessert table with balloons and cake"),

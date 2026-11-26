@@ -2,73 +2,30 @@
 
 import Link from "next/link";
 import { motion } from "motion/react";
-import { useEffect, useState } from "react";
 import { ArrowRight } from "lucide-react";
 import { SafeImage } from "../ui/SafeImage";
 import { ButtonLink } from "../ui/Button";
 import { CategorySearch } from "./CategorySearch";
+import { HeroFilm } from "./HeroFilm";
 import { localizeCategory } from "@/data/i18n-data";
-import { IMG } from "@/data/images";
-import type { ImageRef } from "@/lib/types";
 import { useLang } from "../i18n/LanguageProvider";
 import { categoryRoute, useCatalog } from "@/lib/store/catalog";
 import { cn } from "@/lib/utils";
 
-/** Décor, venues and setups only — no people — cut together like a showreel. */
-const SCENES: Array<{ img: ImageRef; label: string }> = [
-  { img: IMG.wSofaWhite, label: "Wedding · floral mandap" },
-  { img: IMG.wLightChandelier, label: "Reception · banquet hall" },
-  { img: IMG.dPinkParty, label: "Birthday · themed setup" },
-  { img: IMG.wLightCeiling, label: "Wedding · floral ceiling" },
-  { img: IMG.eStageBlue, label: "Corporate · stage lighting" },
-  { img: IMG.dTableCandles, label: "Family · candlelit dinner" },
-  { img: IMG.dBanquetChandelier, label: "Reception · banquet hall" },
-  { img: IMG.dConfetti, label: "Birthday · balloon arch" },
-  { img: IMG.wSeatRomantic, label: "Wedding · royal canopy" },
-  { img: IMG.dReceptionFloral, label: "Family · reception décor" },
-  { img: IMG.wVenueFloral, label: "Reception · banquet hall" },
-];
-const FADE = 1.2;
+
 
 /** Hero: a full-width, video-style sequence (stacked layers, opacity cross-dissolves and one slow, steady push-in per shot). */
 export function Hero() {
   const { t, lang } = useLang();
   const data = useCatalog();
-  const { content, hero } = data.settings;
-  const hold = Math.max(1800, hero.intervalMs);
-  const [shot, setShot] = useState(0);
-  useEffect(() => {
-    const id = setInterval(() => setShot((s) => (s + 1) % SCENES.length), hold);
-    return () => clearInterval(id);
-  }, [hold]);
+  const { content } = data.settings;
   const bn = lang === "bn";
   const cats = data.categories.map((c) => localizeCategory(c, lang));
 
   return (
     <section className="relative">
       <div className="relative h-[100svh] min-h-[560px] w-full overflow-hidden bg-[#050b1c] sm:min-h-[640px]">
-        {SCENES.map((s, i) => {
-          const active = i === shot;
-          return (
-            <motion.div
-              key={s.img.src}
-              aria-hidden={!active}
-              className="absolute inset-0 [backface-visibility:hidden]"
-              initial={false}
-              animate={{ opacity: active ? 1 : 0 }}
-              transition={{ duration: FADE, ease: [0.45, 0, 0.55, 1] }}
-            >
-              <motion.div
-                className="absolute inset-0 will-change-transform [backface-visibility:hidden] [transform:translateZ(0)]"
-                initial={false}
-                animate={{ scale: active ? 1.08 : 1 }}
-                transition={active ? { duration: hold / 1000 + FADE * 2, ease: "linear" } : { duration: 0, delay: FADE }}
-              >
-                <SafeImage src={s.img.src} alt={active ? s.img.alt : ""} fill priority={i < 2} sizes="100vw" quality={90} className="object-cover" />
-              </motion.div>
-            </motion.div>
-          );
-        })}
+        <HeroFilm />
         <div aria-hidden className="absolute inset-0 bg-[linear-gradient(180deg,rgb(5_11_28/.45)_0%,rgb(5_11_28/.05)_30%,rgb(5_11_28/.25)_55%,rgb(5_11_28/.85)_100%)]" />
         <div aria-hidden className="absolute inset-0 bg-[radial-gradient(ellipse_at_30%_70%,rgb(1_95_255/.22),transparent_60%)]" />
 

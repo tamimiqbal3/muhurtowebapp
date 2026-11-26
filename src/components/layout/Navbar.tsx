@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { ShoppingBag, User, LogOut, LayoutDashboard, Shield, Radar, ChevronDown, LayoutGrid, CalendarPlus, X } from "lucide-react";
-import { LogoMark } from "./Logo";
+import { LogoMark, Wordmark } from "./Logo";
 import { ButtonLink } from "../ui/Button";
 import { useAuth } from "../auth/AuthProvider";
 import { usePlan } from "../plan/PlanProvider";
@@ -89,7 +89,7 @@ export function Navbar() {
           <Link href="/" className="group flex min-w-0 items-center gap-2.5" aria-label="MUHURTO">
             <LogoMark className="h-10 w-10" />
             <span className="flex min-w-0 flex-col leading-none">
-              <span className={cn("font-display text-[1.2rem] font-semibold tracking-[0.12em]", onLight && !open ? "text-ink" : "text-paper")}>MUHURTO</span>
+              <Wordmark className={cn("text-[1.05rem]", onLight && !open ? "text-ink" : "text-paper")} />
               <span className={cn("hidden whitespace-nowrap text-[0.62rem] tracking-wide sm:block xl:hidden 2xl:block", lang === "bn" && "bn", onLight && !open ? "text-brand" : "text-sky")}>{lang === "bn" ? "যেখানে আয়োজনের শুরু" : "Where Every Celebration Begins"}</span>
             </span>
           </Link>
@@ -167,7 +167,7 @@ export function Navbar() {
               <div className="flex items-center justify-between">
                 <Link href="/" className="flex items-center gap-2.5" aria-label="MUHURTO">
                   <LogoMark className="h-10 w-10" />
-                  <span className="font-display text-lg font-semibold tracking-[0.12em] text-paper">MUHURTO</span>
+                  <Wordmark className="text-base text-paper" />
                 </Link>
               </div>
               <p className="mt-8 text-[0.65rem] font-semibold tracking-[0.3em] text-paper/50 uppercase">{t("Menu")}</p>

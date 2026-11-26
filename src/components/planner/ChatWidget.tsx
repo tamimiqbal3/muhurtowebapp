@@ -52,12 +52,7 @@ export function ChatWidget() {
     setHint(false);
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
     document.addEventListener("keydown", onKey);
-    const small = window.matchMedia("(max-width: 639px)").matches;
-    if (small) document.body.style.overflow = "hidden";
-    return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
-    };
+    return () => document.removeEventListener("keydown", onKey);
   }, [open]);
 
   if (path?.startsWith("/booking") || path?.startsWith("/checkout") || path?.startsWith("/payment")) return null;
@@ -74,7 +69,7 @@ export function ChatWidget() {
           animate={open ? { opacity: 1, y: 0, scale: 1, visibility: "visible" } : { opacity: 0, y: 24, scale: 0.96, transitionEnd: { visibility: "hidden" } }}
           transition={{ duration: 0.35, ease: EASE }}
           style={{ transformOrigin: "bottom right" }}
-          className="fixed inset-x-2 top-2 bottom-2 z-[90] overflow-hidden rounded-3xl border border-line bg-paper shadow-[0_40px_90px_-30px_rgb(8_20_48/.55)] sm:inset-auto sm:right-6 sm:bottom-24 sm:h-[min(640px,calc(100dvh-9.5rem))] sm:w-[400px] lg:bottom-28"
+          className="fixed right-3 bottom-[96px] z-[90] h-[min(540px,calc(100dvh-172px))] w-[min(380px,calc(100vw-24px))] overflow-hidden rounded-[1.4rem] border border-line bg-paper shadow-[0_30px_70px_-28px_rgb(8_20_48/.5)] sm:right-6 sm:bottom-24 sm:h-[min(600px,calc(100dvh-8rem))] sm:w-[380px] lg:bottom-[6.5rem]"
         >
           <PlannerChat onClose={() => setOpen(false)} onBooked={() => setOpen(false)} />
         </motion.div>
@@ -102,7 +97,7 @@ export function ChatWidget() {
           whileTap={{ scale: 0.95 }}
           aria-label={open ? t("Close chat") : t("Chat with Shubho")}
           aria-expanded={open}
-          className={`relative grid h-14 w-14 place-items-center rounded-full bg-[linear-gradient(135deg,#015fff,#00befe)] text-paper shadow-[0_18px_40px_-12px_rgb(1_95_255/.7)] ${open ? "hidden sm:grid" : ""}`}
+          className={`relative grid h-14 w-14 place-items-center rounded-full bg-[linear-gradient(135deg,#015fff,#00befe)] text-paper shadow-[0_18px_40px_-12px_rgb(1_95_255/.7)] `}
         >
           <AnimatePresence mode="wait" initial={false}>
             {open ? (

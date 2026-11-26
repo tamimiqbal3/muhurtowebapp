@@ -272,7 +272,7 @@ export function PlannerChat({ onClose, onBooked }: { onClose?: () => void; onBoo
     return cat === "food-culinary" ? own : own.filter((s) => !(FOOD_SUBS as readonly string[]).includes(s));
   };
 
-  const chip = "inline-flex min-h-10 items-center justify-center rounded-full border border-brand/25 bg-paper px-4 text-sm font-medium text-brand transition hover:border-brand hover:bg-brand hover:text-paper";
+  const chip = "inline-flex min-h-9 items-center justify-center rounded-full border border-brand/25 bg-paper px-3.5 text-[0.82rem] font-medium text-brand transition hover:border-brand hover:bg-brand hover:text-paper";
   const today = new Date().toISOString().slice(0, 10);
 
   function submit(e: FormEvent) {
@@ -284,8 +284,8 @@ export function PlannerChat({ onClose, onBooked }: { onClose?: () => void; onBoo
 
   return (
     <div className="flex h-full w-full flex-col overflow-hidden bg-paper">
-      <div className="flex items-center gap-3 border-b border-line bg-[linear-gradient(120deg,#015fff,#00befe)] px-5 py-4 text-paper">
-        <span className="relative grid h-11 w-11 shrink-0 place-items-center rounded-full bg-paper"><LogoMark className="h-9 w-9" /><span className="absolute right-0 bottom-0 h-3 w-3 rounded-full border-2 border-paper bg-emerald-400" /></span>
+      <div className="flex items-center gap-3 border-b border-line bg-[linear-gradient(120deg,#015fff,#00befe)] px-4 py-3 text-paper">
+        <span className="relative grid h-10 w-10 shrink-0 place-items-center rounded-full bg-paper"><LogoMark className="h-8 w-8" /><span className="absolute right-0 bottom-0 h-3 w-3 rounded-full border-2 border-paper bg-emerald-400" /></span>
         <div className="min-w-0 flex-1">
           <p className="font-semibold">{t("Shubho")}</p>
           <p className="truncate text-xs text-paper/85">{t("Your celebration planner · online")}</p>
@@ -294,10 +294,10 @@ export function PlannerChat({ onClose, onBooked }: { onClose?: () => void; onBoo
         {onClose && <button onClick={onClose} aria-label={t("Close")} className="grid h-9 w-9 place-items-center rounded-full bg-paper/15 hover:bg-paper/25"><X className="h-4 w-4" /></button>}
       </div>
 
-      <div ref={scrollRef} className="min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain bg-[#f6f8fc] px-4 py-5" aria-live="polite">
+      <div ref={scrollRef} className="min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain bg-[#f6f8fc] px-3.5 py-4" aria-live="polite">
         {msgs.map((m) => (
           <div key={m.id} className={cn("flex", m.from === "user" ? "justify-end" : "justify-start")}>
-            <p className={cn("max-w-[85%] rounded-2xl px-4 py-2.5 text-[0.95rem] leading-relaxed", m.from === "user" ? "rounded-br-md bg-brand text-paper" : "rounded-bl-md bg-paper text-ink shadow-[0_1px_0_rgb(0_0_0/.04)] ring-1 ring-line")}>{m.text}</p>
+            <p className={cn("max-w-[86%] rounded-2xl px-3.5 py-2 text-[0.9rem] leading-relaxed", m.from === "user" ? "rounded-br-md bg-brand text-paper" : "rounded-bl-md bg-paper text-ink shadow-[0_1px_0_rgb(0_0_0/.04)] ring-1 ring-line")}>{m.text}</p>
           </div>
         ))}
         {typing && (
@@ -338,7 +338,7 @@ export function PlannerChat({ onClose, onBooked }: { onClose?: () => void; onBoo
       </div>
 
       {!typing && step !== "plan" && (
-        <div className="max-h-[38%] shrink-0 overflow-y-auto border-t border-line bg-paper px-4 pt-3">
+        <div className="max-h-[34%] shrink-0 overflow-y-auto border-t border-line bg-paper px-3.5 pt-2.5">
           <div className="scrollbar-none flex flex-wrap gap-2 pb-3">
             {step === "occasion" && data.categories.map((c) => <button key={c.slug} className={chip} onClick={() => pickOccasion(c.slug)}>{localizeCategory(c, lang).name}</button>)}
             {step === "guests" && [50, 100, 150, 200, 300, 500].map((n) => <button key={n} className={chip} onClick={() => pickGuests(n)}>{t("{n} guests", { n })}</button>)}
@@ -382,7 +382,7 @@ export function PlannerChat({ onClose, onBooked }: { onClose?: () => void; onBoo
 
       <form onSubmit={submit} className="flex shrink-0 items-center gap-2 border-t border-line bg-paper p-3">
         <input value={text} onChange={(e) => setText(e.target.value)} className="field !rounded-full !py-2.5" placeholder={step === "plan" ? t("Ask for changes or type “start over”") : t("Type your answer…")} aria-label={t("Message")} maxLength={600} />
-        <button type="submit" disabled={!text.trim()} className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-brand text-paper disabled:opacity-40" aria-label={t("Send")}><ArrowUp className="h-5 w-5" /></button>
+        <button type="submit" disabled={!text.trim()} className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-brand text-paper transition disabled:opacity-40" aria-label={t("Send")}><ArrowUp className="h-5 w-5" /></button>
       </form>
     </div>
   );

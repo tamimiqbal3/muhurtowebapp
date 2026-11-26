@@ -250,3 +250,8 @@
 @keyframes ev-chip-3 { 0%, 80% { background: #fbfcff; color: #66728c; border-color: #d6e1f2; scale: 1; } 82% { scale: 1.15; } 85%, 92% { background: #015fff; color: #fbfcff; border-color: #015fff; scale: 1; } 100% { background: #fbfcff; color: #66728c; border-color: #d6e1f2; } }
 .ev-line-3 { animation-name: ev-line-3; }
 @keyframes ev-line-3 { 0%, 65% { opacity: 0; transform: translateY(6px); } 69%, 89% { opacity: 1; transform: translateY(0); } 92%, 100% { opacity: 0; transform: translateY(-6px); } }
+
+@keyframes ticker {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}

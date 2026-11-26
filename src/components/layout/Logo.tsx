@@ -18,9 +18,24 @@ export function Logo({ light, className, lang = "en" }: { light?: boolean; class
     <Link href="/" className={cn("group inline-flex items-center gap-2.5", className)} aria-label="MUHURTO">
       <LogoMark className="h-11 w-11" />
       <span className="flex flex-col leading-none">
-        <span className={cn("font-display text-[1.3rem] font-semibold tracking-[0.14em]", light ? "text-paper" : "text-ink")}>MUHURTO</span>
+        <Wordmark className={cn("text-[1.15rem]", light ? "text-paper" : "text-ink")} />
         <span className={cn("mt-1 text-[0.68rem] tracking-wide", lang === "bn" && "bn", light ? "text-sky" : "text-brand")}>{TAGLINE[lang]}</span>
       </span>
     </Link>
+  );
+}
+
+/**
+ * The MUHURTO name set in the clean sans (Inter) with wide, even tracking — no serif, no ligatures,
+ * no diacritics. Every place the brand name appears uses this so it renders the same everywhere.
+ */
+export function Wordmark({ className }: { className?: string }) {
+  return (
+    <span
+      className={cn("font-sans font-semibold uppercase leading-none tracking-[0.22em] [font-feature-settings:'liga'_0,'calt'_0] [font-variant-ligatures:none]", className)}
+      translate="no"
+    >
+      MUHURTO
+    </span>
   );
 }

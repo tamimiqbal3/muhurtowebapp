@@ -6,7 +6,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import {
   BarChart3, CalendarRange, CreditCard, FileText, Layers, LogOut, MapPin, Menu, Package, Star, Store, Users, Wallet, X, ExternalLink, Upload,
 } from "lucide-react";
-import { LogoMark } from "../layout/Logo";
+import { LogoMark, Wordmark } from "../layout/Logo";
 import { cn } from "@/lib/utils";
 
 const NAV = [
@@ -51,7 +51,7 @@ export function AdminFrame({ children }: { children: ReactNode }) {
         <Link href="/admin" className="flex min-w-0 items-center gap-2.5">
           <LogoMark className="h-9 w-9" />
           <span className="min-w-0 leading-tight">
-            <span className="block font-display text-base font-semibold tracking-[0.12em]">MUHURTO</span>
+            <Wordmark className="block text-[0.95rem]" />
             <span className="block text-[0.65rem] tracking-wide text-muted">Admin panel</span>
           </span>
         </Link>

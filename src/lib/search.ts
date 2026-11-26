@@ -146,7 +146,7 @@ export const SEARCH_SUGGESTIONS: Record<CategorySlug | "all", string[]> = {
   birthday: ["Balloon garland", "Dessert table", "360 booth", "Kids seating", "Party DJ", "Cake smash"],
   "corporate-events": ["Conference stage", "Seminar seating", "PA system", "Headshots", "Registration desk", "Gala lighting"],
   "family-events": ["Aqiqah décor", "Mehendi night", "Family portrait", "String lights", "Milad sound", "Rabindra Sangeet"],
-  "food-culinary": ["Kacchi biryani", "Mezban", "Fuchka counter", "Seven-layer cha", "Espresso bar", "Grazing table"],
+  "food-culinary": ["Kacchi biryani", "Mezban", "Fuchka counter", "Seven-layer cha", "Espresso bar", "Chinese set menu"],
 };
 
 export function parseSearchParams(sp: Record<string, string | string[] | undefined>): SearchParams {

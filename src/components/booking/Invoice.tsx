@@ -11,7 +11,7 @@ import { formatBDT, formatDate, formatDateTime } from "@/lib/format";
 import type { Booking } from "@/lib/types";
 import { useLang } from "../i18n/LanguageProvider";
 import { localizeCategory } from "@/data/i18n-data";
-import { TAGLINE } from "../layout/Logo";
+import { TAGLINE, Wordmark } from "../layout/Logo";
 
 /** Formal invoice issued after a confirmed payment. Printable / savable as PDF from the browser. */
 export function Invoice({ bookingId }: { bookingId: string }) {
@@ -51,7 +51,7 @@ export function Invoice({ bookingId }: { bookingId: string }) {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src="/brand/muhurto-logo-384.png" alt="" className="h-16 w-16 rounded-full bg-paper p-1 sm:h-20 sm:w-20" />
               <div>
-                <p className="font-display text-3xl font-semibold tracking-[0.14em] sm:text-4xl">MUHURTO</p>
+                <p><Wordmark className="text-2xl sm:text-3xl" /></p>
                 <p className="text-sm text-paper/85">{TAGLINE.en} <span className="bn">· {TAGLINE.bn}</span></p>
               </div>
             </div>
