@@ -56,7 +56,7 @@ function CloudBar() {
   );
 }
 
-type Health = { configured: boolean; environment: string; project?: string | null; databaseURL?: string; found: Record<string, boolean>; problems: string[]; database: { ok: boolean; message?: string; raw?: string } };
+type Health = { configured: boolean; environment: string; project?: string | null; databaseURL?: string; instances?: string[] | string | null; found: Record<string, boolean>; problems: string[]; database: { ok: boolean; message?: string; raw?: string } };
 
 /** Pinpoints why the server can't reach Firebase Realtime Database, with the exact fix. */
 function SetupHelp() {
@@ -72,7 +72,8 @@ function SetupHelp() {
       {h && (
         <div className="mt-2 space-y-1 text-ink-soft">
           <p>Server sees ({h.environment}): {Object.entries(h.found).map(([k, v]) => `${k} ${v ? "✓" : "—"}`).join(" · ")}</p>
-          {h.configured && <p>Project <strong>{h.project}</strong> · Realtime Database <strong>{h.databaseURL}</strong></p>}
+          {h.configured && <p>Project <strong>{h.project}</strong> · using Realtime Database <strong>{h.databaseURL}</strong></p>}
+          {h.configured && h.instances != null && <p>Databases in this project: {Array.isArray(h.instances) ? (h.instances.length ? h.instances.join(", ") : "none found") : h.instances}</p>}
           {h.database?.raw && <p className="break-all font-mono text-[0.65rem]">Firebase says: {h.database.raw}</p>}
         </div>
       )}

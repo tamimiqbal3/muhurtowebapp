@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { handle } from "@/lib/server/api";
 import { ApiError } from "@/lib/server/auth";
-import { adminCredentials, adminRtdb } from "@/lib/firebase/admin";
+import { adminCredentials, adminRtdb, databaseURL, listDatabaseInstances } from "@/lib/firebase/admin";
 import { firebaseClientConfig } from "@/lib/config";
 import { isAdminRequest } from "@/lib/server/admin-auth";
 
@@ -32,10 +32,16 @@ export const GET = handle(async () => {
     NEXT_PUBLIC_FIREBASE_DATABASE_URL: has("NEXT_PUBLIC_FIREBASE_DATABASE_URL"),
   };
   let database: { ok: boolean; message?: string; raw?: string } = { ok: false, message: cred.problems[0] };
+  let url: string | null = null;
+  let instances: string[] | string | null = null;
   if (cred.creds) {
+    try { instances = (await listDatabaseInstances()).map((i) => `${i.databaseUrl}${i.type === "DEFAULT_DATABASE" ? " (default)" : ""}`); }
+    catch (e) { instances = `lookup failed: ${String((e as Error)?.message ?? e).slice(0, 200)}`; }
     try {
+      url = await databaseURL();
+      const db = await adminRtdb();
       await Promise.race([
-        adminRtdb().ref("site/version").once("value"),
+        db.ref("site/version").once("value"),
         new Promise((_, rej) => setTimeout(() => rej(new Error("timed out")), 8000)),
       ]);
       database = { ok: true };
@@ -45,7 +51,7 @@ export const GET = handle(async () => {
     }
   }
   return NextResponse.json(
-    { configured: Boolean(cred.creds), environment: process.env.VERCEL_ENV ?? "local", project: cred.creds?.projectId ?? null, databaseURL: firebaseClientConfig.databaseURL, found, problems: cred.problems, database },
+    { configured: Boolean(cred.creds), environment: process.env.VERCEL_ENV ?? "local", project: cred.creds?.projectId ?? null, databaseURL: url ?? firebaseClientConfig.databaseURL, instances, found, problems: cred.problems, database },
     { headers: { "Cache-Control": "no-store" } },
   );
 });

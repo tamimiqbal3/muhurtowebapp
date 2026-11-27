@@ -58,12 +58,34 @@ export async function logPageView(path: string): Promise<void> {
 
 /* ─── Realtime Database ─────────────────────────────────────────────── */
 
-/** Realtime Database for the public site (visitor presence). Loaded lazily. */
+/**
+ * The project's Realtime Database address. The server looks it up from Firebase (it depends on where the
+ * database was created); remembered for the browser session.
+ */
+let dbUrl: Promise<string> | null = null;
+function realtimeURL(): Promise<string> {
+  if (process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL) return Promise.resolve(firebaseClientConfig.databaseURL);
+  dbUrl ??= (async () => {
+    try { const u = sessionStorage.getItem("mh.dburl"); if (u) return u; } catch { /* ignore */ }
+    try {
+      const r = await fetch("/api/site/database");
+      const { url } = (await r.json()) as { url?: string };
+      if (url && /^https:\/\/[a-z0-9.-]+$/.test(url)) {
+        try { sessionStorage.setItem("mh.dburl", url); } catch { /* ignore */ }
+        return url;
+      }
+    } catch { /* fall back */ }
+    return firebaseClientConfig.databaseURL;
+  })();
+  return dbUrl;
+}
+
+/** Realtime Database for the public site (live sync, visitor presence). Loaded lazily. */
 export async function getRealtimeDb() {
   const a = getFirebaseApp();
-  if (!a || !firebaseClientConfig.databaseURL) return null;
-  const { getDatabase } = await import("firebase/database");
-  return getDatabase(a, firebaseClientConfig.databaseURL);
+  if (!a) return null;
+  const [{ getDatabase }, url] = await Promise.all([import("firebase/database"), realtimeURL()]);
+  return getDatabase(a, url);
 }
 
 /**
@@ -72,7 +94,7 @@ export async function getRealtimeDb() {
  */
 let adminApp: FirebaseApp | null = null;
 export async function getAdminRealtimeDb() {
-  if (!isFirebaseClientConfigured || !firebaseClientConfig.databaseURL) return null;
+  if (!isFirebaseClientConfigured) return null;
   adminApp = adminApp ?? (getApps().find((x) => x.name === "muhurto-admin") ?? initializeApp(firebaseClientConfig, "muhurto-admin"));
   const auth = getAuth(adminApp);
   if (!auth.currentUser) {
@@ -82,6 +104,6 @@ export async function getAdminRealtimeDb() {
     const { signInWithCustomToken } = await import("firebase/auth");
     await signInWithCustomToken(auth, token);
   }
-  const { getDatabase } = await import("firebase/database");
-  return getDatabase(adminApp, firebaseClientConfig.databaseURL);
+  const [{ getDatabase }, url] = await Promise.all([import("firebase/database"), realtimeURL()]);
+  return getDatabase(adminApp, url);
 }

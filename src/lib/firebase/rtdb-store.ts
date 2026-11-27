@@ -164,7 +164,7 @@ class Writes {
 
 export class Batch extends Writes {
   async commit() {
-    if (Object.keys(this.updates).length) await this.store.root.update(mergeUpdates(this.updates));
+    if (Object.keys(this.updates).length) await (await this.store.root()).update(mergeUpdates(this.updates));
     this.updates = {};
   }
 }
@@ -211,7 +211,7 @@ export class Query {
   count() { return { get: async () => { const s = await this.get(); return { data: () => ({ count: s.size }) }; } }; }
 
   async get(): Promise<QuerySnap> {
-    const base = this.store.root.child(this.collectionPath);
+    const base = (await this.store.root()).child(this.collectionPath);
     // Let the database do the first equality filter (indexed); the rest is filtered here.
     const eq = this.filters.find((f) => f.op === "==" && ["string", "number", "boolean"].includes(typeof f.value) && !f.field.includes("."));
     let snap: DataSnapshot;
@@ -244,12 +244,12 @@ export class CollectionRef extends Query {
   constructor(store: RtdbStore, path: string) { super(store, path); }
   get id() { return this.collectionPath.split("/").pop() as string; }
   doc(id?: string): DocRef {
-    const key = id ?? (this.store.root.child(this.collectionPath).push().key as string);
+    const key = id ?? (pushId());
     return new DocRef(this.store, `${this.collectionPath}/${safeKey(key)}`);
   }
   async add(data: Record<string, unknown>) { const r = this.doc(); await r.set(data); return r; }
   async listDocuments(): Promise<DocRef[]> {
-    const snap = await this.store.root.child(this.collectionPath).once("value");
+    const snap = await (await this.store.root()).child(this.collectionPath).once("value");
     const out: DocRef[] = [];
     snap.forEach((c) => { out.push(new DocRef(this.store, `${this.collectionPath}/${c.key}`)); return false; });
     return out;
@@ -262,29 +262,42 @@ export class DocRef {
   get ref() { return this; }
   collection(name: string) { return new CollectionRef(this.store, `${this.path}/${safeKey(name)}`); }
   async get(): Promise<DocSnap> {
-    const s = await this.store.root.child(this.path).once("value");
+    const s = await (await this.store.root()).child(this.path).once("value");
     const v = decode(s.val());
     return new DocSnap(this, v && typeof v === "object" ? (v as Record<string, unknown>) : null);
   }
-  async set(data: Record<string, unknown>, opts?: { merge?: boolean }) { await this.store.root.update(toUpdates(this.path, data, opts?.merge ? "merge" : "set", this.store.ServerValue)); }
+  async set(data: Record<string, unknown>, opts?: { merge?: boolean }) { await (await this.store.root()).update(toUpdates(this.path, data, opts?.merge ? "merge" : "set", this.store.ServerValue)); }
   async update(data: Record<string, unknown>) {
-    const exists = (await this.store.root.child(this.path).once("value")).exists();
+    const exists = (await (await this.store.root()).child(this.path).once("value")).exists();
     if (!exists) throw new Error(`No document to update: ${this.path}`);
-    await this.store.root.update(toUpdates(this.path, data, "update", this.store.ServerValue));
+    await (await this.store.root()).update(toUpdates(this.path, data, "update", this.store.ServerValue));
   }
   async create(data: Record<string, unknown>) {
-    if ((await this.store.root.child(this.path).once("value")).exists()) throw new Error(`Document already exists: ${this.path}`);
+    if ((await (await this.store.root()).child(this.path).once("value")).exists()) throw new Error(`Document already exists: ${this.path}`);
     await this.set(data);
   }
-  async delete() { await this.store.root.child(this.path).remove(); }
+  async delete() { await (await this.store.root()).child(this.path).remove(); }
 }
 
 /* ─── the store ────────────────────────────────────────────────────── */
 
+/** A unique, time-ordered key (same shape as Realtime Database push keys), made without a round-trip. */
+const PUSH_CHARS = "-0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_abcdefghijklmnopqrstuvwxyz";
+export function pushId(): string {
+  let t = Date.now(), head = "";
+  for (let i = 0; i < 8; i++) { head = PUSH_CHARS[t % 64] + head; t = Math.floor(t / 64); }
+  let tail = "";
+  for (let i = 0; i < 12; i++) tail += PUSH_CHARS[Math.floor(Math.random() * 64)];
+  return head + tail;
+}
+
 export class RtdbStore {
-  readonly root: Reference;
-  constructor(readonly db: Database, readonly ServerValue: ServerValueT) {
-    this.root = db.ref();
+  private rootRef: Promise<Reference> | null = null;
+  /** `database` resolves the Realtime Database once (its address is looked up on first use). */
+  constructor(private readonly database: () => Promise<Database>, readonly ServerValue: ServerValueT) {}
+  root(): Promise<Reference> {
+    this.rootRef ??= this.database().then((d) => d.ref()).catch((e) => { this.rootRef = null; throw e; });
+    return this.rootRef;
   }
   collection(name: string) { return new CollectionRef(this, safeKey(name)); }
   doc(path: string) { return new DocRef(this, path.split("/").map(safeKey).join("/")); }
@@ -293,7 +306,7 @@ export class RtdbStore {
   async runTransaction<T>(fn: (tx: Transaction) => Promise<T>): Promise<T> {
     const tx = new Transaction(this);
     const out = await fn(tx);
-    if (Object.keys(tx.updates).length) await this.root.update(mergeUpdates(tx.updates));
+    if (Object.keys(tx.updates).length) await (await this.root()).update(mergeUpdates(tx.updates));
     return out;
   }
 }

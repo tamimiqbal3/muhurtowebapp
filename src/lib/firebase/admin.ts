@@ -3,7 +3,7 @@ import { cert, getApps, initializeApp, type App } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import type { Firestore } from "firebase-admin/firestore";
 import { getStorage } from "firebase-admin/storage";
-import { getDatabase, ServerValue } from "firebase-admin/database";
+import { getDatabaseWithUrl, ServerValue, type Database } from "firebase-admin/database";
 import { RtdbStore } from "./rtdb-store";
 import { firebaseClientConfig } from "../config";
 
@@ -78,14 +78,58 @@ export function getAdminApp(): App {
     credential: cert(creds),
     projectId: creds.projectId,
     storageBucket: process.env.FIREBASE_STORAGE_BUCKET || firebaseClientConfig.storageBucket,
-    databaseURL: firebaseClientConfig.databaseURL,
   });
   return app;
 }
 
-/** Realtime Database (live admin alerts and visitor presence). */
-export function adminRtdb() {
-  return getDatabase(getAdminApp()); // the app is initialised with databaseURL
+/**
+ * The real address of this project's Realtime Database. A database's address depends on the location chosen
+ * when it was created, so instead of guessing, the server asks Firebase (with the service account) which
+ * databases the project has. NEXT_PUBLIC_FIREBASE_DATABASE_URL, when set, always wins.
+ */
+let urlLookup: { at: number; url: Promise<string> } | null = null;
+export function databaseURL(): Promise<string> {
+  const fixed = process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL?.trim();
+  if (fixed) return Promise.resolve(fixed.replace(/\/+$/, ""));
+  if (!urlLookup || (urlLookup.at < 0 && Date.now() + urlLookup.at > 60_000)) {
+    const started = Date.now();
+    const url = discoverDatabaseURL().then(
+      (u) => u,
+      (e) => {
+        console.error("[firebase] could not look up the Realtime Database address; using the default", e);
+        urlLookup = { at: -started, url: Promise.resolve(firebaseClientConfig.databaseURL) }; // retry in a minute
+        return firebaseClientConfig.databaseURL;
+      },
+    );
+    urlLookup = { at: started, url };
+  }
+  return urlLookup.url;
+}
+
+export type DatabaseInstance = { name?: string; databaseUrl?: string; type?: string; state?: string };
+export async function listDatabaseInstances(): Promise<DatabaseInstance[]> {
+  const app = getAdminApp();
+  const token = await app.options.credential!.getAccessToken();
+  const project = app.options.projectId ?? firebaseClientConfig.projectId;
+  const res = await fetch(`https://firebasedatabase.googleapis.com/v1beta/projects/${project}/locations/-/instances?pageSize=100`, {
+    headers: { Authorization: `Bearer ${token.access_token}` },
+    signal: AbortSignal.timeout(8000),
+  });
+  if (!res.ok) throw new Error(`Database lookup failed (${res.status}): ${(await res.text()).slice(0, 200)}`);
+  const body = (await res.json()) as { instances?: DatabaseInstance[] };
+  return (body.instances ?? []).filter((i) => i.databaseUrl && i.state !== "DELETED");
+}
+
+async function discoverDatabaseURL(): Promise<string> {
+  const list = await listDatabaseInstances();
+  const pick = list.find((i) => i.type === "DEFAULT_DATABASE") ?? list[0];
+  if (!pick?.databaseUrl) throw new Error("This Firebase project has no Realtime Database.");
+  return pick.databaseUrl.replace(/\/+$/, "");
+}
+
+/** Realtime Database (all app data, live sync, admin alerts and visitor presence). */
+export async function adminRtdb(): Promise<Database> {
+  return getDatabaseWithUrl(await databaseURL(), getAdminApp());
 }
 
 export function adminAuth() {
@@ -99,7 +143,7 @@ export function adminAuth() {
  */
 export function adminDb(): Firestore {
   if (db) return db;
-  db = new RtdbStore(adminRtdb(), ServerValue) as unknown as Firestore;
+  db = new RtdbStore(adminRtdb, ServerValue) as unknown as Firestore;
   return db;
 }
 

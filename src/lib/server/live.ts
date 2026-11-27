@@ -10,7 +10,7 @@ export type LiveEventType = "booking" | "payment" | "signup" | "request";
 export async function pushAdminEvent(e: { type: LiveEventType; title: string; body: string; link?: string; amount?: number }) {
   if (!isAdminConfigured()) return;
   try {
-    const feed = adminRtdb().ref("adminFeed");
+    const feed = (await adminRtdb()).ref("adminFeed");
     await feed.push({ ...e, link: e.link ?? "", amount: e.amount ?? 0, at: Date.now() });
     // Keep the feed small: drop anything beyond the newest 200 alerts.
     const old = await feed.orderByChild("at").limitToFirst(1).once("value");

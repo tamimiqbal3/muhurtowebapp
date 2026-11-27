@@ -1,6 +1,6 @@
 import "server-only";
 import { randomUUID } from "node:crypto";
-import { ServerValue } from "firebase-admin/database";
+import { ServerValue, type DataSnapshot } from "firebase-admin/database";
 import { CATEGORIES } from "../../data/categories";
 import { SERVICES } from "../../data/services";
 import { VENDORS } from "../../data/vendors";
@@ -44,7 +44,11 @@ export interface SiteData {
 const SEED: SiteData = { categories: CATEGORIES, services: SERVICES, vendors: VENDORS, locations: LOCATIONS, reviews: REVIEWS, settings: DEFAULT_SETTINGS, updatedAt: null };
 export const seedData = () => SEED;
 
-const db = () => adminRtdb();
+/** Realtime Database reads give up after 10 s (instead of hanging) so problems surface as clear errors. */
+function timed(p: Promise<DataSnapshot>, what: string): Promise<DataSnapshot> {
+  return Promise.race([p, new Promise<DataSnapshot>((_, rej) => setTimeout(() => rej(new Error(`Realtime Database did not answer (${what}) — timed out`)), 10_000))]);
+}
+async function ref(path?: string) { return (await adminRtdb()).ref(path); }
 
 /* ─── reading ─────────────────────────────────────────────────────── */
 
@@ -52,7 +56,7 @@ let cache: { version: number; data: SiteData | null } | null = null;
 
 /** Current catalogue version (0 = never published). One tiny read. */
 export async function siteVersion(): Promise<number> {
-  const v = (await db().ref("site/version").once("value")).val();
+  const v = (await timed((await ref("site/version")).once("value"), "site/version")).val();
   return typeof v === "number" ? v : 0;
 }
 
@@ -72,7 +76,7 @@ export async function readSite(): Promise<{ version: number; data: SiteData | nu
     cache = { version, data: null };
     return cache;
   }
-  const raw = decode((await db().ref("catalog").once("value")).val()) as Record<string, unknown> | null;
+  const raw = decode((await timed((await ref("catalog")).once("value"), "catalog")).val()) as Record<string, unknown> | null;
   if (!raw) {
     cache = { version, data: null };
     return cache;
@@ -98,7 +102,7 @@ export function publicView(d: SiteData): SiteData {
 /** The site settings alone (support team for invoices, etc.), falling back to defaults. */
 export async function readSettings(): Promise<SiteSettings> {
   try {
-    const raw = decode((await db().ref("catalog/settings").once("value")).val());
+    const raw = decode((await timed((await ref("catalog/settings")).once("value"), "settings")).val());
     return raw ? normalizeSettings(raw) : DEFAULT_SETTINGS;
   } catch {
     return DEFAULT_SETTINGS;
@@ -113,7 +117,7 @@ export async function saveImage(buf: Buffer, contentType: string): Promise<strin
   if (!/^image\/(png|jpeg|webp)$/.test(contentType)) throw new ApiError(400, "Only PNG, JPEG or WebP images can be uploaded.");
   if (buf.length > MAX_IMAGE) throw new ApiError(413, "That image is too large after resizing (max 900 KB). Try a smaller photo.");
   const id = randomUUID().replace(/-/g, "");
-  await db().ref(`media/${id}`).set({ type: contentType, data: buf.toString("base64"), size: buf.length, at: ServerValue.TIMESTAMP });
+  await (await ref(`media/${id}`)).set({ type: contentType, data: buf.toString("base64"), size: buf.length, at: ServerValue.TIMESTAMP });
   return `/api/media/${id}`;
 }
 
@@ -144,7 +148,7 @@ function stamp(updates: Record<string, unknown>) {
 }
 
 async function commit(updates: Record<string, unknown>) {
-  await db().ref().update(mergeUpdates(stamp(updates)));
+  await (await ref()).update(mergeUpdates(stamp(updates)));
   cache = null;
   const { invalidateCatalog } = await import("./catalog");
   invalidateCatalog();
@@ -176,7 +180,7 @@ export async function upsertItem(c: SiteCollection, item: Record<string, unknown
   if (!validKey(key)) throw new ApiError(400, "This item needs a valid ID (letters, numbers and dashes).");
   const clean = await externalize(item);
   const prevKey = previousKey && previousKey !== key && validKey(previousKey) ? previousKey : null;
-  const old = (await db().ref(`catalog/${c}/${prevKey ?? key}/_order`).once("value")).val();
+  const old = (await (await ref(`catalog/${c}/${prevKey ?? key}/_order`)).once("value")).val();
   const updates: Record<string, unknown> = { [`catalog/${c}/${key}`]: encode({ ...clean, _order: typeof old === "number" ? old : Date.now() }) };
   if (prevKey) updates[`catalog/${c}/${prevKey}`] = null;
   await commit(updates);
