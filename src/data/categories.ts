@@ -9,7 +9,7 @@ const eventSubs = (photoName: string, decorName: string) => [
   { slug: "lighting", name: "Lighting", nameBn: "আলোকসজ্জা", description: "Ambient, stage, fairy and architectural lighting." },
   { slug: "photography-videography", name: photoName, nameBn: "ছবি ও ভিডিও", description: "Photographers, cinematographers and drone coverage." },
   { slug: "photo-booths", name: "Photo Booths", nameBn: "ফটো বুথ", description: "Themed booths, instant prints and 360° video." },
-  { slug: "sound", name: "Sound", nameBn: "সাউন্ড সিস্টেম", description: "PA systems, DJs, microphones and live-music sound." },
+  { slug: "sound", name: "Sound", nameBn: "সাউন্ড সিস্টেম", description: "PA sound boxes — line array, sub & top, stage, outdoor and portable systems." },
 ];
 
 export const CATEGORIES: Category[] = [

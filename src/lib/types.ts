@@ -215,6 +215,11 @@ export interface PaymentRecord {
   createdAt: string;
   updatedAt: string;
   paidAt?: string;
+  /** Issued when the payment is confirmed, e.g. INV-2026-00001. */
+  invoiceNo?: string;
+  /** Support person shown on the invoice (picked at random from the support team). */
+  support?: { name: string; email: string; phone: string };
+  customerName?: string;
 }
 
 /* ─── Customisation ──────────────────────────────────────────────────── */

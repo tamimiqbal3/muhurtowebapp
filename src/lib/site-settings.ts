@@ -1,4 +1,5 @@
 import { ALL_PAYMENT_IDS, type PaymentMethodId } from "@/data/payments";
+import { DEFAULT_HOME, normalizeHome, type HomeContent } from "./home-content";
 
 /** Everything the owner can change from Admin → Site settings without touching code. */
 export interface SiteSettings {
@@ -22,6 +23,8 @@ export interface SiteSettings {
   };
   /** Support team members; one is assigned at random to each invoice. */
   supportTeam: SupportMember[];
+  /** Homepage sections: order, visibility, and every list shown on the page. */
+  home: HomeContent;
 }
 
 export interface SupportMember { id: string; name: string; email: string; phone: string }
@@ -62,6 +65,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
     { id: "s5", name: "Sadia Rahman", email: "sadia.support@muhurto.app", phone: "+880 1816-273095" },
     { id: "s6", name: "Mahmudul Karim", email: "mahmud.support@muhurto.app", phone: "+880 1917-560842" },
   ],
+  home: DEFAULT_HOME,
 };
 
 const str = (v: unknown, fallback: string, max = 500) => (typeof v === "string" ? v.trim().slice(0, max) : fallback);
@@ -97,5 +101,6 @@ export function normalizeSettings(input: unknown): SiteSettings {
       footerBlurb: text("footerBlurb"), footerBlurbBn: text("footerBlurbBn"),
     },
     supportTeam: team.length ? team : d.supportTeam,
+    home: normalizeHome(i.home),
   };
 }

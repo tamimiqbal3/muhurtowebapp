@@ -23,3 +23,35 @@ export function getClientStorage(): FirebaseStorage | null {
   const a = getFirebaseApp();
   return a ? getStorage(a) : null;
 }
+
+/**
+ * Google Analytics for Firebase. Browser-only, loaded lazily so it never blocks rendering, and only
+ * where Analytics is supported (it isn't in some private modes and in-app browsers).
+ */
+let analyticsStarted = false;
+export async function startAnalytics(): Promise<void> {
+  if (analyticsStarted || typeof window === "undefined") return;
+  const a = getFirebaseApp();
+  if (!a || !firebaseClientConfig.measurementId) return;
+  analyticsStarted = true;
+  try {
+    const { initializeAnalytics, isSupported } = await import("firebase/analytics");
+    // Page views are logged by us on every route change, so turn off the automatic first one.
+    if (await isSupported()) initializeAnalytics(a, { config: { send_page_view: false } });
+    else analyticsStarted = false;
+  } catch {
+    /* analytics is optional */
+  }
+}
+
+/** Records a page view (the App Router changes pages without a full reload). */
+export async function logPageView(path: string): Promise<void> {
+  if (!analyticsStarted) return;
+  try {
+    const { getAnalytics, isSupported, logEvent } = await import("firebase/analytics");
+    const a = getFirebaseApp();
+    if (a && (await isSupported())) logEvent(getAnalytics(a), "page_view", { page_path: path, page_location: window.location.href, page_title: document.title });
+  } catch {
+    /* ignore */
+  }
+}

@@ -30,9 +30,14 @@ npm run build                  # production build + type-check
 
 Nothing pretends to work: missing credentials produce an explicit notice, never a fake success.
 
-### Local data mode (no Firebase)
+### Firebase mode and local mode
 
-Firebase is intentionally not connected yet. Everything is stored in the browser's local storage through one data layer (`src/lib/store/catalog.ts` for the catalogue, content and settings; `src/lib/demo/store.ts` for accounts, bookings, payments and invoices). Pages read only through `useCatalog()`, so connecting Firebase later means implementing the `CatalogRepository` interface — no page changes. Note: local data lives in each browser, so changes made in the admin panel are visible on the device where they were made.
+The site is connected to the Firebase project **muhurto-app** (web config built into `src/lib/config.ts`; Analytics included). It switches mode automatically:
+
+- **Firebase mode** — when the server has the service-account variables (`FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY`). The catalogue, homepage sections and site settings live in Firestore (`categories`, `services`, `vendors`, `locations`, `reviews`, `site/settings`); admin edits are saved there and appear for every visitor within seconds; admin photo uploads go to Firebase Storage; customers sign in with Firebase Auth; bookings, payments (with invoice numbers) and invoices are stored in Firestore. The admin panel shows “Connected to Firebase”.
+- **Local mode** — without those variables everything is kept in the browser's local storage (`src/lib/store/catalog.ts`, `src/lib/demo/store.ts`), as before. The admin panel shows “Local mode”.
+
+On the first admin save in Firebase mode, Firestore is seeded with the full built-in catalogue automatically. Edits made earlier in local mode can be copied up once with **“Copy them to Firebase”** in the admin panel.
 
 ## Environment variables
 
@@ -55,19 +60,23 @@ See `.env.example`. Add the same values in **Vercel → Project → Settings →
 
 ---
 
-## Firebase setup
+## Firebase setup (project: muhurto-app)
 
-1. Create a Firebase project → add a **Web app** → copy the config into `NEXT_PUBLIC_FIREBASE_*`.
-2. **Authentication** → enable *Email/Password* and *Google*. Add your Vercel domain under *Authorized domains*.
-3. **Firestore** → create database (production mode).
-4. **Storage** → create the default bucket (used for admin image uploads).
-5. **Project settings → Service accounts → Generate new private key** → fill `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY`.
-6. Deploy rules & indexes:
+1. **Authentication → Sign-in method** → enable *Email/Password* (and *Google* if wanted). Under *Settings → Authorized domains* add `muhurtowebapp.vercel.app` (and any custom domain).
+2. **Firestore Database** → *Create database* → production mode → region `asia-south1` (Mumbai, closest to Dhaka).
+3. **Storage** → *Get started* (default bucket `muhurto-app.firebasestorage.app`).
+4. **Project settings → Service accounts → Generate new private key** (downloads a JSON file — keep it private, never commit it). In **Vercel → Settings → Environment Variables** add:
+   - `FIREBASE_PROJECT_ID` = `muhurto-app`
+   - `FIREBASE_CLIENT_EMAIL` = `client_email` from the JSON
+   - `FIREBASE_PRIVATE_KEY` = `private_key` from the JSON (the whole value, including `-----BEGIN PRIVATE KEY-----` and the `\n` sequences)
+   Then redeploy.
+5. Deploy the security rules (they let browsers read only public data; all writes go through the server):
    ```bash
    npm i -g firebase-tools && firebase login
-   firebase use <project-id>
    firebase deploy --only firestore:rules,firestore:indexes,storage
    ```
+   (`.firebaserc` already points at `muhurto-app`.) Or paste `firestore.rules` and `storage.rules` into the console's *Rules* tabs.
+6. Open `/admin` — the bar should read **Connected to Firebase**. Make any save to publish the catalogue to Firestore.
 7. Seed the catalogue (or use **Admin → Services → Import catalogue**):
    ```bash
    npm run seed            # add -- --force to overwrite demo docs

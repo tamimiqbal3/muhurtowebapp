@@ -46,7 +46,8 @@ export default async function PaymentSuccess({ searchParams }: { searchParams: P
           </div>
         )}
         <div className="mt-8 flex flex-wrap justify-center gap-3">
-          <ButtonLink href={`/booking/${booking.id}`} variant="accent">{t("Track your event")}</ButtonLink>
+          {paid && <ButtonLink href={`/invoice/${booking.id}`} variant="accent">{t("View invoice")}</ButtonLink>}
+          <ButtonLink href={`/booking/${booking.id}`} variant={paid ? "outline" : "accent"}>{t("Track your event")}</ButtonLink>
           <ButtonLink href="/dashboard" variant="outline">{t("Go to dashboard")}</ButtonLink>
         </div>
       </div>

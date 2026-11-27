@@ -4,10 +4,11 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import {
-  BarChart3, CalendarRange, CreditCard, FileText, Layers, LogOut, MapPin, Menu, Package, Star, Store, Users, Wallet, X, ExternalLink, Upload,
+  BarChart3, CalendarRange, CreditCard, FileText, Layers, LayoutTemplate, LogOut, MapPin, Menu, Package, Star, Store, Users, Wallet, X, ExternalLink, Upload,
 } from "lucide-react";
 import { LogoMark, Wordmark } from "../layout/Logo";
 import { cn } from "@/lib/utils";
+import { getCatalogSnapshot, importLocalEdits, isCloudMode, localEditsBeforeFirebase, useCloudStatus } from "@/lib/store/catalog";
 
 const NAV = [
   { href: "/admin", label: "Dashboard", icon: BarChart3 },
@@ -19,9 +20,46 @@ const NAV = [
   { href: "/admin/locations", label: "Locations", icon: MapPin },
   { href: "/admin/customers", label: "Customers", icon: Users },
   { href: "/admin/reviews", label: "Reviews", icon: Star },
+  { href: "/admin/homepage", label: "Homepage sections", icon: LayoutTemplate },
   { href: "/admin/content", label: "Website content", icon: FileText },
   { href: "/admin/payment-methods", label: "Payment methods", icon: Wallet },
 ];
+
+/** Where admin changes are saved: Firebase (live for everyone) or this browser only. */
+function CloudBar() {
+  const c = useCloudStatus();
+  const [local, setLocal] = useState<boolean>(false);
+  useEffect(() => {
+    if (c.mode !== "cloud") return;
+    const d = localEditsBeforeFirebase();
+    // Offer the one-time import only if this browser really has edits that differ from what is live.
+    setLocal(Boolean(d && d.updatedAt && JSON.stringify(d.services.map((x) => x.id)) + d.updatedAt !== JSON.stringify(getCatalogSnapshot().services.map((x) => x.id)) + getCatalogSnapshot().updatedAt));
+  }, [c.mode]);
+  if (c.mode === "unknown") return null;
+  if (c.mode === "local") {
+    return (
+      <p className="mb-4 rounded-xl border border-warning/30 bg-warning/10 px-3 py-2 text-xs text-ink">
+        <strong>Local mode:</strong> changes are saved in this browser only. Add the Firebase service-account variables on Vercel (see the setup guide) to save changes to Firebase for every visitor.
+      </p>
+    );
+  }
+  return (
+    <div className="mb-4 space-y-2">
+      <p className={cn("flex flex-wrap items-center gap-2 rounded-xl border px-3 py-2 text-xs", c.error ? "border-danger/30 bg-danger/10" : "border-success/30 bg-success/10")}>
+        <span className={cn("h-2 w-2 rounded-full", c.error ? "bg-danger" : c.saving ? "animate-pulse bg-warning" : "bg-success")} />
+        {c.error ? <span><strong>Not saved:</strong> {c.error}</span>
+          : c.saving ? <span>Saving to Firebase…</span>
+          : <span><strong>Connected to Firebase.</strong> Changes go live for every visitor within a few seconds.{c.empty && " The live site still shows the original catalogue until your first save."}</span>}
+      </p>
+      {local && (
+        <p className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-brand/30 bg-brand/5 px-3 py-2 text-xs">
+          <span>This browser has catalogue edits from before Firebase was connected.</span>
+          <button className="rounded-full bg-brand px-3 py-1.5 font-semibold text-paper" onClick={() => { if (confirm("Replace the live Firebase catalogue with this browser's earlier edits?")) { importLocalEdits(); setLocal(false); } }}>Copy them to Firebase</button>
+        </p>
+      )}
+    </div>
+  );
+}
 
 /** The independent admin panel frame: sidebar, top bar, sign-out. */
 export function AdminFrame({ children }: { children: ReactNode }) {
@@ -71,7 +109,7 @@ export function AdminFrame({ children }: { children: ReactNode }) {
             </aside>
           </div>
         )}
-        <main className="min-w-0 flex-1 p-4 pb-24 sm:p-6 lg:p-8">{children}</main>
+        <main className="min-w-0 flex-1 p-4 pb-24 sm:p-6 lg:p-8"><CloudBar />{children}</main>
       </div>
     </div>
   );
@@ -190,7 +228,19 @@ export function ImageInput({ value, onChange, png }: { value: string; onChange: 
   async function upload(file: File) {
     setBusy(true);
     try {
-      onChange(await compress(file, png ? 600 : 1600, png));
+      const dataUrl = await compress(file, png ? 600 : 2000, png);
+      if (isCloudMode()) {
+        // Firebase: store the photo in Firebase Storage and keep only its URL.
+        const blob = await (await fetch(dataUrl)).blob();
+        const form = new FormData();
+        form.append("file", new File([blob], png ? "image.png" : "image.jpg", { type: blob.type }));
+        const res = await fetch("/api/site/upload", { method: "POST", body: form, credentials: "same-origin" });
+        const out = await res.json().catch(() => ({}));
+        if (!res.ok || !out.url) throw new Error(out.error || "Upload failed.");
+        onChange(out.url);
+      } else onChange(dataUrl);
+    } catch (e) {
+      alert((e as Error).message || "Upload failed.");
     } finally {
       setBusy(false);
     }

@@ -103,7 +103,7 @@ export function PlannerChat({ onClose, onBooked }: { onClose?: () => void; onBoo
   useEffect(() => {
     if (started.current) return;
     started.current = true;
-    say([t("Hello! I am Shubho, your celebration planner. I will help you plan your event in Dhaka step by step."), t("You can tap an answer or simply type, for example: “Wedding for 200 guests in Gulshan on 14 February, budget 5 lakh”."), question("occasion", draft)]);
+    say([t("Hello! I am Ayojon, your event planning assistant. I will help you plan your event in Dhaka step by step."), t("You can tap an answer or simply type, for example: “Wedding for 200 guests in Gulshan on 14 February, budget 5 lakh”."), question("occasion", draft)]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -287,8 +287,8 @@ export function PlannerChat({ onClose, onBooked }: { onClose?: () => void; onBoo
       <div className="flex items-center gap-3 border-b border-line bg-[linear-gradient(120deg,#015fff,#00befe)] px-4 py-3 text-paper">
         <span className="relative grid h-10 w-10 shrink-0 place-items-center rounded-full bg-paper"><LogoMark className="h-8 w-8" /><span className="absolute right-0 bottom-0 h-3 w-3 rounded-full border-2 border-paper bg-emerald-400" /></span>
         <div className="min-w-0 flex-1">
-          <p className="font-semibold">{t("Shubho")}</p>
-          <p className="truncate text-xs text-paper/85">{t("Your celebration planner · online")}</p>
+          <p className="font-semibold">{t("Ayojon")}</p>
+          <p className="truncate text-xs text-paper/85">{t("Event planning assistant · online")}</p>
         </div>
         <button onClick={restart} title={t("Start over")} aria-label={t("Start over")} className="grid h-9 w-9 place-items-center rounded-full bg-paper/15 hover:bg-paper/25"><RotateCcw className="h-4 w-4" /></button>
         {onClose && <button onClick={onClose} aria-label={t("Close")} className="grid h-9 w-9 place-items-center rounded-full bg-paper/15 hover:bg-paper/25"><X className="h-4 w-4" /></button>}

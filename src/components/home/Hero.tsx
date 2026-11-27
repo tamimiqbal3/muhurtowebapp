@@ -9,8 +9,9 @@ import { CategorySearch } from "./CategorySearch";
 import { HeroFilm } from "./HeroFilm";
 import { localizeCategory } from "@/data/i18n-data";
 import { useLang } from "../i18n/LanguageProvider";
-import { categoryRoute, useCatalog } from "@/lib/store/catalog";
+import { activeServices, categoryRoute, useCatalog } from "@/lib/store/catalog";
 import { cn } from "@/lib/utils";
+import { SupportStrip } from "./SupportStrip";
 
 
 
@@ -21,6 +22,7 @@ export function Hero() {
   const { content } = data.settings;
   const bn = lang === "bn";
   const cats = data.categories.map((c) => localizeCategory(c, lang));
+  const live = activeServices(data);
 
   return (
     <section className="relative">
@@ -57,22 +59,31 @@ export function Hero() {
           </div>
           <Link href="/event-planner" className="hidden shrink-0 items-center gap-2 text-sm font-semibold text-brand hover:underline sm:inline-flex">{t("Plan with our assistant")} <ArrowRight className="h-4 w-4" /></Link>
         </div>
-        <ul className="mt-8 grid grid-cols-2 gap-x-4 gap-y-7 sm:grid-cols-3 lg:grid-cols-5">
-          {cats.map((c) => (
-            <li key={c.slug}>
-              <Link href={categoryRoute(c)} className="group block">
-                <span className="relative block aspect-[4/3] overflow-hidden rounded-2xl bg-sand">
-                  <SafeImage src={c.card.src} alt={c.card.alt} fill sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw" quality={90} className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]" />
-                </span>
-                <span className="mt-3 flex items-center justify-between gap-2">
-                  <span className="text-lg leading-tight font-medium text-ink">{c.name}</span>
-                  <ArrowRight className="h-4 w-4 shrink-0 text-muted transition group-hover:translate-x-0.5 group-hover:text-brand" />
-                </span>
-                <span className="mt-1 line-clamp-2 block text-xs text-ink-soft">{c.tagline}</span>
-              </Link>
-            </li>
-          ))}
+        <ul className="mt-8 grid auto-rows-[180px] grid-cols-2 gap-3 sm:auto-rows-[200px] sm:gap-4 lg:auto-rows-[230px] lg:grid-cols-4">
+          {cats.map((c, i) => {
+            const count = live.filter((s) => s.categorySlug === c.slug).length;
+            const lead = i === 0;
+            return (
+              <li key={c.slug} className={cn(lead && "col-span-2 row-span-2", !lead && cats.length % 2 === 0 && i === cats.length - 1 && "col-span-2 lg:col-span-1")}>
+                <Link href={categoryRoute(c)} className="group relative flex h-full overflow-hidden rounded-[1.4rem] bg-sand ring-1 ring-line/60">
+                  <SafeImage src={c.card.src} alt={c.card.alt} fill sizes={lead ? "(max-width: 1024px) 100vw, 50vw" : "(max-width: 1024px) 50vw, 25vw"} quality={90} className="object-cover transition-transform duration-[1400ms] ease-out group-hover:scale-[1.06]" />
+                  <span aria-hidden className="absolute inset-0 bg-[linear-gradient(180deg,rgb(5_11_28/0)_35%,rgb(5_11_28/.78))] transition-opacity duration-500 group-hover:opacity-95" />
+                  <span className="relative mt-auto flex w-full items-end justify-between gap-3 p-4 sm:p-5">
+                    <span className="min-w-0">
+                      <span className={cn("block font-display leading-tight text-paper", lead ? "text-3xl sm:text-4xl" : "text-xl sm:text-2xl")}>{c.name}</span>
+                      <span className={cn("mt-1 text-paper/80", lead ? "line-clamp-2 block max-w-md text-sm" : "hidden text-xs sm:line-clamp-1 sm:block")}>{c.tagline}</span>
+                      <span className="mt-2 inline-flex items-center rounded-full bg-paper/15 px-2.5 py-0.5 text-[0.68rem] font-medium text-paper backdrop-blur">{t("{n} services", { n: count })}</span>
+                    </span>
+                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-paper text-ink transition-transform duration-500 group-hover:-rotate-45 group-hover:bg-brand group-hover:text-paper">
+                      <ArrowRight className="h-4 w-4" />
+                    </span>
+                  </span>
+                </Link>
+              </li>
+            );
+          })}
         </ul>
+        <SupportStrip />
       </div>
     </section>
   );

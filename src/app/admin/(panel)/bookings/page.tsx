@@ -4,7 +4,6 @@ import { useMemo, useState } from "react";
 import { Eye, FileText, Trash2 } from "lucide-react";
 import { Btn, Drawer, PageHead, Pill, Table, bdt } from "@/components/admin/ui";
 import { useLocalOps } from "@/components/admin/useLocal";
-import { deleteLocalBooking, updateLocalBooking } from "@/lib/demo/store";
 import { formatDate, formatDateTime } from "@/lib/format";
 import type { Booking, BookingStatus } from "@/lib/types";
 
@@ -13,7 +12,7 @@ const label = (s: string) => s.replace(/_/g, " ").replace(/^\w/, (c) => c.toUppe
 const tone = (s: BookingStatus) => (s === "confirmed" || s === "completed" ? "success" : s === "pending_payment" || s === "in_progress" ? "warning" : s === "cancelled" || s === "rejected" ? "danger" : "neutral") as "success" | "warning" | "danger" | "neutral";
 
 export default function AdminBookings() {
-  const { bookings, payments, ready, reload } = useLocalOps();
+  const { bookings, payments, ready, setBookingStatus, deleteBooking } = useLocalOps();
   const [filter, setFilter] = useState("");
   const [q, setQ] = useState("");
   const [view, setView] = useState<Booking | null>(null);
@@ -35,14 +34,14 @@ export default function AdminBookings() {
             <td className="px-4 py-3 text-xs">{formatDate(b.event.date)} · {b.event.guests} guests<br /><span className="text-muted">{b.event.venue}, {b.event.city}</span></td>
             <td className="px-4 py-3 font-semibold whitespace-nowrap">{bdt(b.pricing.total)}<br />{b.paymentStatus === "paid" ? <Pill tone="success">Paid</Pill> : <Pill tone="warning">Unpaid</Pill>}</td>
             <td className="px-4 py-3">
-              <select className="field !py-1.5 text-xs" value={b.status} onChange={(e) => { updateLocalBooking(b.id, { status: e.target.value as BookingStatus }); reload(); }}>
+              <select className="field !py-1.5 text-xs" value={b.status} onChange={(e) => void setBookingStatus(b.id, e.target.value as BookingStatus)}>
                 {STATUSES.map((s) => <option key={s} value={s}>{label(s)}</option>)}
               </select>
             </td>
             <td className="px-4 py-3"><div className="flex justify-end gap-1">
               <Btn variant="ghost" onClick={() => setView(b)}><Eye className="h-4 w-4" /></Btn>
               {pay(b.id) && <a href={`/invoice/${b.id}`} target="_blank" rel="noreferrer" className="inline-flex min-h-9 items-center rounded-full px-3 text-ink-soft hover:bg-sand" aria-label="Invoice"><FileText className="h-4 w-4" /></a>}
-              <Btn variant="ghost" className="text-danger" onClick={() => { if (confirm(`Delete booking ${b.code}?`)) { deleteLocalBooking(b.id); reload(); } }}><Trash2 className="h-4 w-4" /></Btn>
+              <Btn variant="ghost" className="text-danger" onClick={() => { if (confirm(`Delete booking ${b.code}?`)) void deleteBooking(b.id); }}><Trash2 className="h-4 w-4" /></Btn>
             </div></td>
           </tr>
         ))}

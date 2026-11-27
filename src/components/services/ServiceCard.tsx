@@ -19,9 +19,11 @@ export interface ServiceCardProps {
   vendorVerified?: boolean;
   priority?: boolean;
   className?: string;
+  /** "print": the photo floats as a framed print — used for photography, where the work is the composition. */
+  variant?: "default" | "print";
 }
 
-export function ServiceCard({ service, vendorName, vendorVerified, priority, className }: ServiceCardProps) {
+export function ServiceCard({ service, vendorName, vendorVerified, priority, className, variant = "default" }: ServiceCardProps) {
   const plan = usePlan();
   const inPlan = plan.hydrated && plan.has(service.id);
   const { t, lang } = useLang();
@@ -35,9 +37,17 @@ export function ServiceCard({ service, vendorName, vendorVerified, priority, cla
     <div className={cn("h-full", className)}>
       <article className="group card flex h-full flex-col overflow-hidden transition-[box-shadow,transform] duration-500 ease-out hover:-translate-y-1.5 hover:shadow-[0_24px_48px_-24px_rgb(8_20_48/.35)]">
         <Link href={`/service/${service.id}`} className="relative block aspect-[4/3] overflow-hidden bg-sand" aria-label={t("View {name}", { name: service.name })}>
-          {img && (
+          {img && variant === "print" ? (
+            <span className="absolute inset-0 grid place-items-center bg-[radial-gradient(120%_90%_at_50%_0%,#eef4ff,#dfe8f8)] p-6">
+              <span className="relative block h-full w-full -rotate-2 rounded-[6px] bg-paper p-2 pb-6 shadow-[0_24px_40px_-18px_rgb(8_20_48/.45)] transition-transform duration-700 ease-out group-hover:-translate-y-2 group-hover:rotate-0">
+                <span className="relative block h-full w-full overflow-hidden rounded-[3px]">
+                  <SafeImage src={img.src} alt={img.alt} fill priority={priority} sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, 30vw" className="object-cover" />
+                </span>
+              </span>
+            </span>
+          ) : img ? (
             <SafeImage src={img.src} alt={img.alt} fill priority={priority} sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" className="object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-[1.07]" />
-          )}
+          ) : null}
           <div className="absolute inset-x-0 top-0 flex items-start justify-between p-3">
             <span className="rounded-full bg-paper/90 px-2.5 py-1 text-[0.65rem] font-semibold tracking-wide backdrop-blur" style={{ color: cat?.accent }}>
               {sub?.name ?? service.subcategorySlug}

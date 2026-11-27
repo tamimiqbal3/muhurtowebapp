@@ -18,7 +18,23 @@ export function Invoice({ bookingId }: { bookingId: string }) {
   const { t, lang } = useLang();
   const data = useCatalog();
   const [state, setState] = useState<{ booking: Booking | null; payment: LocalPayment | null } | null>(null);
-  useEffect(() => setState({ booking: demoBooking(bookingId), payment: localPaymentForBooking(bookingId) }), [bookingId]);
+  useEffect(() => {
+    let live = true;
+    (async () => {
+      try {
+        // Firebase: the server returns the invoice only to the booking's customer or the admin.
+        const res = await fetch(`/api/invoice/${encodeURIComponent(bookingId)}`, { cache: "no-store", credentials: "same-origin" });
+        const body = await res.json().catch(() => ({}));
+        if (!live) return;
+        if (res.ok && body.configured) return setState({ booking: body.booking, payment: body.payment });
+        if (res.ok && body.configured === false) return setState({ booking: demoBooking(bookingId), payment: localPaymentForBooking(bookingId) });
+        setState({ booking: null, payment: null });
+      } catch {
+        if (live) setState({ booking: demoBooking(bookingId), payment: localPaymentForBooking(bookingId) });
+      }
+    })();
+    return () => { live = false; };
+  }, [bookingId]);
 
   if (!state) return <div className="min-h-dvh" />;
   const { booking, payment } = state;

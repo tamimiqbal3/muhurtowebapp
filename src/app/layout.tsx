@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { Inter, Noto_Sans_Bengali, Noto_Serif_Bengali, Playfair_Display, Share_Tech_Mono } from "next/font/google";
 import "./globals.css";
 import { SiteChrome } from "@/components/layout/SiteChrome";
+import { FirebaseAnalytics } from "@/components/analytics/FirebaseAnalytics";
 import { PlanDrawer } from "@/components/plan/PlanDrawer";
 import { Providers } from "@/components/Providers";
 import { Navbar } from "@/components/layout/Navbar";
@@ -42,8 +43,15 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   const lang = await getLang();
   return (
     <html lang={lang} className={`${display.variable} ${sans.variable} ${bengali.variable} ${bengaliSans.variable} ${lcd.variable}`}>
+      <head>
+        {/* Open connections to the photo and film CDNs early so the hero paints fast. */}
+        <link rel="preconnect" href="https://images.pexels.com" />
+        <link rel="preconnect" href="https://videos.pexels.com" />
+        <link rel="dns-prefetch" href="https://videos.pexels.com" />
+      </head>
       <body>
         <Providers lang={lang}>
+          <FirebaseAnalytics />
           <SiteChrome header={<Navbar />} footer={<Footer />} drawer={<PlanDrawer />}>
             {children}
           </SiteChrome>

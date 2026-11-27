@@ -6,6 +6,7 @@ import { PageHero } from "../layout/PageHero";
 import { ButtonLink } from "../ui/Button";
 import { JamdaniRule, SectionHeading } from "../ui/misc";
 import { ServiceGrid } from "./ServiceGrid";
+import { CompositionShowcase } from "./CompositionShowcase";
 import { SafeImage } from "../ui/SafeImage";
 import { formatBDT } from "@/lib/format";
 import { priceSuffix } from "@/lib/pricing";
@@ -48,7 +49,7 @@ export function CategoryLanding({ slug }: { slug: string }) {
         </div>
       )}
 
-      <nav aria-label={t("{cat} sections", { cat: category.name })} className="sticky top-[72px] z-30 border-b border-line bg-ivory/90 backdrop-blur-xl">
+      <nav aria-label={t("{cat} sections", { cat: category.name })} className="sticky top-[var(--header-offset)] z-30 border-b border-line bg-ivory/95 backdrop-blur-xl transition-[top] duration-[450ms] ease-[cubic-bezier(0.22,1,0.36,1)]">
         <ul className="container-x scrollbar-none flex gap-2 overflow-x-auto py-3">
           {category.subcategories.map((sub) => (
             <li key={sub.slug} className="shrink-0">
@@ -91,6 +92,9 @@ export function CategoryLanding({ slug }: { slug: string }) {
               <SectionHeading eyebrow={category.name} title={sub.name} description={sub.description} />
               <ButtonLink href={`/services/${slug}?sub=${sub.slug}`} variant="outline" size="sm">{t("View all {sub}", { sub: sub.name })}</ButtonLink>
             </div>
+            {sub.slug === "photography-videography" && items.length > 0 && (
+              <CompositionShowcase images={items.map((x) => x.images[0]).filter(Boolean)} />
+            )}
             {items.length ? (
               <ServiceGrid services={items} vendors={vendors} />
             ) : (

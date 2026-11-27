@@ -9,7 +9,7 @@ import { ServiceCard } from "../services/ServiceCard";
 import { SafeImage } from "../ui/SafeImage";
 import { useLang } from "../i18n/LanguageProvider";
 import { localizeCategory, localizeService, localizeVendor } from "@/data/i18n-data";
-import { getFaqs, getGallery, getTestimonials } from "@/data/content";
+import { useSiteSettings } from "../SiteSettingsProvider";
 import { activeServices, useCatalog } from "@/lib/store/catalog";
 import { cn } from "@/lib/utils";
 
@@ -71,8 +71,9 @@ export function FeaturedServices() {
 
 /** A slow, endless strip of what MUHURTO promises. */
 export function ValueTicker() {
-  const { t } = useLang();
-  const items = [t("Verified Dhaka vendors"), t("Clear published prices"), t("Secure SSLCOMMERZ payments"), t("One coordinator on the day"), t("Invoices sent instantly"), t("Support in Bangla and English")];
+  const { t, lang } = useLang();
+  const items = useSiteSettings().home.ticker.map((x) => (lang === "bn" ? x.bn || x.en : x.en || x.bn)).filter(Boolean);
+  if (!items.length) return null;
   const row = [...items, ...items];
   return (
     <div className="relative overflow-hidden border-y border-line bg-paper py-4" aria-label={t("Why MUHURTO")}>
@@ -92,7 +93,8 @@ export function ValueTicker() {
 /** A clean, even grid of real setups. */
 export function InspirationGallery() {
   const { t, lang } = useLang();
-  const items = getGallery(lang).slice(0, 8);
+  const items = useSiteSettings().home.gallery.map((g) => ({ src: g.src, alt: g.label, label: lang === "bn" ? g.labelBn || g.label : g.label }));
+  if (!items.length) return null;
   return (
     <section className="container-x pt-20 sm:pt-24">
       <FadeUp><Head eyebrow={t("Inspiration")} title={t("Setups by our partners")} /></FadeUp>
@@ -111,18 +113,19 @@ export function InspirationGallery() {
 
 export function Testimonials() {
   const { t, lang } = useLang();
-  const list = getTestimonials(lang);
+  const list = useSiteSettings().home.testimonials.map((x) => (lang === "bn" ? { id: x.id, name: x.nameBn || x.name, event: x.eventBn || x.event, quote: x.quoteBn || x.quote } : { id: x.id, name: x.name, event: x.event, quote: x.quote }));
+  if (!list.length) return null;
   return (
     <section className="container-x pt-20 sm:pt-24">
       <FadeUp><Head eyebrow={t("Reviews")} title={t("What our hosts say")} /></FadeUp>
       <Stagger as="ul" className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {list.map((x) => (
-          <StaggerItem as="li" key={x.name} className="flex flex-col rounded-2xl border border-line bg-paper p-6 transition-[transform,box-shadow] duration-500 hover:-translate-y-1 hover:shadow-[0_20px_40px_-24px_rgb(8_20_48/.3)]">
+        {list.slice(0, 8).map((x) => (
+          <StaggerItem as="li" key={x.id} className="flex flex-col rounded-2xl border border-line bg-paper p-6 transition-[transform,box-shadow] duration-500 hover:-translate-y-1 hover:shadow-[0_20px_40px_-24px_rgb(8_20_48/.3)]">
             <div className="flex gap-0.5" aria-label={t("Rated {v} out of 5", { v: 5 })}>{Array.from({ length: 5 }).map((_, i) => <Star key={i} className="h-4 w-4 fill-gold text-gold" />)}</div>
             <p className="mt-4 flex-1 text-[0.95rem] leading-relaxed text-ink-soft">“{x.quote}”</p>
             <div className="mt-5 flex items-center gap-3 border-t border-line pt-4">
               <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-brand/10 font-semibold text-brand">{x.name.slice(0, 1)}</span>
-              <span className="min-w-0"><span className="block truncate text-sm font-semibold">{x.name}</span><span className="block truncate text-xs text-muted">{x.event} · {x.city}</span></span>
+              <span className="min-w-0"><span className="block truncate text-sm font-semibold">{x.name}</span><span className="block truncate text-xs text-muted">{x.event}</span></span>
             </div>
           </StaggerItem>
         ))}
@@ -133,10 +136,11 @@ export function Testimonials() {
 
 export function HomeFaq() {
   const { t, lang } = useLang();
-  const faqs = getFaqs(lang).slice(0, 6);
+  const faqs = useSiteSettings().home.faqs.map((f) => (lang === "bn" ? { q: f.qBn || f.q, a: f.aBn || f.a } : { q: f.q, a: f.a }));
   const [open, setOpen] = useState<number | null>(0);
+  if (!faqs.length) return null;
   return (
-    <section className="container-x pt-20 sm:pt-24">
+    <section id="faq" className="container-x scroll-mt-28 pt-20 sm:pt-24">
       <div className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:gap-16">
         <FadeUp>
           <Head eyebrow={t("FAQ")} title={t("Frequently asked questions")} />
@@ -147,7 +151,7 @@ export function HomeFaq() {
           {faqs.map((f, i) => {
             const on = open === i;
             return (
-              <li key={f.q}>
+              <li key={i}>
                 <button className="flex w-full items-center justify-between gap-4 py-5 text-left" aria-expanded={on} onClick={() => setOpen(on ? null : i)}>
                   <span className="font-semibold">{f.q}</span>
                   <Plus className={cn("h-5 w-5 shrink-0 text-brand transition-transform duration-300", on && "rotate-45")} />

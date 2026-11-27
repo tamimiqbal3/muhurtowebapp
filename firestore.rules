@@ -22,6 +22,13 @@ service cloud.firestore {
     match /services/{id}      { allow read: if resource.data.active != false || isAdmin(); allow write: if false; }
     match /vendors/{id}       { allow read: if true; allow write: if false; }
     match /reviews/{id}       { allow read: if resource.data.hidden != true || isAdmin(); allow write: if false; }
+    match /locations/{id}     { allow read: if true; allow write: if false; }
+
+    // Site content & settings (homepage sections, contact details, payment methods…).
+    match /site/{doc} {
+      allow read: if doc == 'settings' || doc == 'meta';
+      allow write: if false;
+    }
 
     // Users can read their own profile; role changes are server-only.
     match /users/{userId} {

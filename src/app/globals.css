@@ -255,3 +255,11 @@
   from { transform: translateX(0); }
   to { transform: translateX(-50%); }
 }
+
+/* Space taken by the floating header; 0 while it is tucked away so sticky bars move up with it. */
+:root { --header-offset: 76px; }
+@media (min-width: 1024px) { :root { --header-offset: 84px; } }
+html[data-header="hidden"] { --header-offset: 0px; }
+
+/* Process steps: one column per step on large screens (step count is admin-editable). */
+@media (min-width: 1024px) { .mh-steps { grid-template-columns: repeat(var(--n), minmax(0, 1fr)); } }

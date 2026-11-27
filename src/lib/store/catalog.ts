@@ -1,12 +1,15 @@
 "use client";
 
 /**
- * Local data store (temporary, until Firebase is connected).
+ * The catalogue store: categories, subcategories, services, vendors, Dhaka locations, reviews and
+ * site settings/content. Every page reads through `useCatalog()` / `getCatalogSnapshot()`.
  *
- * Holds everything the admin can manage — categories, subcategories, services, vendors, Dhaka
- * locations, reviews and site settings/content — in this browser's localStorage, seeded from
- * the files in src/data. Every page reads through `useCatalog()` / `getCatalogSnapshot()`, so
- * replacing `localRepository` with a Firestore-backed repository later needs no page changes.
+ * Two modes, chosen automatically:
+ *  - Firebase ("cloud"): when the server has Firebase access, data comes from Firestore via
+ *    /api/site/catalog and admin edits are saved there (so every visitor sees them). A copy is kept in
+ *    localStorage only so pages paint instantly on the next visit.
+ *  - Local: without Firebase server access, everything lives in this browser's localStorage,
+ *    seeded from the files in src/data.
  */
 import { useSyncExternalStore } from "react";
 import { CATEGORIES } from "@/data/categories";
@@ -55,6 +58,51 @@ export const localRepository: CatalogRepository = {
   },
 };
 
+const CLOUD_KEY = "muhurto.catalog.cloud.v1";
+const MODE_KEY = "muhurto.catalog.mode";
+
+/** Copy of the Firestore catalogue for instant paint (never edited directly). */
+const cloudCache: CatalogRepository = {
+  load() {
+    try {
+      const raw = localStorage.getItem(CLOUD_KEY);
+      return raw ? (JSON.parse(raw) as Partial<CatalogData>) : null;
+    } catch {
+      return null;
+    }
+  },
+  save(data) {
+    try {
+      localStorage.setItem(CLOUD_KEY, JSON.stringify(data));
+    } catch {
+      /* storage full or blocked */
+    }
+  },
+};
+
+/* ─── Firebase sync status ─────────────────────────────────────────── */
+
+export interface CloudStatus {
+  /** "unknown" until the server answers. */
+  mode: "unknown" | "local" | "cloud";
+  /** Firestore has no catalogue yet — the bundled data is shown until the first admin save. */
+  empty: boolean;
+  saving: number;
+  error: string | null;
+  lastSavedAt: string | null;
+}
+let cloud: CloudStatus = { mode: "unknown", empty: false, saving: 0, error: null, lastSavedAt: null };
+const cloudListeners = new Set<() => void>();
+const setCloud = (patch: Partial<CloudStatus>) => {
+  cloud = { ...cloud, ...patch };
+  cloudListeners.forEach((l) => l());
+};
+const UNKNOWN: CloudStatus = { mode: "unknown", empty: false, saving: 0, error: null, lastSavedAt: null };
+export function useCloudStatus(): CloudStatus {
+  return useSyncExternalStore((cb) => { cloudListeners.add(cb); return () => cloudListeners.delete(cb); }, () => cloud, () => UNKNOWN);
+}
+export const isCloudMode = () => cloud.mode === "cloud";
+
 let repo: CatalogRepository = localRepository;
 let state: CatalogData = SEED;
 let loaded = false;
@@ -65,7 +113,7 @@ const listeners = new Set<() => void>();
  * all of its admin edits, but any built-in item still showing a stock (Pexels) photo is moved to the
  * current photo, so replaced or broken images never get stuck. Photos an admin uploaded are untouched.
  */
-const MEDIA_VERSION = 3;
+const MEDIA_VERSION = 4;
 const isStock = (src?: string) => !src || src.includes("images.pexels.com");
 
 function refreshMedia(stored: Partial<CatalogData> & { mediaVersion?: number }) {
@@ -104,9 +152,13 @@ function hydrate(raw: Partial<CatalogData> | null): CatalogData {
 function ensureLoaded() {
   if (loaded || typeof window === "undefined") return;
   loaded = true;
+  let lastMode: string | null = null;
+  try { lastMode = localStorage.getItem(MODE_KEY); } catch { /* ignore */ }
+  if (lastMode === "cloud") repo = cloudCache;
   state = hydrate(repo.load());
+  void syncFromServer();
   window.addEventListener("storage", (e) => {
-    if (e.key !== KEY) return;
+    if (e.key !== (repo === cloudCache ? CLOUD_KEY : KEY)) return;
     state = hydrate(repo.load());
     listeners.forEach((l) => l());
   });
@@ -134,14 +186,72 @@ export function useCatalog(): CatalogData {
   return useSyncExternalStore(subscribe, getCatalogSnapshot, () => SEED);
 }
 
-export function updateCatalog(fn: (d: CatalogData) => CatalogData) {
+/** Loads the live catalogue from Firestore (when the server has Firebase access). */
+export async function syncFromServer(): Promise<void> {
+  if (typeof window === "undefined") return;
+  const admin = window.location.pathname.startsWith("/admin");
+  try {
+    const res = await fetch(admin ? "/api/site/catalog?admin=1" : "/api/site/catalog", { cache: admin ? "no-store" : "default", credentials: "same-origin" });
+    if (!res.ok) throw new Error(String(res.status));
+    const body = (await res.json()) as { configured: boolean; data?: Partial<CatalogData> | null };
+    if (!body.configured) {
+      if (repo === cloudCache) { repo = localRepository; state = hydrate(repo.load()); listeners.forEach((l) => l()); }
+      try { localStorage.setItem(MODE_KEY, "local"); } catch { /* ignore */ }
+      setCloud({ mode: "local" });
+      return;
+    }
+    try { localStorage.setItem(MODE_KEY, "cloud"); } catch { /* ignore */ }
+    repo = cloudCache;
+    // While saves are in flight, keep the optimistic local state; the next sync settles it.
+    if (cloud.saving === 0) {
+      state = body.data ? hydrate({ ...body.data, mediaVersion: MEDIA_VERSION } as Partial<CatalogData>) : SEED;
+      if (body.data) cloudCache.save({ ...state, mediaVersion: MEDIA_VERSION } as CatalogData);
+      listeners.forEach((l) => l());
+    }
+    setCloud({ mode: "cloud", empty: !body.data });
+  } catch {
+    // Offline or server error: keep what we have.
+    if (cloud.mode === "unknown") setCloud({ mode: repo === cloudCache ? "cloud" : "local" });
+  }
+}
+
+/* Saves to Firestore run one after another, in the order they were made. */
+let queue: Promise<unknown> = Promise.resolve();
+function send(body: Record<string, unknown>, onDone?: (res: Record<string, unknown>) => void) {
+  setCloud({ saving: cloud.saving + 1, error: null });
+  queue = queue.then(async () => {
+    try {
+      const res = await fetch("/api/site/admin", { method: "POST", headers: { "Content-Type": "application/json" }, credentials: "same-origin", body: JSON.stringify(body) });
+      const out = (await res.json().catch(() => ({}))) as Record<string, unknown>;
+      if (!res.ok) throw new Error(typeof out.error === "string" ? out.error : "Could not save to Firebase.");
+      onDone?.(out);
+      setCloud({ saving: cloud.saving - 1, lastSavedAt: new Date().toISOString(), empty: false });
+    } catch (e) {
+      setCloud({ saving: cloud.saving - 1, error: (e as Error).message || "Could not save to Firebase." });
+      void syncFromServer(); // show what is really stored
+    }
+    if (cloud.saving === 0) void syncFromServer();
+  });
+}
+
+function applyLocal(fn: (d: CatalogData) => CatalogData) {
   ensureLoaded();
   state = { ...fn(state), updatedAt: new Date().toISOString() };
   repo.save({ ...state, mediaVersion: MEDIA_VERSION } as CatalogData);
   listeners.forEach((l) => l());
 }
 
+export function updateCatalog(fn: (d: CatalogData) => CatalogData) {
+  applyLocal(fn);
+  if (isCloudMode()) send({ op: "replace", data: state });
+}
+
 export function resetCatalog() {
+  if (isCloudMode()) {
+    applyLocal(() => SEED);
+    send({ op: "reset" });
+    return;
+  }
   state = SEED;
   try {
     localStorage.removeItem(KEY);
@@ -151,6 +261,21 @@ export function resetCatalog() {
   listeners.forEach((l) => l());
 }
 
+/** This browser's catalogue from before Firebase was connected (if any), for a one-time import. */
+export function localEditsBeforeFirebase(): CatalogData | null {
+  const d = localRepository.load();
+  return d && Array.isArray(d.services) ? hydrate(d) : null;
+}
+
+/** Copies this browser's pre-Firebase catalogue into Firestore. */
+export function importLocalEdits() {
+  const d = localEditsBeforeFirebase();
+  if (!d || !isCloudMode()) return false;
+  applyLocal(() => d);
+  send({ op: "replace", data: d });
+  return true;
+}
+
 /* ─── Generic CRUD helpers ─────────────────────────────────────────── */
 
 type Collection = "categories" | "services" | "vendors" | "locations" | "reviews";
@@ -158,21 +283,35 @@ type Item<C extends Collection> = CatalogData[C][number];
 const keyOf = (c: Collection, item: unknown) => String(c === "categories" ? (item as { slug: string }).slug : (item as { id: string }).id);
 
 export function upsert<C extends Collection>(c: C, item: Item<C>, previousKey?: string) {
-  updateCatalog((d) => {
+  const write = isCloudMode() ? applyLocal : updateCatalog;
+  write((d) => {
     const list = d[c] as Item<C>[];
     const k = previousKey ?? keyOf(c, item);
     const i = list.findIndex((x) => keyOf(c, x) === k);
     const next = i >= 0 ? list.map((x, j) => (j === i ? item : x)) : [...list, item];
     return { ...d, [c]: next };
   });
+  if (isCloudMode()) {
+    const k = keyOf(c, item);
+    send({ op: "upsert", collection: c, item, previousKey: previousKey && previousKey !== k ? previousKey : undefined }, (res) => {
+      // Uploaded images come back as Storage URLs — swap them in.
+      if (res.item) applyLocal((d) => ({ ...d, [c]: (d[c] as Item<C>[]).map((x) => (keyOf(c, x) === k ? (res.item as Item<C>) : x)) }));
+    });
+  }
 }
 
 export function remove<C extends Collection>(c: C, key: string) {
-  updateCatalog((d) => ({ ...d, [c]: (d[c] as Item<C>[]).filter((x) => keyOf(c, x) !== key) }));
+  const write = isCloudMode() ? applyLocal : updateCatalog;
+  write((d) => ({ ...d, [c]: (d[c] as Item<C>[]).filter((x) => keyOf(c, x) !== key) }));
+  if (isCloudMode()) send({ op: "remove", collection: c, key });
 }
 
 export function saveSettings(settings: SiteSettings) {
-  updateCatalog((d) => ({ ...d, settings: normalizeSettings(settings) }));
+  const write = isCloudMode() ? applyLocal : updateCatalog;
+  write((d) => ({ ...d, settings: normalizeSettings(settings) }));
+  if (isCloudMode()) send({ op: "settings", settings: normalizeSettings(settings) }, (res) => {
+    if (res.settings) applyLocal((d) => ({ ...d, settings: normalizeSettings(res.settings) }));
+  });
 }
 
 /* ─── Selectors ────────────────────────────────────────────────────── */

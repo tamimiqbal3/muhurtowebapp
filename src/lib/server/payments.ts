@@ -6,16 +6,19 @@ import { getPaymentMethod } from "../../data/payments";
 import { ApiError, type SessionUser } from "./auth";
 import { createPendingAssignment, autoAssign } from "./monitoring";
 import { writeEventUpdate, writeNotification } from "./notify";
+import { readSettings } from "./site-store";
 
 export function sslcommerzConfig() {
   const storeId = process.env.SSLCOMMERZ_STORE_ID;
   const storePassword = process.env.SSLCOMMERZ_STORE_PASSWORD;
-  const sandbox = (process.env.SSLCOMMERZ_SANDBOX ?? "true") !== "false";
+  // Without merchant credentials, the public SSLCOMMERZ sandbox test store is used (no real money).
+  const usingTestStore = !(storeId && storePassword);
+  const sandbox = usingTestStore || (process.env.SSLCOMMERZ_SANDBOX ?? "true") !== "false";
   const base = sandbox ? "https://sandbox.sslcommerz.com" : "https://securepay.sslcommerz.com";
   return {
-    configured: Boolean(storeId && storePassword),
-    storeId: storeId ?? "",
-    storePassword: storePassword ?? "",
+    configured: true,
+    storeId: usingTestStore ? "testbox" : storeId!,
+    storePassword: usingTestStore ? "qwerty" : storePassword!,
     sandbox,
     initUrl: `${base}/gwprocess/v4/api.php`,
     validationUrl: `${base}/validator/api/validationserverAPI.php`,
@@ -173,9 +176,14 @@ export async function finalizePayment(valId: string, tranId: string): Promise<Fi
     return { ok: false, bookingId: payment.bookingId, reason };
   }
 
+  const settings = await readSettings();
+  const team = settings.supportTeam;
+  const support = team[Math.floor(Math.random() * team.length)] ?? { name: "MUHURTO Support", email: settings.contact.email, phone: settings.contact.phone };
+
   const outcome = await db.runTransaction(async (tx): Promise<FinalizeOutcome> => {
     const bRef = db.collection(COL.bookings).doc(payment.bookingId);
-    const [p2, bSnap] = await Promise.all([tx.get(pRef), tx.get(bRef)]);
+    const counterRef = db.collection("counters").doc("invoices");
+    const [p2, bSnap, counter] = await Promise.all([tx.get(pRef), tx.get(bRef), tx.get(counterRef)]);
     const current = p2.data() as PaymentRecord;
     if (current.status === "paid") return { ok: true, bookingId: payment.bookingId };
     const booking = bSnap.data() as Booking | undefined;
@@ -191,7 +199,13 @@ export async function finalizePayment(valId: string, tranId: string): Promise<Fi
       writeNotification(db, { userId: "admins", title: "Duplicate payment — refund required", body: `Booking ${booking.code} received a second payment (${tranId}).`, link: "/admin/payments" }, tx);
       return { ok: true, bookingId: booking.id, duplicate: true };
     }
-    tx.update(pRef, { ...gatewayFields, status: "paid", paidAt: now });
+    // Sequential invoice number per year: INV-2026-00001, INV-2026-00002, …
+    const year = new Date(now).getFullYear();
+    const c = counter.data() as { year?: number; next?: number } | undefined;
+    const seq = c?.year === year ? (c.next ?? 1) : 1;
+    tx.set(counterRef, { year, next: seq + 1 });
+    const invoiceNo = `INV-${year}-${String(seq).padStart(5, "0")}`;
+    tx.update(pRef, { ...gatewayFields, status: "paid", paidAt: now, invoiceNo, support: { name: support.name, email: support.email, phone: support.phone }, customerName: booking.contact?.name ?? "" });
     const confirmed: Booking = { ...booking, status: "confirmed", paymentStatus: "paid", paidAt: now, monitoring: { status: "pending_assignment", agentId: null, agentName: null, agentPhone: null }, updatedAt: now };
     tx.update(bRef, { status: confirmed.status, paymentStatus: "paid", paidAt: now, monitoring: confirmed.monitoring, updatedAt: now });
     createPendingAssignment(tx, confirmed);

@@ -58,6 +58,11 @@ export function Navbar() {
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  // Let sticky bars elsewhere (e.g. category section tabs) slide up with the header.
+  useEffect(() => {
+    document.documentElement.dataset.header = hidden && !open ? "hidden" : "shown";
+  }, [hidden, open]);
   useEffect(() => { setOpen(false); setMenu(false); }, [pathname]);
   useEffect(() => {
     document.documentElement.style.overflow = open ? "hidden" : "";

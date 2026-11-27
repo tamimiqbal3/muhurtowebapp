@@ -1,22 +1,15 @@
 import type { Metadata } from "next";
 import { Hero } from "@/components/home/Hero";
-import { ClosingInvite, PlannerTeaser, Polaroids } from "@/components/home/Cinematic";
-import { FeaturedServices, HomeFaq, InspirationGallery, Testimonials, ValueTicker } from "@/components/home/HomeSections";
+import { HomeBody } from "@/components/home/HomeBody";
 
 export const metadata: Metadata = { alternates: { canonical: "/" } };
 
+/** The hero, then every section in the order chosen in Admin → Homepage sections. */
 export default function HomePage() {
   return (
     <>
       <Hero />
-      <ValueTicker />
-      <FeaturedServices />
-      <Polaroids />
-      <PlannerTeaser />
-      <InspirationGallery />
-      <Testimonials />
-      <HomeFaq />
-      <ClosingInvite />
+      <HomeBody />
     </>
   );
 }

@@ -1,7 +1,13 @@
 import type { NextConfig } from "next";
+import { readdirSync } from "node:fs";
+
+// Payment logo files actually present in /public/payments, so the site never requests files that don't exist.
+let paymentFiles = "";
+try { paymentFiles = readdirSync("./public/payments").filter((f) => /\.(svg|png|webp)$/i.test(f)).join(","); } catch { /* none */ }
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  env: { NEXT_PUBLIC_PAYMENT_FILES: paymentFiles },
   poweredByHeader: false,
   images: {
     // Pexels resizes on its own CDN, so we use a custom loader that requests

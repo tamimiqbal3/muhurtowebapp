@@ -29,8 +29,13 @@ export interface PaymentMethod {
   brandColor: string;
 }
 
-const local = (id: string) => [`/payments/${id}.svg`, `/payments/${id}.png`];
+const PRESENT = new Set((process.env.NEXT_PUBLIC_PAYMENT_FILES ?? "").split(",").filter(Boolean));
+/** Only files that really exist in /public/payments (checked at build time). */
+const local = (id: string) => [`${id}.svg`, `${id}.png`, `${id}.webp`].filter((f) => PRESENT.has(f)).map((f) => `/payments/${f}`);
 const commons = (file: string) => `https://commons.wikimedia.org/wiki/Special:FilePath/${file}`;
+
+/** Remote (non-local) logo sources for a method — fetched once by /api/logo and served from our own domain. */
+export const remoteLogos = (m: PaymentMethod) => m.logo.filter((u) => /^https:\/\//.test(u));
 
 export const PAYMENT_METHODS: PaymentMethod[] = [
   // Mobile banking (MFS)
