@@ -36,13 +36,7 @@ function CloudBar() {
     setLocal(Boolean(d && d.updatedAt && JSON.stringify(d.services.map((x) => x.id)) + d.updatedAt !== JSON.stringify(getCatalogSnapshot().services.map((x) => x.id)) + getCatalogSnapshot().updatedAt));
   }, [c.mode]);
   if (c.mode === "unknown") return null;
-  if (c.mode === "local") {
-    return (
-      <p className="mb-4 rounded-xl border border-warning/30 bg-warning/10 px-3 py-2 text-xs text-ink">
-        <strong>Local mode:</strong> changes are saved in this browser only. Add the Firebase service-account variables on Vercel (see the setup guide) to save changes to Firebase for every visitor.
-      </p>
-    );
-  }
+  if (c.mode === "local") return <SetupHelp />;
   return (
     <div className="mb-4 space-y-2">
       <p className={cn("flex flex-wrap items-center gap-2 rounded-xl border px-3 py-2 text-xs", c.error ? "border-danger/30 bg-danger/10" : "border-success/30 bg-success/10")}>
@@ -57,6 +51,33 @@ function CloudBar() {
           <button className="rounded-full bg-brand px-3 py-1.5 font-semibold text-paper" onClick={() => { if (confirm("Replace the live Firebase catalogue with this browser's earlier edits?")) { importLocalEdits(); setLocal(false); } }}>Copy them to Firebase</button>
         </p>
       )}
+    </div>
+  );
+}
+
+type Health = { configured: boolean; environment: string; found: Record<string, boolean>; problems: string[]; firestore: { ok: boolean; message?: string } };
+
+/** Pinpoints why the server can't reach Firebase, with the exact fix. */
+function SetupHelp() {
+  const [h, setH] = useState<Health | null>(null);
+  useEffect(() => { fetch("/api/site/health", { cache: "no-store" }).then((r) => r.json()).then(setH).catch(() => undefined); }, []);
+  const reasons = h ? [...h.problems, ...(h.configured && !h.firestore.ok && h.firestore.message ? [h.firestore.message] : [])] : [];
+  return (
+    <div className="mb-4 rounded-xl border border-warning/40 bg-warning/10 p-4 text-xs text-ink">
+      <p><strong>Not connected to Firebase yet</strong> — changes are saved in this browser only.</p>
+      {reasons.length > 0 && (
+        <ul className="mt-2 list-disc space-y-1 pl-5 font-medium">{reasons.map((r) => <li key={r}>{r}</li>)}</ul>
+      )}
+      {h && (
+        <p className="mt-2 text-ink-soft">
+          Server sees ({h.environment}): {Object.entries(h.found).map(([k, v]) => `${k} ${v ? "✓" : "—"}`).join(" · ")}
+        </p>
+      )}
+      <ol className="mt-3 list-decimal space-y-1 pl-5 text-ink-soft">
+        <li>Firebase console → Project settings → <strong>Service accounts</strong> → <strong>Generate new private key</strong> (downloads a .json file).</li>
+        <li>Vercel → your project → Settings → <strong>Environment Variables</strong> → add <code>FIREBASE_SERVICE_ACCOUNT</code> and paste the <em>entire</em> contents of that .json file as the value. Tick <strong>Production</strong> (and Preview).</li>
+        <li>Vercel → Deployments → ⋯ on the latest → <strong>Redeploy</strong> (variables only apply to new deployments).</li>
+      </ol>
     </div>
   );
 }

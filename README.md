@@ -65,7 +65,7 @@ See `.env.example`. Add the same values in **Vercel → Project → Settings →
 1. **Authentication → Sign-in method** → enable *Email/Password* (and *Google* if wanted). Under *Settings → Authorized domains* add `muhurtowebapp.vercel.app` (and any custom domain).
 2. **Firestore Database** → *Create database* → production mode → region `asia-south1` (Mumbai, closest to Dhaka).
 3. **Storage** → *Get started* (default bucket `muhurto-app.firebasestorage.app`).
-4. **Project settings → Service accounts → Generate new private key** (downloads a JSON file — keep it private, never commit it). In **Vercel → Settings → Environment Variables** add:
+4. **Project settings → Service accounts → Generate new private key** (downloads a JSON file — keep it private, never commit it). In **Vercel → Settings → Environment Variables** add **`FIREBASE_SERVICE_ACCOUNT`** with the *entire* file contents as the value (Production), then redeploy. Alternatively add the three separate variables:
    - `FIREBASE_PROJECT_ID` = `muhurto-app`
    - `FIREBASE_CLIENT_EMAIL` = `client_email` from the JSON
    - `FIREBASE_PRIVATE_KEY` = `private_key` from the JSON (the whole value, including `-----BEGIN PRIVATE KEY-----` and the `\n` sequences)
