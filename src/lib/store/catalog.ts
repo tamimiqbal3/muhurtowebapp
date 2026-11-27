@@ -60,8 +60,36 @@ let state: CatalogData = SEED;
 let loaded = false;
 const listeners = new Set<() => void>();
 
-function hydrate(stored: Partial<CatalogData> | null): CatalogData {
-  if (!stored) return SEED;
+/**
+ * Bumped whenever the built-in photos change. A catalogue saved in this browser before the bump keeps
+ * all of its admin edits, but any built-in item still showing a stock (Pexels) photo is moved to the
+ * current photo, so replaced or broken images never get stuck. Photos an admin uploaded are untouched.
+ */
+const MEDIA_VERSION = 3;
+const isStock = (src?: string) => !src || src.includes("images.pexels.com");
+
+function refreshMedia(stored: Partial<CatalogData> & { mediaVersion?: number }) {
+  if (stored.mediaVersion === MEDIA_VERSION) return stored;
+  const cats = new Map(SEED.categories.map((c) => [c.slug, c]));
+  const svcs = new Map(SEED.services.map((x) => [x.id, x]));
+  return {
+    ...stored,
+    categories: stored.categories?.map((c) => {
+      const seed = cats.get(c.slug);
+      if (!seed) return c;
+      return { ...c, hero: isStock(c.hero?.src) ? seed.hero : c.hero, card: isStock(c.card?.src) ? seed.card : c.card };
+    }),
+    services: stored.services?.map((x) => {
+      const seed = svcs.get(x.id);
+      if (!seed) return x;
+      return x.images?.every((i) => isStock(i.src)) ? { ...x, images: seed.images } : x;
+    }),
+  };
+}
+
+function hydrate(raw: Partial<CatalogData> | null): CatalogData {
+  if (!raw) return SEED;
+  const stored = refreshMedia(raw);
   return {
     categories: Array.isArray(stored.categories) ? stored.categories : SEED.categories,
     services: Array.isArray(stored.services) ? stored.services : SEED.services,
@@ -109,7 +137,7 @@ export function useCatalog(): CatalogData {
 export function updateCatalog(fn: (d: CatalogData) => CatalogData) {
   ensureLoaded();
   state = { ...fn(state), updatedAt: new Date().toISOString() };
-  repo.save(state);
+  repo.save({ ...state, mediaVersion: MEDIA_VERSION } as CatalogData);
   listeners.forEach((l) => l());
 }
 

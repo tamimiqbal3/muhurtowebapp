@@ -2,20 +2,30 @@
 
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
+import { IMG } from "@/data/images";
 
 /**
- * The homepage film: six HD décor and venue clips (Pexels, free licence), cut together like an edited
+ * The homepage film: six sharp (1080p–1440p) banquet, chandelier and reception-stage clips with no religious themes (Pexels, free licence), cut together like an edited
  * showreel. Two <video> layers alternate — while one plays, the next clip loads behind it, then the
- * layers cross-dissolve. Falls back to the poster frames if video cannot play (data saver, old browsers).
+ * layers cross-dissolve. Falls back to still photos if video cannot play (data saver, old browsers).
  */
-export const FILM: Array<{ src: string; poster: string; start?: number }> = [
-  { src: "https://videos.pexels.com/video-files/29277601/12628076_1920_1080_30fps.mp4", poster: "https://images.pexels.com/videos/29277601/african-wedding-best-wedding-black-wedding-budget-wedding-29277601.jpeg?auto=compress&cs=srgb&w=1920" },
-  { src: "https://videos.pexels.com/video-files/36546022/15496443_1920_1080_50fps.mp4", poster: "https://images.pexels.com/videos/36546022/abstract-light-aesthetic-interior-artistic-decoration-decoration-36546022.jpeg?auto=compress&cs=srgb&w=1920" },
-  { src: "https://videos.pexels.com/video-files/4317216/4317216-hd_1920_1080_25fps.mp4", poster: "https://images.pexels.com/videos/4317216/pexels-photo-4317216.jpeg?auto=compress&cs=srgb&w=1920", start: 2 },
-  { src: "https://videos.pexels.com/video-files/29277600/12628078_1920_1080_30fps.mp4", poster: "https://images.pexels.com/videos/29277600/african-wedding-best-wedding-black-wedding-budget-wedding-29277600.jpeg?auto=compress&cs=srgb&w=1920" },
-  { src: "https://videos.pexels.com/video-files/4286568/4286568-hd_1920_1080_25fps.mp4", poster: "https://images.pexels.com/videos/4286568/pexels-photo-4286568.jpeg?auto=compress&cs=srgb&w=1920", start: 3 },
-  { src: "https://videos.pexels.com/video-files/4317192/4317192-hd_1920_1080_25fps.mp4", poster: "https://images.pexels.com/videos/4317192/pexels-photo-4317192.jpeg?auto=compress&cs=srgb&w=1920", start: 2 },
+export const FILM: Array<{ src: string; start?: number }> = [
+  // Sparkling chandelier venue (2730×1440)
+  { src: "https://videos.pexels.com/video-files/34223158/14504315_2730_1440_30fps.mp4" },
+  // Indoor reception hall with floral décor and seating (2560×1440)
+  { src: "https://videos.pexels.com/video-files/31702886/13507850_2560_1440_24fps.mp4", start: 1 },
+  // White banquet hall with chandeliers (2560×1440)
+  { src: "https://videos.pexels.com/video-files/35851898/15203443_2560_1440_30fps.mp4" },
+  // Banquet hall with chandeliers and flower arrangements (1080p60)
+  { src: "https://videos.pexels.com/video-files/31501463/13430943_1920_1080_60fps.mp4", start: 1 },
+  // Ornate reception stage with florals and seating (1080p)
+  { src: "https://videos.pexels.com/video-files/32500797/13858467_1920_1080_30fps.mp4", start: 4 },
+  // Crystal chandeliers over a mirrored ballroom ceiling (1080p50)
+  { src: "https://videos.pexels.com/video-files/34958626/14808580_1920_1080_50fps.mp4", start: 1 },
 ];
+
+/** Shown if video can't play (Data Saver, Low Power Mode): verified stills of the same kind of venues. */
+const STILLS = [IMG.wLightChandelier, IMG.wStageWarm, IMG.dBanquetChandelier, IMG.wLightCeiling, IMG.wSofaWhite, IMG.wVenueFloral];
 
 const CUT = 5200; // ms each shot stays on screen
 const FADE = 1400; // ms cross-dissolve
@@ -37,7 +47,6 @@ export function HeroFilm({ className }: { className?: string }) {
     if (v.dataset.src !== clip.src) {
       v.dataset.src = clip.src;
       v.src = clip.src;
-      v.poster = clip.poster;
       v.load();
     }
     const seek = () => { try { v.currentTime = clip.start ?? 0; } catch { /* not seekable yet */ } };
@@ -52,10 +61,16 @@ export function HeroFilm({ className }: { className?: string }) {
     load(1, 1);
     refs[0].current?.play().catch(() => setFailed(true));
     let layer = 0;
+    let waited = 0;
     const id = setInterval(() => {
       const next = 1 - layer;
       const nv = refs[next].current;
-      nv?.play().catch(() => undefined);
+      // Avoid cutting to a clip that hasn't buffered — hold the current shot one beat longer instead.
+      // (Some mobile browsers won't buffer a paused video, so after one wait we cut anyway.)
+      if (!nv) return;
+      if (nv.readyState < 3 && waited < 1) { waited++; return; }
+      waited = 0;
+      nv.play().catch(() => undefined);
       layer = next;
       shotRef.current = (shotRef.current + 1) % FILM.length;
       setShot(shotRef.current);
@@ -71,12 +86,19 @@ export function HeroFilm({ className }: { className?: string }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Still-image fallback keeps its own gentle rhythm.
+  useEffect(() => {
+    if (!failed) return;
+    const id = setInterval(() => setShot((n) => n + 1), CUT);
+    return () => clearInterval(id);
+  }, [failed]);
+
   if (failed) {
     return (
       <div className={cn("absolute inset-0", className)}>
-        {FILM.map((c, i) => (
+        {STILLS.map((c, i) => (
           // eslint-disable-next-line @next/next/no-img-element
-          <img key={c.src} src={c.poster} alt="" className={cn("absolute inset-0 h-full w-full object-cover transition-opacity duration-[1400ms]", i === shot ? "opacity-100" : "opacity-0")} />
+          <img key={c.src} src={`${c.src}?auto=compress&cs=srgb&w=2400`} alt="" className={cn("absolute inset-0 h-full w-full object-cover transition-opacity duration-[1400ms]", i === shot % STILLS.length ? "opacity-100" : "opacity-0")} />
         ))}
       </div>
     );
@@ -93,7 +115,7 @@ export function HeroFilm({ className }: { className?: string }) {
           loop
           preload="auto"
           onError={() => layer === 0 && setFailed(true)}
-          className={cn("absolute inset-0 h-full w-full scale-[1.02] object-cover transition-opacity ease-in-out [transition-duration:1400ms]", front === layer ? "opacity-100" : "opacity-0")}
+          className={cn("absolute inset-0 h-full w-full object-cover transition-opacity ease-in-out [transition-duration:1400ms]", front === layer ? "opacity-100" : "opacity-0")}
         />
       ))}
     </div>

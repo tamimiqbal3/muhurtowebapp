@@ -115,7 +115,12 @@ export const IMG = {
   bBaby: px(18429385, "Mother holding her baby at a birthday celebration"),
 
   // ── Corporate ──
-  cStage: px(691485, "Conference room with rows of chairs and a projector screen"),
+  cStage: px(29708256, "Speaker on a conference stage with a large digital screen"),
+  cAudienceStage: px(9275222, "Audience facing a lit conference stage"),
+  cPodiumHall: px(37012314, "Conference hall with a podium and rows of chairs"),
+  cAwardHall: px(35064539, "Full auditorium facing a large event stage"),
+  cAuditoriumModern: px(36900082, "Modern auditorium with black seats and a stage"),
+  cHallModern: px(36900079, "Modern conference hall with seating and a stage"),
   cAudience: px(9275222, "Audience watching a presentation with stage lights"),
   cRoomBlack: px(16859956, "Conference room with neatly arranged black chairs"),
   cProjection: px(9300726, "Modern conference room with a projection screen"),

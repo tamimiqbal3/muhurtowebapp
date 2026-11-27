@@ -29,7 +29,7 @@ export const GALLERY = [
   { ...IMG.wRedGold, label: "Reception stage", span: "tall" },
   { ...IMG.fuSpicy, label: "Live fuchka", span: "" },
   { ...IMG.wStageVibrant, label: "Mehendi décor", span: "" },
-  { ...IMG.eStageBlue, label: "Conference stage", span: "wide" },
+  { ...IMG.cAudienceStage, label: "Conference stage", span: "wide" },
   { ...IMG.dTableCandles, label: "Candlelit dinner", span: "" },
   { ...IMG.dPinkParty, label: "Birthday setup", span: "tall" },
   { ...IMG.dFairyCorridor, label: "Evening lights", span: "" },
