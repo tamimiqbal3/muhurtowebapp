@@ -227,7 +227,8 @@ export async function syncFromServer(version?: number): Promise<void> {
   if (admin) qs.set("admin", "1");
   if (version) qs.set("v", String(version));
   try {
-    const res = await fetch(`/api/site/catalog${qs.size ? `?${qs}` : ""}`, { cache: admin ? "no-store" : "default", credentials: "same-origin" });
+    const q = qs.toString();
+    const res = await fetch(`/api/site/catalog${q ? `?${q}` : ""}`, { cache: admin ? "no-store" : "default", credentials: "same-origin" });
     if (!res.ok) throw new Error(String(res.status));
     const body = (await res.json()) as { configured: boolean; version?: number; data?: Partial<CatalogData> | null };
     if (!body.configured) {
