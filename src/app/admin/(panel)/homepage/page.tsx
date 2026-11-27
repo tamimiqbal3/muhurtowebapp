@@ -149,14 +149,6 @@ export default function AdminHomepage() {
         />
 
         <ListEditor
-          title="Promise strip" help="The short phrases that scroll under the hero."
-          items={h.ticker} summary={(x) => x.en}
-          blank={() => ({ id: uid("k"), en: "", bn: "" })}
-          onChange={(ticker) => update({ ticker })}
-          fields={[{ key: "en", label: "Text (English)" }, { key: "bn", label: "Text (Bangla)" }]}
-        />
-
-        <ListEditor
           title="Inspiration gallery" help="Photos of real setups. Upload a photo or paste an image link."
           items={h.gallery} summary={(x) => x.label}
           blank={() => ({ id: uid("g"), src: "", label: "", labelBn: "" })}

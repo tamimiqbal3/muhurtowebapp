@@ -49,7 +49,7 @@ function CloudBar() {
         <span className={cn("h-2 w-2 rounded-full", c.error ? "bg-danger" : c.saving ? "animate-pulse bg-warning" : "bg-success")} />
         {c.error ? <span><strong>Not saved:</strong> {c.error}</span>
           : c.saving ? <span>Saving to Firebase…</span>
-          : <span><strong>Connected to Firebase.</strong> Changes go live for every visitor within a few seconds.{c.empty && " The live site still shows the original catalogue until your first save."}</span>}
+          : <span><strong>Connected to Firebase{c.live ? " · live sync on" : ""}.</strong> {c.live ? "Every change appears instantly on all devices." : "Changes go live for every visitor within a few seconds."}{c.empty && " The live site shows the original catalogue until your first save."}</span>}
       </p>
       {local && (
         <p className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-brand/30 bg-brand/5 px-3 py-2 text-xs">

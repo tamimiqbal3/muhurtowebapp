@@ -4,7 +4,7 @@ import Link from "next/link";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import { PageHero } from "../layout/PageHero";
 import { ButtonLink } from "../ui/Button";
-import { JamdaniRule, SectionHeading } from "../ui/misc";
+import { SectionHeading } from "../ui/misc";
 import { ServiceGrid } from "./ServiceGrid";
 import { CompositionShowcase } from "./CompositionShowcase";
 import { SafeImage } from "../ui/SafeImage";
@@ -87,9 +87,8 @@ export function CategoryLanding({ slug }: { slug: string }) {
         const items = list.filter((s) => s.subcategorySlug === sub.slug);
         return (
           <section key={sub.slug} id={sub.slug} className="container-x scroll-mt-36 pt-16">
-            <JamdaniRule className="mb-8 opacity-70" />
             <div className="mb-8 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-              <SectionHeading eyebrow={category.name} title={sub.name} description={sub.description} />
+              <SectionHeading title={sub.name} description={sub.description} />
               <ButtonLink href={`/services/${slug}?sub=${sub.slug}`} variant="outline" size="sm">{t("View all {sub}", { sub: sub.name })}</ButtonLink>
             </div>
             {sub.slug === "photography-videography" && items.length > 0 && (

@@ -6,7 +6,7 @@ import { CategoryLanding } from "@/components/services/CategoryLanding";
 export async function generateMetadata(): Promise<Metadata> {
   const { t } = await getT();
   const title = t("Wedding");
-  const description = t("Bangladeshi wedding décor, holud stages, photography, lighting and sound.");
+  const description = t("Bangladeshi wedding decor, holud stages, photography, lighting and sound.");
   return { title, description, alternates: { canonical: "/wedding" }, openGraph: { title: `${title} · ${t("MUHURTO")}`, description } };
 }
 

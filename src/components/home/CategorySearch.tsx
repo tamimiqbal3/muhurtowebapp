@@ -106,7 +106,7 @@ export function CategorySearch({ className, initialCategory = "", initialQuery =
               if (e.key === "ArrowUp") { e.preventDefault(); setActive((a) => Math.max(-1, a - 1)); }
               if (e.key === "Escape") setFocused(false);
             }}
-            placeholder={category ? t("Search {cat} services…", { cat: cats.find((c) => c.slug === category)?.name ?? "" }) : t("Search décor, kacchi, photographers, fuchka…")}
+            placeholder={category ? t("Search {cat} services…", { cat: cats.find((c) => c.slug === category)?.name ?? "" }) : t("Search decor, kacchi, photographers, fuchka…")}
             className="h-12 min-w-0 flex-1 bg-transparent text-[0.95rem] outline-none placeholder:text-muted/80"
             aria-label={t("Search services")}
             role="combobox"

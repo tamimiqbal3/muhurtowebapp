@@ -4,7 +4,7 @@ import { IMG } from "./images";
 
 // DEMO DATA — illustrative testimonials and reviews, clearly labelled in the UI.
 export const TESTIMONIALS = [
-  { name: "Nusrat & Tanvir", city: "Dhaka", event: "Wedding · 450 guests", quote: "We booked décor, kacchi and photography in one place, and our coordinator handled every vendor call on the day. Our families actually got to enjoy the holud." },
+  { name: "Nusrat & Tanvir", city: "Dhaka", event: "Wedding · 450 guests", quote: "We booked decor, kacchi and photography in one place, and our coordinator handled every vendor call on the day. Our families actually got to enjoy the holud." },
   { name: "Farhana Akter", city: "Uttara", event: "First birthday", quote: "The balloon setup and photo booth were exactly what we picked online. Seeing the vendor progress on the dashboard made the week before so much calmer." },
   { name: "Rezaul Karim", city: "Gulshan", event: "Corporate seminar · 220 people", quote: "Transparent pricing with the 2% fee shown upfront. Sound, seating and the cha station all arrived on time — our agent sent updates every hour." },
   { name: "Sharmin Sultana", city: "Bashundhara R/A", event: "Parents' 40th anniversary", quote: "The Rabindra Sangeet evening and the family film made my mother cry happy tears. Everything felt personal, not packaged." },
@@ -28,7 +28,7 @@ export const REVIEWS: Review[] = [
 export const GALLERY = [
   { ...IMG.wRedGold, label: "Reception stage", span: "tall" },
   { ...IMG.fuSpicy, label: "Live fuchka", span: "" },
-  { ...IMG.wStageVibrant, label: "Mehendi décor", span: "" },
+  { ...IMG.wStageVibrant, label: "Mehendi decor", span: "" },
   { ...IMG.cAudienceStage, label: "Conference stage", span: "wide" },
   { ...IMG.dTableCandles, label: "Candlelit dinner", span: "" },
   { ...IMG.dPinkParty, label: "Birthday setup", span: "tall" },
@@ -38,7 +38,7 @@ export const GALLERY = [
 ] as const;
 
 export const FAQS = [
-  { q: "How does MUHURTO pricing work?", a: "Food and seating are priced per person. Décor, lighting, photography, photo booths and sound show a price for every 50 guests. Your total is the sum of the services you choose, plus a 2% platform fee shown before you pay." },
+  { q: "How does MUHURTO pricing work?", a: "Food and seating are priced per person. Decor, lighting, photography, photo booths and sound show a price for every 50 guests. Your total is the sum of the services you choose, plus a 2% platform fee shown before you pay." },
   { q: "Which areas do you serve?", a: "MUHURTO is based in Dhaka and works only within Dhaka. All our partners, venues and service providers are in Dhaka, and you can choose your event area from the list when booking." },
   { q: "Which payment methods are supported?", a: "All SSLCOMMERZ methods: bKash, Nagad, Rocket, Upay and other mobile wallets, Visa, Mastercard, American Express and UnionPay cards, and internet banking from major banks. You receive an invoice as soon as the payment is confirmed." },
   { q: "How does the Event Planner work?", a: "The Event Planner is a planning assistant. Tell it the occasion, number of guests, budget, date and area, choose the services you need, and it builds a priced plan from our catalogue that you can book in one step." },
@@ -49,7 +49,7 @@ export const FAQS = [
 ];
 
 export const STEPS = [
-  { n: "01", title: "Explore Services", body: "Browse verified Dhaka partners for décor, food, photography and sound, with clear published prices." },
+  { n: "01", title: "Explore Services", body: "Browse verified Dhaka partners for decor, food, photography and sound, with clear published prices." },
   { n: "02", title: "Plan Your Event", body: "Talk to our planning assistant or choose services yourself, with options and add-ons." },
   { n: "03", title: "Confirm & Pay", body: "Pay securely through SSLCOMMERZ by mobile banking, card or internet banking, and receive your invoice." },
   { n: "04", title: "Enjoy Your Moment", body: "A dedicated coordinator manages every vendor while you follow progress from your dashboard." },
@@ -83,7 +83,7 @@ const STEPS_BN = [
 ];
 
 export const GALLERY_LABEL_BN: Record<string, string> = {
-  "Reception stage": "রিসেপশন মঞ্চ", "Mehendi décor": "মেহেদির সাজসজ্জা", "Conference stage": "কনফারেন্স মঞ্চ", "Birthday setup": "জন্মদিনের সাজ", "Evening lights": "সন্ধ্যার আলো", "Live fuchka": "লাইভ ফুচকা", "Mehendi details": "মেহেদির কারুকাজ", "Conference keynote": "কনফারেন্সের কিনোট",
+  "Reception stage": "রিসেপশন মঞ্চ", "Mehendi decor": "মেহেদির সাজসজ্জা", "Conference stage": "কনফারেন্স মঞ্চ", "Birthday setup": "জন্মদিনের সাজ", "Evening lights": "সন্ধ্যার আলো", "Live fuchka": "লাইভ ফুচকা", "Mehendi details": "মেহেদির কারুকাজ", "Conference keynote": "কনফারেন্সের কিনোট",
   "Candlelit dinner": "মোমবাতির আলোয় ডিনার", "Birthday sparkle": "জন্মদিনের ঝলক", "Family evening": "পারিবারিক সন্ধ্যা", "Banquet hall": "ব্যাংকুয়েট হল", "Wedding buffet": "বিবাহের বুফে",
 };
 

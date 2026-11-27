@@ -5,9 +5,8 @@ import { requirePageUser } from "@/lib/server/auth";
 import { loadBookingOr404 } from "@/lib/server/page-data";
 import { sslcommerzConfig } from "@/lib/server/payments";
 import { PageHero } from "@/components/layout/PageHero";
-import { DemoCheckout } from "@/components/booking/DemoCheckout";
+import { FirebaseSetupNotice } from "@/components/ui/SetupNotice";
 import { LiveCheckout } from "@/components/booking/LiveCheckout";
-import { DemoGate } from "@/components/auth/DemoGate";
 import { getT } from "@/lib/i18n/server";
 
 export const metadata: Metadata = { title: "Checkout", robots: { index: false } };
@@ -20,12 +19,7 @@ export default async function CheckoutPage({ searchParams }: { searchParams: Pro
     <PageHero crumbs={[{ label: t("Home"), href: "/" }, { label: t("My bookings"), href: "/my-bookings" }, { label: t("Checkout") }]} eyebrow={code ? t("Step 2 of 2 · Booking {code}", { code }) : t("Step 2 of 2")} title={t("Confirm & pay")} description={t("Review the final breakdown, choose mobile banking, a card or internet banking, and pay securely through SSLCOMMERZ.")} />
   );
   if (!isAdminConfigured()) {
-    return (
-      <>
-        {hero()}
-        <div className="container-x pt-10"><DemoGate><DemoCheckout id={id ?? ""} /></DemoGate></div>
-      </>
-    );
+    return <FirebaseSetupNotice feature="Payments" />;
   }
   const user = await requirePageUser(`/checkout?booking=${id ?? ""}`);
   const booking = await loadBookingOr404(id, user);

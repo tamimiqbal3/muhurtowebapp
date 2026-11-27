@@ -34,7 +34,7 @@ Nothing pretends to work: missing credentials produce an explicit notice, never 
 
 The site is connected to the Firebase project **muhurto-app** (web config built into `src/lib/config.ts`; Analytics included). It switches mode automatically:
 
-- **Firebase mode** — when the server has the service-account variables (`FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY`). The catalogue, homepage sections and site settings live in Firestore (`categories`, `services`, `vendors`, `locations`, `reviews`, `site/settings`); admin edits are saved there and appear for every visitor within seconds; admin photo uploads go to Firebase Storage; customers sign in with Firebase Auth; bookings, payments (with invoice numbers) and invoices are stored in Firestore. The admin panel shows “Connected to Firebase”.
+- **Firebase mode** — when the server has the service-account variables (`FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY`). The catalogue, homepage sections and site settings live in Firestore (`categories`, `services`, `vendors`, `locations`, `reviews`, `site/settings`); admin edits are saved there and appear for every visitor within seconds; admin photo uploads go to Firebase Storage; customers sign in with real Firebase Authentication (Google Sign-In and email/password — no demo accounts); every browser keeps live Firestore listeners open, so admin changes appear on all devices instantly; bookings, payments (with invoice numbers) and invoices are stored in Firestore. The admin panel shows “Connected to Firebase”.
 - **Local mode** — without those variables everything is kept in the browser's local storage (`src/lib/store/catalog.ts`, `src/lib/demo/store.ts`), as before. The admin panel shows “Local mode”.
 
 On the first admin save in Firebase mode, Firestore is seeded with the full built-in catalogue automatically. Edits made earlier in local mode can be copied up once with **“Copy them to Firebase”** in the admin panel.
@@ -163,7 +163,7 @@ English is the default. The toggle in the navbar (and the mobile menu) sets the 
 
 ## Animations & loading
 
-The loading screen plays once, when a visitor first enters the site. Page transitions, smooth-scroll hijacking and route loaders were removed. The homepage hero is a full-width sequence of décor and venue photographs (no people) that cross-dissolve with one slow, steady push-in per shot; its speed is set in Admin → Website content.
+The loading screen plays once, when a visitor first enters the site. Page transitions, smooth-scroll hijacking and route loaders were removed. The homepage hero is a full-width sequence of decor and venue photographs (no people) that cross-dissolve with one slow, steady push-in per shot; its speed is set in Admin → Website content.
 
 ## Project structure
 

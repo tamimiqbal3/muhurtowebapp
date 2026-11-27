@@ -14,7 +14,6 @@ export interface CustomSection { id: string; eyebrow: string; eyebrowBn: string;
 
 /** Built-in sections (the hero is always first). Custom sections use the id `custom:<id>`. */
 export const BUILT_IN_SECTIONS = {
-  ticker: "Promise strip (scrolling)",
   featured: "Featured services",
   process: "Your event, your process",
   planner: "Plan it in a conversation",
@@ -39,7 +38,7 @@ export const DEFAULT_HOME: HomeContent = {
   sections: (Object.keys(BUILT_IN_SECTIONS) as BuiltInSection[]).map((id) => ({ id, visible: true })),
   process: [
     { id: "p1", title: "Choose your occasion", titleBn: "অনুষ্ঠান বেছে নিন", body: "Pick Wedding, Birthday, Corporate, Family Events or Food & Culinary to see every service for that occasion.", bodyBn: "বিয়ে, জন্মদিন, কর্পোরেট, পারিবারিক অনুষ্ঠান বা খাবার — বেছে নিন এবং সেই অনুষ্ঠানের সব সেবা দেখুন।", cta: "See occasions", ctaBn: "অনুষ্ঠানগুলো দেখুন", href: "/#occasions" },
-    { id: "p2", title: "Pick services — or ask Ayojon", titleBn: "সেবা বাছুন — অথবা আয়োজনকে বলুন", body: "Browse décor, lighting, sound, photography and food with published prices, or tell Ayojon your guests, budget and area and get a ready plan.", bodyBn: "প্রকাশিত মূল্যসহ সাজসজ্জা, আলো, সাউন্ড, ছবি ও খাবার দেখুন, অথবা আয়োজনকে অতিথি, বাজেট ও এলাকা জানিয়ে তৈরি পরিকল্পনা নিন।", cta: "Ask Ayojon", ctaBn: "আয়োজনকে জিজ্ঞেস করুন", href: "/event-planner" },
+    { id: "p2", title: "Pick services — or ask Ayojon", titleBn: "সেবা বাছুন — অথবা আয়োজনকে বলুন", body: "Browse decor, lighting, sound, photography and food with published prices, or tell Ayojon your guests, budget and area and get a ready plan.", bodyBn: "প্রকাশিত মূল্যসহ সাজসজ্জা, আলো, সাউন্ড, ছবি ও খাবার দেখুন, অথবা আয়োজনকে অতিথি, বাজেট ও এলাকা জানিয়ে তৈরি পরিকল্পনা নিন।", cta: "Ask Ayojon", ctaBn: "আয়োজনকে জিজ্ঞেস করুন", href: "/event-planner" },
     { id: "p3", title: "Review your event plan", titleBn: "পরিকল্পনা যাচাই করুন", body: "Everything you add goes into your plan. Set guests and options — food is per person, other services per 50 guests — and the total updates instantly.", bodyBn: "যা যোগ করবেন সব পরিকল্পনায় জমা হয়। অতিথি ও অপশন ঠিক করুন — খাবার জনপ্রতি, অন্যান্য সেবা প্রতি ৫০ অতিথি — মোট মূল্য সঙ্গে সঙ্গে হালনাগাদ হয়।", cta: "Browse services", ctaBn: "সেবা দেখুন", href: "/search" },
     { id: "p4", title: "Book & pay securely", titleBn: "বুক করুন ও নিরাপদে পেমেন্ট দিন", body: "Add your date and venue, then pay with bKash, Nagad, cards or internet banking through SSLCOMMERZ. Your invoice is issued at once.", bodyBn: "তারিখ ও ভেন্যু দিন, তারপর এসএসএলকমার্জের মাধ্যমে বিকাশ, নগদ, কার্ড বা ইন্টারনেট ব্যাংকিংয়ে পেমেন্ট দিন। সঙ্গে সঙ্গে ইনভয়েস পাবেন।", cta: "Payment questions", ctaBn: "পেমেন্ট সংক্রান্ত প্রশ্ন", href: "/faq" },
     { id: "p5", title: "We run the day", titleBn: "অনুষ্ঠান আমরা সামলাই", body: "A dedicated coordinator confirms every vendor and manages the event while you follow progress from your bookings.", bodyBn: "একজন নিবেদিত সমন্বয়ক প্রত্যেক সেবাদাতা নিশ্চিত করে অনুষ্ঠান পরিচালনা করেন, আর আপনি বুকিং থেকে অগ্রগতি দেখেন।", cta: "My bookings", ctaBn: "আমার বুকিং", href: "/my-bookings" },

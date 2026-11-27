@@ -2,155 +2,166 @@
 
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
-import { IMG } from "@/data/images";
 
 /**
- * The homepage film: banquet, chandelier and reception-stage clips (Pexels, free licence) with no
- * religious themes, cut together like an edited showreel.
+ * The homepage film: wedding-hall, banquet and chandelier clips (Pexels, free licence) with no
+ * religious themes, edited together as one continuous showreel.
  *
- * Built to feel instant:
- *  - a sharp still is painted immediately, so the hero is never blank while video buffers;
- *  - the film fades in over it only once the first clip is genuinely playing;
- *  - the lightest clip plays first, phones get 1080p clips only, and the next clip is fetched
- *    only after the current one is running (never two heavy downloads competing at start-up);
- *  - Data Saver / slow connections keep the stills, which cross-fade on the same rhythm.
+ * Playback is built to never freeze:
+ *  - 1080p clips only (light enough for mobile data), played from the start — no seeking;
+ *  - the next clip is buffered on a hidden layer and only cross-fades in once it is actually playing;
+ *  - until then the current clip simply keeps looping, so the picture never stops;
+ *  - a stalled clip is skipped; playback pauses while the hero is off-screen or the tab is hidden and
+ *    resumes afterwards; if the browser blocks autoplay it starts on the first touch or scroll.
  */
-type Clip = { src: string; start?: number; hd?: boolean };
-export const FILM: Clip[] = [
-  // Banquet hall dressed for a wedding (1080p, 24fps — lightest, so it starts first)
-  { src: "https://videos.pexels.com/video-files/34926854/14794510_1920_1080_24fps.mp4", start: 1 },
-  // Sparkling chandelier venue (2730×1440)
-  { src: "https://videos.pexels.com/video-files/34223158/14504315_2730_1440_30fps.mp4", hd: true },
-  // Indoor reception hall with floral décor and seating (2560×1440)
-  { src: "https://videos.pexels.com/video-files/31702886/13507850_2560_1440_24fps.mp4", start: 1, hd: true },
-  // Ornate reception stage with florals and seating (1080p)
-  { src: "https://videos.pexels.com/video-files/32500797/13858467_1920_1080_30fps.mp4", start: 4 },
-  // White banquet hall with chandeliers (2560×1440)
-  { src: "https://videos.pexels.com/video-files/35851898/15203443_2560_1440_30fps.mp4", hd: true },
-  // Crystal chandeliers over a mirrored ballroom ceiling (1080p)
-  { src: "https://videos.pexels.com/video-files/34958626/14808580_1920_1080_50fps.mp4", start: 1 },
+export const FILM: string[] = [
+  "https://videos.pexels.com/video-files/34926854/14794510_1920_1080_24fps.mp4", // banquet hall dressed for a wedding
+  "https://videos.pexels.com/video-files/34958626/14808580_1920_1080_50fps.mp4", // crystal chandeliers, mirrored ceiling
+  "https://videos.pexels.com/video-files/32500797/13858467_1920_1080_30fps.mp4", // reception stage with florals
+  "https://videos.pexels.com/video-files/39846486/16997895_1920_1080_50fps.mp4", // indoor wedding reception setup
+  "https://videos.pexels.com/video-files/31501463/13430943_1920_1080_60fps.mp4", // banquet hall with chandeliers & flowers
+  "https://videos.pexels.com/video-files/34926867/14794519_1920_1080_24fps.mp4", // wedding hall, florals and ambient light
 ];
 
-/** Verified stills of the same kind of venues — shown instantly, and as the no-video fallback. */
-const STILLS = [IMG.dBanquetChandelier, IMG.wLightChandelier, IMG.wStageWarm, IMG.wLightCeiling, IMG.wSofaWhite, IMG.wVenueFloral];
-const still = (src: string, w: number) => `${src}?auto=compress&cs=srgb&w=${w}`;
-
-const CUT = 5200; // ms each shot stays on screen
-const FADE = 1400; // ms cross-dissolve
+const SHOT = 6.5; // seconds each clip is on screen (or its full length if shorter)
+const FADE = 1.6; // seconds of cross-dissolve
 
 export function HeroFilm({ className }: { className?: string }) {
-  const refs = [useRef<HTMLVideoElement>(null), useRef<HTMLVideoElement>(null)];
-  const [front, setFront] = useState(0);
-  const [playing, setPlaying] = useState(false); // film has started — fade it in over the still
-  const [failed, setFailed] = useState(false);
-  const [shot, setShot] = useState(0);
-  const clips = useRef<Clip[]>(FILM);
-  const shotRef = useRef(0);
-
-  const load = (layer: number, i: number) => {
-    const v = refs[layer].current;
-    const list = clips.current;
-    if (!v || !list.length) return;
-    const clip = list[i % list.length];
-    v.muted = true;
-    v.defaultMuted = true;
-    if (v.dataset.src !== clip.src) {
-      v.dataset.src = clip.src;
-      v.preload = "auto";
-      v.src = clip.src;
-      v.load();
-    }
-    const seek = () => { try { v.currentTime = clip.start ?? 0; } catch { /* not seekable yet */ } };
-    if (v.readyState >= 1) seek();
-    else v.addEventListener("loadedmetadata", seek, { once: true });
-  };
+  const a = useRef<HTMLVideoElement>(null);
+  const b = useRef<HTMLVideoElement>(null);
+  const root = useRef<HTMLDivElement>(null);
+  const [front, setFront] = useState(0); // which layer is visible
+  const [started, setStarted] = useState(false);
 
   useEffect(() => {
-    const nav = navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } };
-    if (nav.connection?.saveData || /(^|-)2g$/.test(nav.connection?.effectiveType ?? "")) { setFailed(true); return; }
-    // Phones: skip the 1440p clips — 1080p is already sharper than the screen.
-    if (window.matchMedia("(max-width: 767px)").matches) clips.current = FILM.filter((c) => !c.hd);
+    const layers = [a.current!, b.current!];
+    if (!layers[0] || !layers[1]) return;
+    let active = 0; // layer index currently shown
+    let clip = 0; // FILM index on the active layer
+    let switching = false;
+    let lastTime = -1;
+    let stuckSince = 0;
+    let visible = true;
+    let disposed = false;
 
-    const first = refs[0].current;
-    if (!first) return;
-    let started = false;
-    const onPlaying = () => {
-      if (started) return;
-      started = true;
-      setPlaying(true);
-      load(1, 1); // only now fetch the next clip
+    const prep = (v: HTMLVideoElement, src: string) => {
+      v.muted = true;
+      v.defaultMuted = true;
+      v.playsInline = true;
+      if (v.dataset.src !== src) {
+        v.dataset.src = src;
+        v.src = src;
+        v.preload = "auto";
+        v.load();
+      }
     };
-    first.addEventListener("playing", onPlaying);
-    load(0, 0);
-    first.play().catch(() => setFailed(true));
+    const ready = (v: HTMLVideoElement) => v.readyState >= 3; // HAVE_FUTURE_DATA
+    const tryPlay = (v: HTMLVideoElement) => v.play().catch(() => undefined);
 
-    let layer = 0;
-    let waited = 0;
-    const id = setInterval(() => {
-      if (!started) return;
-      const next = 1 - layer;
-      const nv = refs[next].current;
-      if (!nv) return;
-      // Avoid cutting to a clip that hasn't buffered — hold one beat longer (then cut anyway, for
-      // mobile browsers that won't buffer a paused video).
-      if (nv.readyState < 3 && waited < 1) { waited++; return; }
-      waited = 0;
-      nv.play().catch(() => undefined);
-      layer = next;
-      shotRef.current += 1;
-      setFront(next);
+    const queueNext = () => prep(layers[1 - active], FILM[(clip + 1) % FILM.length]);
+
+    const cut = async () => {
+      if (switching || disposed) return;
+      const next = layers[1 - active];
+      if (!ready(next)) return; // keep looping the current clip until the next one is buffered
+      switching = true;
+      try {
+        next.currentTime = 0;
+      } catch { /* fresh clip */ }
+      await tryPlay(next);
+      // Wait for the first real frame before dissolving, so the fade never shows a frozen picture.
+      await new Promise<void>((res) => {
+        if (next.currentTime > 0.05) return res();
+        const done = () => { next.removeEventListener("timeupdate", done); res(); };
+        next.addEventListener("timeupdate", done);
+        setTimeout(done, 800);
+      });
+      if (disposed) return;
+      const old = layers[active];
+      active = 1 - active;
+      clip = (clip + 1) % FILM.length;
+      setFront(active);
+      lastTime = -1;
       setTimeout(() => {
-        const hidden = refs[1 - layer].current;
-        hidden?.pause();
-        load(1 - layer, shotRef.current + 1);
-      }, FADE + 100);
-    }, CUT);
-    return () => {
-      clearInterval(id);
-      first.removeEventListener("playing", onPlaying);
+        if (disposed) return;
+        old.pause();
+        queueNext();
+        switching = false;
+      }, FADE * 1000 + 150);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
+    const onTime = () => {
+      const v = layers[active];
+      const len = Number.isFinite(v.duration) ? v.duration : SHOT + FADE;
+      if (v.currentTime >= Math.min(SHOT, len - FADE - 0.2)) void cut();
+    };
+
+    // Watchdog: recover from a stalled clip, and from a clip that ended without looping.
+    const watchdog = window.setInterval(() => {
+      if (!visible || document.hidden || disposed) return;
+      const v = layers[active];
+      if (v.paused && !switching) void tryPlay(v);
+      if (Math.abs(v.currentTime - lastTime) < 0.01) {
+        if (!stuckSince) stuckSince = Date.now();
+        else if (Date.now() - stuckSince > 3500) { stuckSince = 0; void cut(); }
+      } else stuckSince = 0;
+      lastTime = v.currentTime;
+    }, 700);
+
+    layers.forEach((v, i) => {
+      v.loop = true; // the shown clip loops until the next is ready — it never stops on a last frame
+      v.addEventListener("timeupdate", () => { if (i === active) onTime(); });
+      v.addEventListener("playing", () => { if (i === active) setStarted(true); });
+    });
+
+    // Start: first clip on layer A, buffer the second on layer B.
+    prep(layers[0], FILM[0]);
+    void tryPlay(layers[0]);
+    const firstPlaying = () => queueNext();
+    layers[0].addEventListener("playing", firstPlaying, { once: true });
+
+    // If autoplay was blocked (e.g. low-power mode), start on the first interaction.
+    const kick = () => { if (layers[active].paused) void tryPlay(layers[active]); };
+    window.addEventListener("touchstart", kick, { passive: true });
+    window.addEventListener("scroll", kick, { passive: true });
+    window.addEventListener("pointerdown", kick);
+
+    // Pause off-screen / in background tabs; resume when visible again.
+    const resume = () => { if (visible && !document.hidden) void tryPlay(layers[active]); else layers[active].pause(); };
+    const io = new IntersectionObserver(([e]) => { visible = e.isIntersecting; resume(); }, { threshold: 0.05 });
+    if (root.current) io.observe(root.current);
+    document.addEventListener("visibilitychange", resume);
+
+    return () => {
+      disposed = true;
+      window.clearInterval(watchdog);
+      io.disconnect();
+      document.removeEventListener("visibilitychange", resume);
+      window.removeEventListener("touchstart", kick);
+      window.removeEventListener("scroll", kick);
+      window.removeEventListener("pointerdown", kick);
+      layers.forEach((v) => v.pause());
+    };
   }, []);
 
-  // Stills keep their own gentle rhythm when there is no film.
-  useEffect(() => {
-    if (!failed) return;
-    const id = setInterval(() => setShot((n) => n + 1), CUT);
-    return () => clearInterval(id);
-  }, [failed]);
-
   return (
-    <div className={cn("absolute inset-0 bg-[#0a1024]", className)} aria-hidden>
-      {/* Instant still (and the fallback slideshow) */}
-      {(failed ? STILLS : STILLS.slice(0, 1)).map((c, i) => (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          key={c.src}
-          src={still(c.src, 1600)}
-          srcSet={`${still(c.src, 960)} 960w, ${still(c.src, 1600)} 1600w, ${still(c.src, 2400)} 2400w`}
-          sizes="100vw"
-          alt=""
-          fetchPriority={i === 0 ? "high" : "low"}
-          decoding="async"
-          className={cn("absolute inset-0 h-full w-full object-cover transition-opacity duration-[1400ms]", !failed || i === shot % STILLS.length ? "opacity-100" : "opacity-0")}
+    <div ref={root} className={cn("absolute inset-0 bg-[#070d1f]", className)} aria-hidden>
+      {[a, b].map((ref, i) => (
+        <video
+          key={i}
+          ref={ref}
+          muted
+          playsInline
+          autoPlay={i === 0}
+          preload={i === 0 ? "auto" : "none"}
+          disablePictureInPicture
+          disableRemotePlayback
+          className={cn(
+            "absolute inset-0 h-full w-full object-cover transition-opacity ease-in-out [transition-duration:1600ms] [backface-visibility:hidden] [transform:translateZ(0)]",
+            started && front === i ? "opacity-100" : "opacity-0",
+          )}
         />
       ))}
-      {!failed &&
-        [0, 1].map((layer) => (
-          <video
-            key={layer}
-            ref={refs[layer]}
-            muted
-            playsInline
-            loop
-            preload={layer === 0 ? "auto" : "none"}
-            onError={() => layer === 0 && !playing && setFailed(true)}
-            className={cn(
-              "absolute inset-0 h-full w-full object-cover transition-opacity ease-in-out [transition-duration:1400ms]",
-              playing && front === layer ? "opacity-100" : "opacity-0",
-            )}
-          />
-        ))}
     </div>
   );
 }

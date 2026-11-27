@@ -35,7 +35,7 @@ export const CATEGORIES: Category[] = [
     route: "/birthday",
     hero: IMG.dPinkParty,
     card: IMG.dBirthdaySetup,
-    subcategories: eventSubs("Photo and Videography", "Décor"),
+    subcategories: eventSubs("Photo and Videography", "Decor"),
   },
   {
     slug: "corporate-events",
@@ -47,7 +47,7 @@ export const CATEGORIES: Category[] = [
     route: "/corporate-events",
     hero: IMG.cAudienceStage,
     card: IMG.cAuditoriumModern,
-    subcategories: eventSubs("Photography and Videography", "Décor"),
+    subcategories: eventSubs("Photography and Videography", "Decor"),
   },
   {
     slug: "family-events",
@@ -59,7 +59,7 @@ export const CATEGORIES: Category[] = [
     route: "/family-events",
     hero: IMG.dFairyCorridor,
     card: IMG.dReceptionFloral,
-    subcategories: eventSubs("Photography and Videography", "Décor"),
+    subcategories: eventSubs("Photography and Videography", "Decor"),
   },
   {
     slug: "food-culinary",

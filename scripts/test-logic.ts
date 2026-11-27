@@ -27,8 +27,8 @@ console.log("Seed data");
 test("exact category names and subsections", () => {
   assert.deepEqual(CATEGORIES.map((c) => c.name), ["Wedding", "Birthday", "Corporate Events", "Family Events", "Food & Culinary"]);
   assert.deepEqual(CATEGORIES[0].subcategories.map((s) => s.name), ["Decor", "Sitting Area", "Lighting", "Photography and Videography", "Photo Booths", "Sound"]);
-  assert.deepEqual(CATEGORIES[1].subcategories.map((s) => s.name), ["Décor", "Sitting Area", "Lighting", "Photo and Videography", "Photo Booths", "Sound"]);
-  for (const i of [2, 3]) assert.deepEqual(CATEGORIES[i].subcategories.map((s) => s.name), ["Décor", "Sitting Area", "Lighting", "Photography and Videography", "Photo Booths", "Sound"]);
+  assert.deepEqual(CATEGORIES[1].subcategories.map((s) => s.name), ["Decor", "Sitting Area", "Lighting", "Photo and Videography", "Photo Booths", "Sound"]);
+  for (const i of [2, 3]) assert.deepEqual(CATEGORIES[i].subcategories.map((s) => s.name), ["Decor", "Sitting Area", "Lighting", "Photography and Videography", "Photo Booths", "Sound"]);
   assert.deepEqual(CATEGORIES[4].subcategories.map((s) => s.name), ["Platter", "Fuchka", "CHA / Coffee"]);
 });
 test("≥10 services per category and every subsection populated", () => {

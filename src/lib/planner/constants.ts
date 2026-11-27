@@ -4,7 +4,7 @@ export const FOOD_SUBS = ["platter", "fuchka", "cha-coffee"] as const;
 export const EVENT_SUBS = ["decor", "sitting-area", "lighting", "photography-videography", "photo-booths", "sound"] as const;
 
 export const SUB_LABELS: Record<string, string> = {
-  decor: "Décor",
+  decor: "Decor",
   "sitting-area": "Sitting Area",
   lighting: "Lighting",
   "photography-videography": "Photography & Videography",

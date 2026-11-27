@@ -48,7 +48,7 @@ export const DEFAULT_SETTINGS: SiteSettings = {
   content: {
     heroTitle: "Where Every Celebration Begins.",
     heroTitleBn: "যেখানে আয়োজনের শুরু",
-    heroSubtitle: "Décor, venues, catering, photography and sound for weddings, birthdays, corporate and family events across Dhaka — planned, booked and managed in one place.",
+    heroSubtitle: "Decor, venues, catering, photography and sound for weddings, birthdays, corporate and family events across Dhaka — planned, booked and managed in one place.",
     heroSubtitleBn: "ঢাকাজুড়ে বিয়ে, জন্মদিন, কর্পোরেট ও পারিবারিক অনুষ্ঠানের সাজসজ্জা, ভেন্যু, খাবার, ছবি ও সাউন্ড — এক জায়গায় পরিকল্পনা, বুকিং ও ব্যবস্থাপনা।",
     aboutTitle: "Moments, managed with care.",
     aboutTitleBn: "যত্নে সাজানো প্রতিটি মুহূর্ত।",

@@ -90,14 +90,16 @@ export interface CloudStatus {
   saving: number;
   error: string | null;
   lastSavedAt: string | null;
+  /** Live Firestore listeners are connected (changes from any device appear instantly). */
+  live: boolean;
 }
-let cloud: CloudStatus = { mode: "unknown", empty: false, saving: 0, error: null, lastSavedAt: null };
+let cloud: CloudStatus = { mode: "unknown", empty: false, saving: 0, error: null, lastSavedAt: null, live: false };
 const cloudListeners = new Set<() => void>();
 const setCloud = (patch: Partial<CloudStatus>) => {
   cloud = { ...cloud, ...patch };
   cloudListeners.forEach((l) => l());
 };
-const UNKNOWN: CloudStatus = { mode: "unknown", empty: false, saving: 0, error: null, lastSavedAt: null };
+const UNKNOWN: CloudStatus = { mode: "unknown", empty: false, saving: 0, error: null, lastSavedAt: null, live: false };
 export function useCloudStatus(): CloudStatus {
   return useSyncExternalStore((cb) => { cloudListeners.add(cb); return () => cloudListeners.delete(cb); }, () => cloud, () => UNKNOWN);
 }
@@ -157,6 +159,7 @@ function ensureLoaded() {
   if (lastMode === "cloud") repo = cloudCache;
   state = hydrate(repo.load());
   void syncFromServer();
+  void startLive();
   window.addEventListener("storage", (e) => {
     if (e.key !== (repo === cloudCache ? CLOUD_KEY : KEY)) return;
     state = hydrate(repo.load());
@@ -186,6 +189,42 @@ export function useCatalog(): CatalogData {
   return useSyncExternalStore(subscribe, getCatalogSnapshot, () => SEED);
 }
 
+/* ─── Live sync: Firestore listeners keep every open browser up to date ─── */
+
+let live = false;
+let pendingLive: CatalogData | null | undefined;
+
+function applyLive(d: CatalogData | null) {
+  if (d) {
+    state = d;
+    cloudCache.save({ ...d, mediaVersion: MEDIA_VERSION } as CatalogData);
+    try { localStorage.setItem(MODE_KEY, "cloud"); } catch { /* ignore */ }
+    repo = cloudCache;
+  } else if (repo === cloudCache) {
+    state = SEED; // Firestore not published yet: show the built-in catalogue
+  }
+  listeners.forEach((l) => l());
+}
+
+async function startLive() {
+  try {
+    const { subscribeSite } = await import("@/lib/firebase/realtime");
+    await subscribeSite(
+      (raw) => {
+        live = true;
+        const d = raw ? hydrate({ ...(raw as unknown as Partial<CatalogData>), mediaVersion: MEDIA_VERSION } as Partial<CatalogData>) : null;
+        setCloud({ live: true, empty: !raw });
+        // Don't overwrite an admin's in-flight edits; apply the newest snapshot once saves settle.
+        if (cloud.saving > 0) { pendingLive = d; return; }
+        applyLive(d);
+      },
+      () => { live = false; setCloud({ live: false }); },
+    );
+  } catch {
+    live = false;
+  }
+}
+
 /** Loads the live catalogue from Firestore (when the server has Firebase access). */
 export async function syncFromServer(): Promise<void> {
   if (typeof window === "undefined") return;
@@ -202,8 +241,8 @@ export async function syncFromServer(): Promise<void> {
     }
     try { localStorage.setItem(MODE_KEY, "cloud"); } catch { /* ignore */ }
     repo = cloudCache;
-    // While saves are in flight, keep the optimistic local state; the next sync settles it.
-    if (cloud.saving === 0) {
+    // Live listeners are the source of truth when running; otherwise use this response.
+    if (cloud.saving === 0 && !live) {
       state = body.data ? hydrate({ ...body.data, mediaVersion: MEDIA_VERSION } as Partial<CatalogData>) : SEED;
       if (body.data) cloudCache.save({ ...state, mediaVersion: MEDIA_VERSION } as CatalogData);
       listeners.forEach((l) => l());
@@ -230,7 +269,10 @@ function send(body: Record<string, unknown>, onDone?: (res: Record<string, unkno
       setCloud({ saving: cloud.saving - 1, error: (e as Error).message || "Could not save to Firebase." });
       void syncFromServer(); // show what is really stored
     }
-    if (cloud.saving === 0) void syncFromServer();
+    if (cloud.saving === 0) {
+      if (live && pendingLive !== undefined) { applyLive(pendingLive); pendingLive = undefined; }
+      else if (!live) void syncFromServer();
+    }
   });
 }
 

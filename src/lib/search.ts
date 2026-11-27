@@ -25,7 +25,7 @@ export interface SearchResult {
 const SYNONYMS: Record<string, string[]> = {
   biye: ["wedding"], bie: ["wedding"], shadi: ["wedding"], walima: ["wedding", "reception"],
   haldi: ["holud"], gayeholud: ["holud"], mehndi: ["mehendi", "henna"], henna: ["mehendi"],
-  decoration: ["decor"], decorations: ["decor"], décor: ["decor"], stage: ["decor", "stage"],
+  decoration: ["decor"], decorations: ["decor"], decor: ["decor"], stage: ["decor", "stage"],
   chair: ["seating"], chairs: ["seating"], seats: ["seating"], sitting: ["seating"], table: ["seating", "tables"],
   light: ["lighting"], lights: ["lighting"], fairy: ["lighting", "fairy"],
   photo: ["photography"], photos: ["photography"], photographer: ["photography"], camera: ["photography"],
@@ -141,11 +141,11 @@ export function searchServices(services: Service[], vendorsList: Vendor[], param
 }
 
 export const SEARCH_SUGGESTIONS: Record<CategorySlug | "all", string[]> = {
-  all: ["Gaye holud décor", "Kacchi platter", "Live fuchka", "Wedding photography", "Conference sound", "Cha station"],
-  wedding: ["Holud stage", "Reception décor", "Fairy lights", "Wedding film", "Photo booth", "Shehnai"],
+  all: ["Gaye holud decor", "Kacchi platter", "Live fuchka", "Wedding photography", "Conference sound", "Cha station"],
+  wedding: ["Holud stage", "Reception decor", "Fairy lights", "Wedding film", "Photo booth", "Shehnai"],
   birthday: ["Balloon garland", "Dessert table", "360 booth", "Kids seating", "Party DJ", "Cake smash"],
   "corporate-events": ["Conference stage", "Seminar seating", "PA system", "Headshots", "Registration desk", "Gala lighting"],
-  "family-events": ["Aqiqah décor", "Mehendi night", "Family portrait", "String lights", "Milad sound", "Rabindra Sangeet"],
+  "family-events": ["Aqiqah decor", "Mehendi night", "Family portrait", "String lights", "Milad sound", "Rabindra Sangeet"],
   "food-culinary": ["Kacchi biryani", "Mezban", "Fuchka counter", "Seven-layer cha", "Espresso bar", "Chinese set menu"],
 };
 

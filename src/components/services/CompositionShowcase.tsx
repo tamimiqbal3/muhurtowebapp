@@ -8,7 +8,7 @@ import { useLang } from "../i18n/LanguageProvider";
 
 const SHOTS = [
   { icon: Frame, en: "Wide establishing shot", bn: "পুরো আয়োজনের প্রশস্ত দৃশ্য", noteEn: "The whole venue, styled and lit, before guests arrive.", noteBn: "অতিথি আসার আগে সাজানো ও আলোকিত পুরো ভেন্যু।" },
-  { icon: Sparkles, en: "Stage & décor", bn: "মঞ্চ ও সাজসজ্জা", noteEn: "Symmetry, florals and backdrop composed straight-on.", noteBn: "সামনাসামনি সাজানো মঞ্চ, ফুল ও ব্যাকড্রপ।" },
+  { icon: Sparkles, en: "Stage & decor", bn: "মঞ্চ ও সাজসজ্জা", noteEn: "Symmetry, florals and backdrop composed straight-on.", noteBn: "সামনাসামনি সাজানো মঞ্চ, ফুল ও ব্যাকড্রপ।" },
   { icon: Aperture, en: "Details & styling", bn: "খুঁটিনাটি ও স্টাইলিং", noteEn: "Close frames of tables, invitations and textures.", noteBn: "টেবিল, আমন্ত্রণপত্র ও নকশার কাছ থেকে তোলা ছবি।" },
   { icon: Lamp, en: "Light & mood", bn: "আলো ও আবহ", noteEn: "Golden-hour and evening light that sets the feeling.", noteBn: "গোধূলি ও সন্ধ্যার আলোয় আবহ ফুটিয়ে তোলা।" },
   { icon: Clapperboard, en: "Cinematic film", bn: "সিনেমাটিক ফিল্ম", noteEn: "Slow, steady movement edited into a short film.", noteBn: "ধীর, স্থির ক্যামেরা চলন সম্পাদনা করে ছোট চলচ্চিত্র।" },

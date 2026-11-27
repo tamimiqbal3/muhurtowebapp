@@ -38,7 +38,7 @@ export function Preloader() {
           <motion.div className="absolute inset-x-0 top-0 h-1/2 bg-ivory" exit={{ y: "-100%" }} transition={{ duration: 0.9, ease: [0.76, 0, 0.24, 1] }} />
           <motion.div className="absolute inset-x-0 bottom-0 h-1/2 bg-ivory" exit={{ y: "100%" }} transition={{ duration: 0.9, ease: [0.76, 0, 0.24, 1] }} />
           <motion.div className="absolute inset-0 grid place-items-center" exit={{ opacity: 0, scale: 0.96 }} transition={{ duration: 0.4 }}>
-            <EventLoader title={t("Preparing your event")} steps={[t("Arranging the décor"), t("Preparing the menu"), t("Setting up the lighting"), t("Booking the photographer")]} />
+            <EventLoader title={t("Preparing your event")} steps={[t("Arranging the decor"), t("Preparing the menu"), t("Setting up the lighting"), t("Booking the photographer")]} />
           </motion.div>
         </motion.div>
       )}

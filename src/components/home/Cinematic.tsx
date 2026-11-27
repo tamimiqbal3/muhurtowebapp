@@ -75,7 +75,7 @@ export function AboutInvitation() {
 export function Polaroids() {
   const { t } = useLang();
   const items = [
-    { img: IMG.wStageVibrant, title: t("Discover"), body: t("Verified décor, catering, photography and sound partners, with published prices.") },
+    { img: IMG.wStageVibrant, title: t("Discover"), body: t("Verified decor, catering, photography and sound partners, with published prices.") },
     { img: IMG.dBanquetChandelier, title: t("Design"), body: t("Plan with our assistant or choose services yourself, with clear published prices.") },
     { img: IMG.dReceptionFloral, title: t("Relax"), body: t("Your coordinator manages the day while you follow progress online.") },
   ];
@@ -186,7 +186,7 @@ export function PlannerTeaser() {
   const shadow = useTransform(p, [0, 1], [0.15, 0.55]);
   const [step, setStep] = useState(0);
   const demo = [
-    { k: "Décor", p: 180000 },
+    { k: "Decor", p: 180000 },
     { k: "Photography & Videography", p: 85000 },
     { k: "Lighting", p: 42000 },
     { k: "Platter", p: 118000 },
@@ -203,7 +203,6 @@ export function PlannerTeaser() {
     <section ref={ref} className="container-x pt-32">
       <div className="grid items-center gap-16 lg:grid-cols-2">
         <div>
-          <Reveal><p className="eyebrow">{t("Event planner")}</p></Reveal>
           <h2 className="mt-3 text-4xl leading-[1.08] sm:text-5xl"><SplitWords text={t("Plan it in a conversation.")} /></h2>
           <Reveal variant="focus" delay={0.1}>
             <p className="mt-5 max-w-lg text-ink-soft">{t("Tell our assistant the occasion, guests, budget and area in Dhaka. It suggests services, shows the total and books it in one step.")}</p>
@@ -377,7 +376,6 @@ export function ClosingInvite() {
       <div className="relative overflow-hidden rounded-[2rem] bg-brand-gradient px-8 py-14 text-paper sm:px-14">
         <div className="relative grid items-center gap-8 lg:grid-cols-[1.4fr_1fr]">
           <div>
-            <p className="eyebrow text-paper/70">{t("Ready when you are")}</p>
             <h2 className="mt-3 text-4xl text-paper sm:text-5xl">{t("Let's plan your moment.")}</h2>
             <p className="mt-4 max-w-xl text-paper/80">{t("Browse our services or use the planner to build your event.")}</p>
           </div>

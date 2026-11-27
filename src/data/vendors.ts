@@ -9,7 +9,7 @@ const v = (id: string, name: string, tagline: string, area: string, since: numbe
 export const VENDORS: Vendor[] = [
   v("shapla-events", "Shapla Events Studio", "Bridal stages with a Bengali soul", "Banani", 2012, ["wedding", "family-events"], "+880 1711-204512"),
   v("nakshi-decor", "Nakshi Decor House", "Jamdani-inspired styling for every occasion", "Dhanmondi", 2015, ["wedding", "family-events", "birthday"], "+880 1819-336741"),
-  v("rangdhanu-decor", "Rangdhanu Decor", "Colourful décor for family celebrations", "Mirpur", 2014, ["birthday", "family-events"], "+880 1912-448203"),
+  v("rangdhanu-decor", "Rangdhanu Decor", "Colourful decor for family celebrations", "Mirpur", 2014, ["birthday", "family-events"], "+880 1912-448203"),
   v("prodip-lighting", "Prodip Lighting Co.", "Warm light for memorable nights", "Mohakhali DOHS", 2011, ["wedding", "family-events", "corporate-events", "birthday"], "+880 1713-552918"),
   v("golpo-frames", "Golpo Frames", "Documentary wedding films and photographs", "Gulshan", 2016, ["wedding", "family-events"], "+880 1716-601347"),
   v("moyna-photography", "Moyna Photography", "Candid photography for every celebration", "Uttara", 2017, ["wedding", "birthday", "family-events"], "+880 1817-774520"),

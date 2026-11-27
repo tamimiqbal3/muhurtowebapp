@@ -13,12 +13,11 @@ import { useSiteSettings } from "../SiteSettingsProvider";
 import { activeServices, useCatalog } from "@/lib/store/catalog";
 import { cn } from "@/lib/utils";
 
-function Head({ eyebrow, title, href, link }: { eyebrow: string; title: string; href?: string; link?: string }) {
+function Head({ title, href, link }: { eyebrow?: string; title: string; href?: string; link?: string }) {
   return (
     <div className="flex items-end justify-between gap-4">
       <div className="min-w-0">
-        <p className="eyebrow">{eyebrow}</p>
-        <h2 className="mt-2 text-3xl leading-tight sm:text-4xl">{title}</h2>
+        <h2 className="text-3xl leading-tight sm:text-4xl">{title}</h2>
       </div>
       {href && link && <Link href={href} className="hidden shrink-0 items-center gap-1.5 text-sm font-semibold text-brand hover:underline sm:inline-flex">{link} <ArrowRight className="h-4 w-4" /></Link>}
     </div>
@@ -90,23 +89,35 @@ export function ValueTicker() {
   );
 }
 
-/** A clean, even grid of real setups. */
+/**
+ * Real setups on a slow, continuous drift to the left. Each photo also floats gently up and down on
+ * its own rhythm. Pauses while hovered.
+ */
 export function InspirationGallery() {
   const { t, lang } = useLang();
-  const items = useSiteSettings().home.gallery.map((g) => ({ src: g.src, alt: g.label, label: lang === "bn" ? g.labelBn || g.label : g.label }));
+  const items = useSiteSettings().home.gallery.map((g) => ({ src: g.src, alt: lang === "bn" ? g.labelBn || g.label : g.label }));
   if (!items.length) return null;
+  const row = [...items, ...items];
   return (
-    <section className="container-x pt-20 sm:pt-24">
-      <FadeUp><Head eyebrow={t("Inspiration")} title={t("Setups by our partners")} /></FadeUp>
-      <Stagger as="ul" className="mt-8 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
-        {items.map((g) => (
-          <StaggerItem as="li" key={g.src} className="group relative aspect-[4/3] overflow-hidden rounded-2xl bg-sand">
-            <SafeImage src={g.src} alt={g.alt} fill sizes="(max-width: 1024px) 50vw, 25vw" quality={90} className="object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-[1.08]" />
-            <span aria-hidden className="absolute inset-0 bg-[linear-gradient(180deg,transparent_55%,rgb(5_11_28/.55))] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-            <span className="absolute bottom-3 left-3 translate-y-0 rounded-full bg-paper/90 px-3 py-1 text-xs font-medium text-ink backdrop-blur transition-transform duration-500 group-hover:-translate-y-1">{g.label}</span>
-          </StaggerItem>
-        ))}
-      </Stagger>
+    <section className="pt-20 sm:pt-24">
+      <FadeUp className="container-x"><Head eyebrow="" title={t("Setups by our partners")} /></FadeUp>
+      <FadeUp className="mt-10">
+        <div className="group relative overflow-hidden">
+          <ul className="flex w-max gap-4 py-6 [animation:gallery-drift_70s_linear_infinite] group-hover:[animation-play-state:paused] sm:gap-6">
+            {row.map((g, i) => (
+              <li key={i} aria-hidden={i >= items.length} className="w-[64vw] shrink-0 sm:w-[340px]" style={{ marginTop: i % 2 ? 28 : 0 }}>
+                <div className="overflow-hidden rounded-2xl bg-sand [animation:float-y_9s_ease-in-out_infinite]" style={{ animationDelay: `${(i % 5) * -1.7}s` }}>
+                  <div className="relative aspect-[4/5]">
+                    <SafeImage src={g.src} alt={g.alt} fill sizes="(max-width: 640px) 64vw, 340px" quality={90} className="object-cover" />
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+          <div aria-hidden className="pointer-events-none absolute inset-y-0 left-0 w-16 bg-gradient-to-r from-ivory sm:w-28" />
+          <div aria-hidden className="pointer-events-none absolute inset-y-0 right-0 w-16 bg-gradient-to-l from-ivory sm:w-28" />
+        </div>
+      </FadeUp>
     </section>
   );
 }

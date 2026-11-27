@@ -36,7 +36,10 @@ export function useLocalOps() {
     const on = () => void reload();
     window.addEventListener("storage", on);
     window.addEventListener("focus", on);
+    // New bookings and payments from customers show up without a manual refresh.
+    const timer = setInterval(() => { if (document.visibilityState === "visible") on(); }, 15_000);
     return () => {
+      clearInterval(timer);
       window.removeEventListener("storage", on);
       window.removeEventListener("focus", on);
     };

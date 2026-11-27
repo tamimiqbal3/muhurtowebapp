@@ -1,10 +1,11 @@
 @import "tailwindcss";
 
 @theme inline {
-  --font-display: var(--font-cormorant), "Playfair Display", var(--font-bengali), Georgia, serif;
-  --font-sans: var(--font-manrope), "Inter", var(--font-bengali-sans), system-ui, sans-serif;
-  --font-bangla: var(--font-bengali), "Noto Serif Bengali", serif;
-  --font-lcd: var(--font-lcd-mono), "Share Tech Mono", ui-monospace, monospace;
+  /* One clean, standard sans-serif everywhere (Arial), with Noto Sans Bengali for Bangla text. */
+  --font-display: Arial, "Helvetica Neue", Helvetica, var(--font-bengali-sans, "Noto Sans Bengali"), sans-serif;
+  --font-sans: Arial, "Helvetica Neue", Helvetica, var(--font-bengali-sans, "Noto Sans Bengali"), sans-serif;
+  --font-bangla: var(--font-bengali-sans, "Noto Sans Bengali"), Arial, sans-serif;
+  --font-lcd: Arial, "Helvetica Neue", Helvetica, sans-serif;
 }
 
 @theme {
@@ -104,6 +105,7 @@
   }
   body {
     @apply bg-ivory font-sans text-ink antialiased;
+    font-variant-ligatures: none;
     max-width: 100%;
     text-rendering: optimizeLegibility;
   }
@@ -118,16 +120,20 @@
   }
   h1, h2, h3, h4 {
     @apply font-display text-ink;
-    letter-spacing: -0.01em;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    /* No ligatures, swashes or alternate glyphs — plain, standard letterforms only. */
+    font-feature-settings: "liga" 0, "calt" 0, "dlig" 0, "swsh" 0;
+    font-variant-ligatures: none;
   }
   .bn {
     font-family: var(--font-bangla);
   }
   html[lang="bn"] body {
-    font-family: var(--font-bengali-sans), var(--font-manrope), system-ui, sans-serif;
+    font-family: var(--font-bengali-sans, "Noto Sans Bengali"), Arial, sans-serif;
   }
   html[lang="bn"] h1, html[lang="bn"] h2, html[lang="bn"] h3, html[lang="bn"] h4 {
-    font-family: var(--font-bengali), var(--font-cormorant), serif;
+    font-family: var(--font-bengali-sans, "Noto Sans Bengali"), Arial, sans-serif;
     letter-spacing: 0;
     line-height: 1.25;
   }
@@ -263,3 +269,7 @@ html[data-header="hidden"] { --header-offset: 0px; }
 
 /* Process steps: one column per step on large screens (step count is admin-editable). */
 @media (min-width: 1024px) { .mh-steps { grid-template-columns: repeat(var(--n), minmax(0, 1fr)); } }
+
+/* Floating motion: continuous leftward drift and a slow vertical float. */
+@keyframes gallery-drift { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@keyframes float-y { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }

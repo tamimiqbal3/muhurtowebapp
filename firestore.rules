@@ -19,9 +19,10 @@ service cloud.firestore {
     // Public catalogue (read-only for everyone; admins write via the server).
     match /categories/{id}    { allow read: if true; allow write: if false; }
     match /subcategories/{id} { allow read: if true; allow write: if false; }
-    match /services/{id}      { allow read: if resource.data.active != false || isAdmin(); allow write: if false; }
+    // Catalogue is public and read live by every browser (hidden items are filtered on the page).
+    match /services/{id}      { allow read: if true; allow write: if false; }
     match /vendors/{id}       { allow read: if true; allow write: if false; }
-    match /reviews/{id}       { allow read: if resource.data.hidden != true || isAdmin(); allow write: if false; }
+    match /reviews/{id}       { allow read: if true; allow write: if false; }
     match /locations/{id}     { allow read: if true; allow write: if false; }
 
     // Site content & settings (homepage sections, contact details, payment methods…).

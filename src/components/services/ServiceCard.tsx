@@ -5,13 +5,12 @@ import { MapPin, BadgeCheck, SlidersHorizontal, Check } from "lucide-react";
 import type { Service } from "@/lib/types";
 import { formatBDT } from "@/lib/format";
 import { priceSuffix } from "@/lib/pricing";
-import { findCategory, useCatalog } from "@/lib/store/catalog";
 import { SafeImage } from "../ui/SafeImage";
 import { Badge, Rating } from "../ui/misc";
 import { usePlan } from "../plan/PlanProvider";
 import { cn } from "@/lib/utils";
 import { useLang } from "../i18n/LanguageProvider";
-import { cityName, localizeCategory } from "@/data/i18n-data";
+import { cityName } from "@/data/i18n-data";
 
 export interface ServiceCardProps {
   service: Service;
@@ -27,10 +26,6 @@ export function ServiceCard({ service, vendorName, vendorVerified, priority, cla
   const plan = usePlan();
   const inPlan = plan.hydrated && plan.has(service.id);
   const { t, lang } = useLang();
-  const data = useCatalog();
-  const rawCat = findCategory(data, service.categorySlug);
-  const cat = rawCat ? localizeCategory(rawCat, lang) : undefined;
-  const sub = cat?.subcategories.find((x) => x.slug === service.subcategorySlug);
   const img = service.images[0];
 
   return (
@@ -48,11 +43,6 @@ export function ServiceCard({ service, vendorName, vendorVerified, priority, cla
           ) : img ? (
             <SafeImage src={img.src} alt={img.alt} fill priority={priority} sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw" className="object-cover transition-transform duration-[1200ms] ease-out group-hover:scale-[1.07]" />
           ) : null}
-          <div className="absolute inset-x-0 top-0 flex items-start justify-between p-3">
-            <span className="rounded-full bg-paper/90 px-2.5 py-1 text-[0.65rem] font-semibold tracking-wide backdrop-blur" style={{ color: cat?.accent }}>
-              {sub?.name ?? service.subcategorySlug}
-            </span>
-          </div>
         </Link>
         <div className="flex flex-1 flex-col p-5">
           <div className="flex items-center justify-between gap-2">

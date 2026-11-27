@@ -1,14 +1,14 @@
 import { Camera, Flower2, Lightbulb, UtensilsCrossed } from "lucide-react";
 
 const STEPS = [
-  { icon: Flower2, label: "Arranging the décor" },
+  { icon: Flower2, label: "Arranging the decor" },
   { icon: UtensilsCrossed, label: "Preparing the menu" },
   { icon: Lightbulb, label: "Setting up the lighting" },
   { icon: Camera, label: "Booking the photographer" },
 ];
 
 /**
- * Loading screen: an event coming together. A ring fills in four stages — décor,
+ * Loading screen: an event coming together. A ring fills in four stages — decor,
  * catering, lighting, photography — each lighting up as it is "arranged", with a line
  * of status text underneath. Pure SVG + CSS, so it shows instantly.
  */

@@ -45,7 +45,7 @@ function Inner() {
           ) : (
             <EmptyState
               title={params.q ? t("Nothing found for “{q}”", { q: params.q }) : t("No services match")}
-              body={t("Check the spelling, try a broader word like “décor” or “catering”, or ask our planning assistant.")}
+              body={t("Check the spelling, try a broader word like “decor” or “catering”, or ask our planning assistant.")}
               action={<div className="flex flex-wrap justify-center gap-2"><ButtonLink href="/search" variant="outline">{t("Clear search")}</ButtonLink><ButtonLink href="/event-planner" variant="accent">{t("Plan with our assistant")}</ButtonLink></div>}
             />
           )}

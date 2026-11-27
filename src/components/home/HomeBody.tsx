@@ -3,13 +3,12 @@
 import type { ReactNode } from "react";
 import { useSiteSettings } from "../SiteSettingsProvider";
 import { ClosingInvite, PlannerTeaser } from "./Cinematic";
-import { FeaturedServices, HomeFaq, InspirationGallery, Testimonials, ValueTicker } from "./HomeSections";
+import { FeaturedServices, HomeFaq, InspirationGallery, Testimonials } from "./HomeSections";
 import { EventProcess } from "./EventProcess";
 import { CustomSection } from "./CustomSection";
 import type { BuiltInSection } from "@/lib/home-content";
 
 const BUILT_IN: Record<BuiltInSection, () => ReactNode> = {
-  ticker: () => <ValueTicker />,
   featured: () => <FeaturedServices />,
   process: () => <EventProcess />,
   planner: () => <PlannerTeaser />,

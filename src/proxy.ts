@@ -15,7 +15,7 @@ export function proxy(req: NextRequest) {
     url.search = "";
     return NextResponse.redirect(url);
   }
-  const hasSession = Boolean(req.cookies.get("__session")?.value || req.cookies.get("muhurto_demo")?.value);
+  const hasSession = Boolean(req.cookies.get("__session")?.value);
   if (!hasSession) {
     const url = req.nextUrl.clone();
     url.pathname = "/login";
