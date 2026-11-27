@@ -1,5 +1,5 @@
 import "server-only";
-import { FieldValue } from "firebase-admin/firestore";
+import { FieldValue } from "../firebase/rtdb-store";
 import { adminDb, COL } from "../firebase/admin";
 import type { Booking, MilestoneStatus, MonitoringAssignment, VendorProgressStatus } from "../types";
 import { ApiError, type SessionUser } from "./auth";

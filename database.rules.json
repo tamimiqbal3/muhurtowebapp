@@ -1,5 +1,8 @@
 {
   "rules": {
+    "site": {
+      "version": { ".read": true, ".write": false }
+    },
     "presence": {
       ".read": "auth != null && auth.token.admin === true",
       ".indexOn": ["at"],
@@ -13,6 +16,14 @@
       ".write": false,
       ".indexOn": ["at"]
     },
+    "bookings": { ".indexOn": ["customerId", "status", "createdAt"] },
+    "payments": { ".indexOn": ["bookingId", "status", "customerId", "createdAt"] },
+    "users": { ".indexOn": ["email", "createdAt"] },
+    "notifications": { ".indexOn": ["userId", "createdAt"] },
+    "customizationRequests": { ".indexOn": ["customerId", "status", "createdAt"] },
+    "eventUpdates": { ".indexOn": ["bookingId", "createdAt"] },
+    "monitoringAgents": { ".indexOn": ["active"] },
+    "monitoringAssignments": { ".indexOn": ["agentId", "bookingId", "eventDate"] },
     "$other": {
       ".read": false,
       ".write": false

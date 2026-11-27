@@ -1,33 +1,35 @@
 import "server-only";
 import { randomUUID } from "node:crypto";
+import { ServerValue } from "firebase-admin/database";
 import { CATEGORIES } from "../../data/categories";
 import { SERVICES } from "../../data/services";
 import { VENDORS } from "../../data/vendors";
 import { LOCATIONS } from "../../data/locations";
 import { REVIEWS } from "../../data/content";
 import { DEFAULT_SETTINGS, normalizeSettings, type SiteSettings } from "../site-settings";
-import type { DocumentSnapshot, QuerySnapshot, WriteBatch } from "firebase-admin/firestore";
-import { adminDb, adminStorage, COL } from "../firebase/admin";
+import { adminRtdb } from "../firebase/admin";
+import { _decode as decode, _encode as encode, mergeUpdates } from "../firebase/rtdb-store";
 import type { Category, Location, Review, Service, Vendor } from "../types";
 import { ApiError } from "./auth";
-import { invalidateCatalog } from "./catalog";
 
 /**
- * The website's catalogue and content in Firestore — what the admin panel edits and every visitor sees.
+ * The website's catalogue and content in Firebase Realtime Database — what the admin panel edits and
+ * every visitor sees.
  *
- *   categories/{slug}  services/{id}  vendors/{id}  locations/{id}  reviews/{id}
- *   site/settings      (contact, payments, homepage sections, support team…)
- *   site/meta          ({ seeded, updatedAt })
+ *   /catalog/categories/{slug}   /catalog/services/{id}   /catalog/vendors/{id}
+ *   /catalog/locations/{id}      /catalog/reviews/{id}    /catalog/settings   /catalog/meta
+ *   /site/version   ← a single number, bumped on every change. Browsers listen to ONLY this (a few
+ *                     bytes), then fetch the catalogue from Vercel's CDN, cached per version. This keeps
+ *                     Realtime Database downloads tiny on the free plan while every device updates live.
+ *   /media/{id}     ← images uploaded in the admin panel, served (and CDN-cached) from /api/media/{id}
  *
- * All writes happen here (Firebase Admin SDK, after the admin session is checked); the security
- * rules let browsers read the public parts only.
+ * All writes happen here on the server (after the admin session is checked); database.rules.json lets
+ * browsers read /site/version only.
  */
 export type SiteCollection = "categories" | "services" | "vendors" | "locations" | "reviews";
 export const SITE_COLLECTIONS: SiteCollection[] = ["categories", "services", "vendors", "locations", "reviews"];
-const LOCATIONS_COL = "locations";
-const colName = (c: SiteCollection) => (c === "locations" ? LOCATIONS_COL : COL[c]);
 const keyOf = (c: SiteCollection, item: Record<string, unknown>) => String(c === "categories" ? item.slug : item.id);
-const validKey = (k: string) => /^[\w.-]{1,100}$/.test(k);
+const validKey = (k: string) => /^[\w-]{1,100}$/.test(k);
 
 export interface SiteData {
   categories: Category[];
@@ -40,38 +42,52 @@ export interface SiteData {
 }
 
 const SEED: SiteData = { categories: CATEGORIES, services: SERVICES, vendors: VENDORS, locations: LOCATIONS, reviews: REVIEWS, settings: DEFAULT_SETTINGS, updatedAt: null };
+export const seedData = () => SEED;
+
+const db = () => adminRtdb();
 
 /* ─── reading ─────────────────────────────────────────────────────── */
 
-let cache: { at: number; data: SiteData | null } | null = null;
-const TTL = 5_000;
+let cache: { version: number; data: SiteData | null } | null = null;
 
-/** The full catalogue from Firestore, or null if it has never been published (use the bundled seed). */
-export async function readSite(fresh = false): Promise<SiteData | null> {
-  if (!fresh && cache && Date.now() - cache.at < TTL) return cache.data;
-  const db = adminDb();
-  const meta = await db.collection("site").doc("meta").get();
-  if (!meta.exists) {
-    cache = { at: Date.now(), data: null };
-    return null;
+/** Current catalogue version (0 = never published). One tiny read. */
+export async function siteVersion(): Promise<number> {
+  const v = (await db().ref("site/version").once("value")).val();
+  return typeof v === "number" ? v : 0;
+}
+
+function toList<T>(node: unknown): T[] {
+  if (!node || typeof node !== "object") return [];
+  return Object.values(node as Record<string, Record<string, unknown>>)
+    .filter((x) => x && typeof x === "object")
+    .sort((a, b) => Number(a._order ?? 0) - Number(b._order ?? 0))
+    .map((x) => { const { _order, ...rest } = x; void _order; return rest as T; });
+}
+
+/** The full catalogue, or null if it has never been published (the bundled seed is used). */
+export async function readSite(): Promise<{ version: number; data: SiteData | null }> {
+  const version = await siteVersion();
+  if (cache && cache.version === version) return cache;
+  if (!version) {
+    cache = { version, data: null };
+    return cache;
   }
-  const [cats, svcs, vends, locs, revs, settings] = await Promise.all([
-    ...SITE_COLLECTIONS.map((c) => db.collection(colName(c)).get()),
-    db.collection("site").doc("settings").get(),
-  ]);
-  const order = (a: { data: () => Record<string, unknown> }, b: { data: () => Record<string, unknown> }) => Number(a.data()._order ?? 0) - Number(b.data()._order ?? 0);
-  const list = <T,>(snap: QuerySnapshot) => snap.docs.sort(order).map((d) => { const { _order, ...rest } = d.data(); void _order; return rest as T; });
+  const raw = decode((await db().ref("catalog").once("value")).val()) as Record<string, unknown> | null;
+  if (!raw) {
+    cache = { version, data: null };
+    return cache;
+  }
   const data: SiteData = {
-    categories: list<Category>(cats as QuerySnapshot),
-    services: list<Service>(svcs as QuerySnapshot),
-    vendors: list<Vendor>(vends as QuerySnapshot),
-    locations: list<Location>(locs as QuerySnapshot),
-    reviews: list<Review>(revs as QuerySnapshot),
-    settings: normalizeSettings((settings as DocumentSnapshot).data() ?? {}),
-    updatedAt: (meta.data()?.updatedAt as string) ?? null,
+    categories: toList<Category>(raw.categories),
+    services: toList<Service>(raw.services),
+    vendors: toList<Vendor>(raw.vendors),
+    locations: toList<Location>(raw.locations),
+    reviews: toList<Review>(raw.reviews),
+    settings: normalizeSettings(raw.settings ?? {}),
+    updatedAt: ((raw.meta as Record<string, unknown> | undefined)?.updatedAt as string) ?? null,
   };
-  cache = { at: Date.now(), data };
-  return data;
+  cache = { version, data };
+  return cache;
 }
 
 /** What a visitor may see: active services and visible reviews only. */
@@ -79,29 +95,35 @@ export function publicView(d: SiteData): SiteData {
   return { ...d, services: d.services.filter((s) => s.active !== false), reviews: d.reviews.filter((r) => !r.hidden) };
 }
 
-/* ─── images: anything uploaded as a data: URL is moved into Firebase Storage ─── */
+/** The site settings alone (support team for invoices, etc.), falling back to defaults. */
+export async function readSettings(): Promise<SiteSettings> {
+  try {
+    const raw = decode((await db().ref("catalog/settings").once("value")).val());
+    return raw ? normalizeSettings(raw) : DEFAULT_SETTINGS;
+  } catch {
+    return DEFAULT_SETTINGS;
+  }
+}
+
+/* ─── images: stored in Realtime Database, served & CDN-cached by /api/media/{id} ─── */
+
+const MAX_IMAGE = 900 * 1024; // keep each image well under 1 MB (admin uploads are resized in the browser)
+
+export async function saveImage(buf: Buffer, contentType: string): Promise<string> {
+  if (!/^image\/(png|jpeg|webp)$/.test(contentType)) throw new ApiError(400, "Only PNG, JPEG or WebP images can be uploaded.");
+  if (buf.length > MAX_IMAGE) throw new ApiError(413, "That image is too large after resizing (max 900 KB). Try a smaller photo.");
+  const id = randomUUID().replace(/-/g, "");
+  await db().ref(`media/${id}`).set({ type: contentType, data: buf.toString("base64"), size: buf.length, at: ServerValue.TIMESTAMP });
+  return `/api/media/${id}`;
+}
 
 async function uploadDataUrl(dataUrl: string): Promise<string> {
   const m = /^data:(image\/(png|jpeg|webp));base64,(.+)$/.exec(dataUrl);
   if (!m) throw new ApiError(400, "Only PNG, JPEG or WebP images can be uploaded.");
-  const buf = Buffer.from(m[3], "base64");
-  if (buf.length > 8 * 1024 * 1024) throw new ApiError(413, "That image is too large (8 MB max).");
-  return saveImage(buf, m[1]);
+  return saveImage(Buffer.from(m[3], "base64"), m[1]);
 }
 
-export async function saveImage(buf: Buffer, contentType: string): Promise<string> {
-  const ext = contentType === "image/png" ? "png" : contentType === "image/webp" ? "webp" : "jpg";
-  const bucket = adminStorage().bucket();
-  const path = `site/${new Date().toISOString().slice(0, 7)}/${randomUUID()}.${ext}`;
-  const token = randomUUID();
-  await bucket.file(path).save(buf, {
-    resumable: false,
-    metadata: { contentType, cacheControl: "public, max-age=31536000, immutable", metadata: { firebaseStorageDownloadTokens: token } },
-  });
-  return `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(path)}?alt=media&token=${token}`;
-}
-
-/** Walks any value and replaces data: image URLs with Storage URLs. */
+/** Walks any value and replaces data: image URLs with /api/media URLs. */
 async function externalize<T>(value: T): Promise<T> {
   if (typeof value === "string") return (value.startsWith("data:image/") ? await uploadDataUrl(value) : value) as T;
   if (Array.isArray(value)) return (await Promise.all(value.map((v) => externalize(v)))) as T;
@@ -115,101 +137,61 @@ async function externalize<T>(value: T): Promise<T> {
 
 /* ─── writing ─────────────────────────────────────────────────────── */
 
-const MAX_DOC = 900_000;
-function checkSize(o: unknown) {
-  if (JSON.stringify(o).length > MAX_DOC) throw new ApiError(413, "That item is too large to save.");
+function stamp(updates: Record<string, unknown>) {
+  updates["catalog/meta"] = { seeded: true, updatedAt: new Date().toISOString() };
+  updates["site/version"] = ServerValue.TIMESTAMP; // every open browser refreshes from this
+  return updates;
 }
 
-async function commitInChunks(ops: Array<(b: WriteBatch) => void>) {
-  const db = adminDb();
-  for (let i = 0; i < ops.length; i += 400) {
-    const batch = db.batch();
-    ops.slice(i, i + 400).forEach((op) => op(batch));
-    await batch.commit();
-  }
+async function commit(updates: Record<string, unknown>) {
+  await db().ref().update(mergeUpdates(stamp(updates)));
+  cache = null;
+  const { invalidateCatalog } = await import("./catalog");
+  invalidateCatalog();
 }
 
 /** Replaces the whole catalogue (first publish, "restore defaults", or importing a browser's local edits). */
 export async function writeAll(input: SiteData) {
-  const db = adminDb();
   const data = await externalize(input);
-  const ops: Array<(b: WriteBatch) => void> = [];
+  const node: Record<string, unknown> = {};
   for (const c of SITE_COLLECTIONS) {
-    const col = db.collection(colName(c));
-    const existing = await col.listDocuments();
-    const items = (data[c] as unknown as Record<string, unknown>[]).filter((x) => validKey(keyOf(c, x)));
-    const keep = new Set(items.map((x) => keyOf(c, x)));
-    existing.filter((d) => !keep.has(d.id)).forEach((d) => ops.push((b) => b.delete(d)));
-    items.forEach((x, i) => { checkSize(x); ops.push((b) => b.set(col.doc(keyOf(c, x)), { ...x, _order: i })); });
+    node[c] = Object.fromEntries(
+      (data[c] as unknown as Record<string, unknown>[])
+        .filter((x) => validKey(keyOf(c, x)))
+        .map((x, i) => [keyOf(c, x), encode({ ...x, _order: i })]),
+    );
   }
-  const settings = normalizeSettings(data.settings);
-  checkSize(settings);
-  const now = new Date().toISOString();
-  ops.push((b) => b.set(db.collection("site").doc("settings"), settings));
-  ops.push((b) => b.set(db.collection("site").doc("meta"), { seeded: true, updatedAt: now }));
-  await commitInChunks(ops);
-  done();
+  node.settings = encode(normalizeSettings(data.settings));
+  await commit({ catalog: node });
 }
 
-/** Makes sure Firestore holds the full catalogue before the first single-item edit. */
+/** Makes sure the database holds the full catalogue before the first single-item edit. */
 async function ensureSeeded() {
-  const meta = await adminDb().collection("site").doc("meta").get();
-  if (!meta.exists) await writeAll(SEED);
-}
-
-async function touch() {
-  await adminDb().collection("site").doc("meta").set({ seeded: true, updatedAt: new Date().toISOString() }, { merge: true });
-  done();
-}
-
-function done() {
-  cache = null;
-  invalidateCatalog();
+  if (!(await siteVersion())) await writeAll(SEED);
 }
 
 export async function upsertItem(c: SiteCollection, item: Record<string, unknown>, previousKey?: string) {
   await ensureSeeded();
-  const db = adminDb();
   const key = keyOf(c, item);
   if (!validKey(key)) throw new ApiError(400, "This item needs a valid ID (letters, numbers and dashes).");
   const clean = await externalize(item);
-  checkSize(clean);
-  const col = db.collection(colName(c));
-  const prev = previousKey && previousKey !== key && validKey(previousKey) ? col.doc(previousKey) : null;
-  const old = await (prev ?? col.doc(key)).get();
-  const order = old.exists ? old.data()?._order ?? Date.now() : Date.now();
-  const batch = db.batch();
-  batch.set(col.doc(key), { ...clean, _order: order });
-  if (prev) batch.delete(prev);
-  await batch.commit();
-  await touch();
+  const prevKey = previousKey && previousKey !== key && validKey(previousKey) ? previousKey : null;
+  const old = (await db().ref(`catalog/${c}/${prevKey ?? key}/_order`).once("value")).val();
+  const updates: Record<string, unknown> = { [`catalog/${c}/${key}`]: encode({ ...clean, _order: typeof old === "number" ? old : Date.now() }) };
+  if (prevKey) updates[`catalog/${c}/${prevKey}`] = null;
+  await commit(updates);
   return clean;
 }
 
 export async function removeItem(c: SiteCollection, key: string) {
   if (!validKey(key)) throw new ApiError(400, "Invalid item.");
   await ensureSeeded();
-  await adminDb().collection(colName(c)).doc(key).delete();
-  await touch();
+  await commit({ [`catalog/${c}/${key}`]: null });
 }
 
 export async function saveSiteSettings(input: unknown) {
   await ensureSeeded();
   const settings = normalizeSettings(await externalize(input));
-  checkSize(settings);
-  await adminDb().collection("site").doc("settings").set(settings);
-  await touch();
+  await commit({ "catalog/settings": encode(settings) });
   return settings;
-}
-
-export const seedData = () => SEED;
-
-/** The site settings alone (support team for invoices, etc.), falling back to defaults. */
-export async function readSettings(): Promise<SiteSettings> {
-  try {
-    const snap = await adminDb().collection("site").doc("settings").get();
-    return snap.exists ? normalizeSettings(snap.data()) : DEFAULT_SETTINGS;
-  } catch {
-    return DEFAULT_SETTINGS;
-  }
 }

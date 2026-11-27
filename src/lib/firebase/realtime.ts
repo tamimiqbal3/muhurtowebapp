@@ -1,50 +1,33 @@
 "use client";
 
-import { getFirebaseApp } from "./client";
+import { getRealtimeDb } from "./client";
 
 /**
- * Live subscription to the website's catalogue and content in Firestore. Every browser keeps these
- * listeners open, so an admin change appears on every device within about a second — no refresh.
+ * Live sync through Firebase Realtime Database.
  *
- * Calls `onData(null)` while Firestore has no published catalogue yet (the built-in one is shown).
+ * Every open browser listens to ONE tiny value — /site/version — which the server bumps on every admin
+ * change. When it changes, the page fetches the new catalogue (served from Vercel's CDN, cached per
+ * version). So a change reaches every device within about a second, while each visitor downloads only a
+ * few bytes from Realtime Database instead of the whole catalogue — well inside the free (Spark) plan.
+ *
+ * To stay under the free plan's limit of 100 simultaneous connections, a tab that has been in the
+ * background for a minute disconnects, and reconnects (catching up instantly) when it's shown again.
  */
-export type LiveSite = {
-  categories: unknown[]; services: unknown[]; vendors: unknown[]; locations: unknown[]; reviews: unknown[];
-  settings: unknown; updatedAt: string | null;
-};
-
-const COLS = ["categories", "services", "vendors", "locations", "reviews"] as const;
-
-export async function subscribeSite(onData: (d: LiveSite | null) => void, onError: (e: Error) => void): Promise<() => void> {
-  const app = getFirebaseApp();
-  if (!app) throw new Error("Firebase is not configured.");
-  const { getFirestore, collection, doc, onSnapshot } = await import("firebase/firestore");
-  const db = getFirestore(app);
-  const parts: Partial<Record<(typeof COLS)[number] | "settings" | "meta", unknown>> = {};
-  const unsubs: Array<() => void> = [];
-  const strip = (o: Record<string, unknown>) => { const { _order, ...rest } = o; void _order; return rest; };
-
-  const emit = () => {
-    if (!("meta" in parts) || !("settings" in parts) || COLS.some((c) => !(c in parts))) return; // wait for the first full picture
-    const meta = parts.meta as { updatedAt?: string } | null;
-    if (!meta) return onData(null);
-    onData({
-      categories: parts.categories as unknown[], services: parts.services as unknown[], vendors: parts.vendors as unknown[],
-      locations: parts.locations as unknown[], reviews: parts.reviews as unknown[], settings: parts.settings ?? {}, updatedAt: meta.updatedAt ?? null,
-    });
+export async function subscribeVersion(onVersion: (v: number) => void, onError: (e: Error) => void): Promise<() => void> {
+  const db = await getRealtimeDb();
+  if (!db) throw new Error("Firebase is not configured.");
+  const { ref, onValue, goOffline, goOnline } = await import("firebase/database");
+  const off = onValue(
+    ref(db, "site/version"),
+    (snap) => { const v = snap.val(); onVersion(typeof v === "number" ? v : 0); },
+    (e) => onError(e),
+  );
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const onVis = () => {
+    clearTimeout(timer);
+    if (document.hidden) timer = setTimeout(() => goOffline(db), 60_000);
+    else goOnline(db);
   };
-  const fail = (e: Error) => onError(e);
-
-  for (const c of COLS) {
-    unsubs.push(onSnapshot(collection(db, c), (snap) => {
-      parts[c] = snap.docs
-        .map((d) => d.data() as Record<string, unknown>)
-        .sort((a, b) => Number(a._order ?? 0) - Number(b._order ?? 0))
-        .map(strip);
-      emit();
-    }, fail));
-  }
-  unsubs.push(onSnapshot(doc(db, "site", "settings"), (snap) => { parts.settings = snap.exists() ? snap.data() : {}; emit(); }, fail));
-  unsubs.push(onSnapshot(doc(db, "site", "meta"), (snap) => { parts.meta = snap.exists() ? snap.data() : null; emit(); }, fail));
-  return () => unsubs.forEach((u) => u());
+  document.addEventListener("visibilitychange", onVis);
+  return () => { off(); clearTimeout(timer); document.removeEventListener("visibilitychange", onVis); };
 }

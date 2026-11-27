@@ -1,7 +1,7 @@
-/* Grants a role to a registered user.
+/* Grants a role to a registered user (stored in Realtime Database).
    Usage: npm run set-role -- someone@example.com admin|agent|customer [phone] [city,city] */
 import { getAuth } from "firebase-admin/auth";
-import { getFirestore } from "firebase-admin/firestore";
+import { getDatabase } from "firebase-admin/database";
 import { initAdmin } from "./_admin";
 
 async function main() {
@@ -12,16 +12,18 @@ async function main() {
   }
   initAdmin();
   const user = await getAuth().getUserByEmail(email);
-  const db = getFirestore();
+  const db = getDatabase();
+  const name = user.displayName ?? email.split("@")[0];
   await getAuth().setCustomUserClaims(user.uid, { role });
-  await db.collection("users").doc(user.uid).set({ uid: user.uid, email, name: user.displayName ?? email.split("@")[0], role, updatedAt: new Date().toISOString() }, { merge: true });
+  await db.ref(`users/${user.uid}`).update({ uid: user.uid, email, name, role, updatedAt: new Date().toISOString() });
   if (role === "agent") {
-    await db.collection("monitoringAgents").doc(user.uid).set(
-      { id: user.uid, name: user.displayName ?? email.split("@")[0], email, phone, cities: cities.split(",").map((c) => c.trim()).filter(Boolean), active: true, activeAssignments: 0, createdAt: new Date().toISOString() },
-      { merge: true },
-    );
+    const list = cities.split(",").map((c) => c.trim()).filter(Boolean);
+    const agent = db.ref(`monitoringAgents/${user.uid}`);
+    const existing = (await agent.once("value")).val() as { activeAssignments?: number; createdAt?: string } | null;
+    await agent.update({ id: user.uid, name, email, phone, cities: list.length ? list : "__empty_array__", active: true, activeAssignments: existing?.activeAssignments ?? 0, createdAt: existing?.createdAt ?? new Date().toISOString() });
   }
   console.log(`${email} is now ${role}. Ask them to sign out and back in.`);
+  process.exit(0);
 }
 
 main().catch((e) => {

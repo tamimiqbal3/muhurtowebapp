@@ -85,7 +85,7 @@ export function normalizeSettings(input: unknown): SiteSettings {
   const text = (k: keyof SiteSettings["content"], max = 400) => str(ct[k], d.content[k], max) || d.content[k];
   const enabled = Array.isArray(p.enabled) ? (p.enabled.filter((x: unknown) => typeof x === "string" && (ALL_PAYMENT_IDS as string[]).includes(x)) as PaymentMethodId[]) : d.payments.enabled;
   const logos: Partial<Record<PaymentMethodId, string>> = {};
-  if (p.logos && typeof p.logos === "object") for (const id of ALL_PAYMENT_IDS) { const u = p.logos[id]; if (typeof u === "string" && ((/^https:\/\//.test(u) && u.length < 600) || (/^data:image\/(png|jpeg|webp);base64,/.test(u) && u.length < 700_000))) logos[id] = u; }
+  if (p.logos && typeof p.logos === "object") for (const id of ALL_PAYMENT_IDS) { const u = p.logos[id]; if (typeof u === "string" && ((/^https:\/\//.test(u) && u.length < 600) || /^\/api\/media\/[a-f0-9]{16,64}$/.test(u) || (/^data:image\/(png|jpeg|webp);base64,/.test(u) && u.length < 700_000))) logos[id] = u; }
   const ms = Number(i.hero?.intervalMs);
   return {
     contact: { address: str(c.address, d.contact.address), addressBn: str(c.addressBn, d.contact.addressBn), phone: str(c.phone, d.contact.phone, 40), email: str(c.email, d.contact.email, 120), hours: str(c.hours, d.contact.hours, 120), hoursBn: str(c.hoursBn, d.contact.hoursBn, 120) },

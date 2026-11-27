@@ -56,29 +56,33 @@ function CloudBar() {
   );
 }
 
-type Health = { configured: boolean; environment: string; found: Record<string, boolean>; problems: string[]; firestore: { ok: boolean; message?: string } };
+type Health = { configured: boolean; environment: string; project?: string | null; databaseURL?: string; found: Record<string, boolean>; problems: string[]; database: { ok: boolean; message?: string; raw?: string } };
 
-/** Pinpoints why the server can't reach Firebase, with the exact fix. */
+/** Pinpoints why the server can't reach Firebase Realtime Database, with the exact fix. */
 function SetupHelp() {
   const [h, setH] = useState<Health | null>(null);
   useEffect(() => { fetch("/api/site/health", { cache: "no-store" }).then((r) => r.json()).then(setH).catch(() => undefined); }, []);
-  const reasons = h ? [...h.problems, ...(h.configured && !h.firestore.ok && h.firestore.message ? [h.firestore.message] : [])] : [];
+  const reasons = h ? [...h.problems, ...(h.configured && !h.database?.ok && h.database?.message ? [h.database.message] : [])] : [];
+  const keyMissing = h ? !h.configured : false;
   return (
     <div className="mb-4 rounded-xl border border-warning/40 bg-warning/10 p-4 text-xs text-ink">
       <p><strong>Not connected to Firebase yet</strong> — changes are saved in this browser only.</p>
-      {reasons.length > 0 && (
-        <ul className="mt-2 list-disc space-y-1 pl-5 font-medium">{reasons.map((r) => <li key={r}>{r}</li>)}</ul>
-      )}
+      {h?.configured && h.database?.ok && <p className="mt-2">The server can reach Realtime Database now — reload this page.</p>}
+      {reasons.length > 0 && <ul className="mt-2 list-disc space-y-1 pl-5 font-medium">{reasons.map((r) => <li key={r}>{r}</li>)}</ul>}
       {h && (
-        <p className="mt-2 text-ink-soft">
-          Server sees ({h.environment}): {Object.entries(h.found).map(([k, v]) => `${k} ${v ? "✓" : "—"}`).join(" · ")}
-        </p>
+        <div className="mt-2 space-y-1 text-ink-soft">
+          <p>Server sees ({h.environment}): {Object.entries(h.found).map(([k, v]) => `${k} ${v ? "✓" : "—"}`).join(" · ")}</p>
+          {h.configured && <p>Project <strong>{h.project}</strong> · Realtime Database <strong>{h.databaseURL}</strong></p>}
+          {h.database?.raw && <p className="break-all font-mono text-[0.65rem]">Firebase says: {h.database.raw}</p>}
+        </div>
       )}
-      <ol className="mt-3 list-decimal space-y-1 pl-5 text-ink-soft">
-        <li>Firebase console → Project settings → <strong>Service accounts</strong> → <strong>Generate new private key</strong> (downloads a .json file).</li>
-        <li>Vercel → your project → Settings → <strong>Environment Variables</strong> → add <code>FIREBASE_SERVICE_ACCOUNT</code> and paste the <em>entire</em> contents of that .json file as the value. Tick <strong>Production</strong> (and Preview).</li>
-        <li>Vercel → Deployments → ⋯ on the latest → <strong>Redeploy</strong> (variables only apply to new deployments).</li>
-      </ol>
+      {keyMissing && (
+        <ol className="mt-3 list-decimal space-y-1 pl-5 text-ink-soft">
+          <li>Firebase console → Project settings → <strong>Service accounts</strong> → <strong>Generate new private key</strong> (downloads a .json file).</li>
+          <li>Vercel → your project → Settings → <strong>Environment Variables</strong> → add <code>FIREBASE_SERVICE_ACCOUNT</code> and paste the <em>entire</em> contents of that .json file. Tick <strong>Production</strong>.</li>
+          <li>Vercel → Deployments → ⋯ on the latest → <strong>Redeploy</strong>.</li>
+        </ol>
+      )}
     </div>
   );
 }

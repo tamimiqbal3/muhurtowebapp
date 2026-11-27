@@ -2,7 +2,7 @@
 
 Premium event management & planning marketplace for Bangladesh — weddings, birthdays, corporate events, family events and food & culinary services, with an AI event planner, customisation requests, SSLCommerz payments (2% platform fee) and a Monitoring Agent for every paid event.
 
-**Stack:** Next.js 16 (App Router) · TypeScript · Tailwind CSS v4 · Motion · Lenis smooth scroll · Lucide · Firebase Auth / Firestore / Storage · Gemini API · SSLCommerz · Vercel
+**Stack:** Next.js 16 (App Router) · TypeScript · Tailwind CSS v4 · Motion · Lenis smooth scroll · Lucide · Firebase Auth / Realtime Database · Gemini API · SSLCommerz · Vercel
 
 ---
 
@@ -20,7 +20,7 @@ npm run build                  # production build + type-check
 
 | Feature | No env vars | + Firebase | + Gemini | + SSLCommerz |
 |---|---|---|---|---|
-| Homepage, 5 categories, 30 subsections, 60 listings, search & filters | ✅ (bundled demo catalogue) | ✅ (Firestore catalogue) | | |
+| Homepage, 5 categories, 30 subsections, 60 listings, search & filters | ✅ (bundled demo catalogue) | ✅ (Realtime Database catalogue) | | |
 | Customize page & event plan (saved on device) | ✅ | ✅ | | |
 | AI Event Planner | ✅ rule-based mode (clearly labelled) | | ✅ Gemini mode | |
 | Login, register, customer dashboard, bookings, customisation requests | ✅ **demo mode** — stored in this browser (labelled) | ✅ real accounts | | |
@@ -34,10 +34,16 @@ Nothing pretends to work: missing credentials produce an explicit notice, never 
 
 The site is connected to the Firebase project **muhurto-app** (web config built into `src/lib/config.ts`; Analytics included). It switches mode automatically:
 
-- **Firebase mode** — when the server has the service-account variables (`FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY`). The catalogue, homepage sections and site settings live in Firestore (`categories`, `services`, `vendors`, `locations`, `reviews`, `site/settings`); admin edits are saved there and appear for every visitor within seconds; admin photo uploads go to Firebase Storage; customers sign in with real Firebase Authentication (Google Sign-In and email/password — no demo accounts); every browser keeps live Firestore listeners open, so admin changes appear on all devices instantly; bookings, payments (with invoice numbers) and invoices are stored in Firestore. The admin panel shows “Connected to Firebase”.
+- **Firebase mode** — when the server has the service account (`FIREBASE_SERVICE_ACCOUNT`). **All data lives in Firebase Realtime Database** — no Firestore or Storage needed (both fine to leave unused on the free Spark plan):
+  - `catalog/{categories,services,vendors,locations,reviews,settings}` — what the admin panel edits; `media/{id}` — uploaded images, served (and CDN-cached) at `/api/media/{id}`.
+  - `site/version` — a timestamp bumped on every admin save. Every open browser listens to just this value; when it changes the page fetches the new catalogue from `/api/site/catalog?v=<version>`, which Vercel's CDN caches per version. Changes reach all devices in about a second while Realtime Database serves each visitor only a few bytes.
+  - `users`, `bookings`, `payments`, `notifications`, `customizationRequests`, `eventUpdates`, `monitoringAgents`, `monitoringAssignments`, `counters` — written only by the server (Admin SDK), queried through the indexes in `database.rules.json`.
+  - `presence/{session}` (visitors online) and `adminFeed` (live admin alerts).
+  - Free-plan care: background tabs disconnect after a minute (Spark allows 100 simultaneous connections) and reconnect instantly when shown again.
+  Customers sign in with real Firebase Authentication (Google). The admin panel shows “Connected to Firebase · live sync on”.
 - **Local mode** — without those variables everything is kept in the browser's local storage (`src/lib/store/catalog.ts`, `src/lib/demo/store.ts`), as before. The admin panel shows “Local mode”.
 
-On the first admin save in Firebase mode, Firestore is seeded with the full built-in catalogue automatically. Edits made earlier in local mode can be copied up once with **“Copy them to Firebase”** in the admin panel.
+On the first admin save in Firebase mode, Realtime Database is seeded with the full built-in catalogue automatically. Edits made earlier in local mode can be copied up once with **“Copy them to Firebase”** in the admin panel.
 
 ## Environment variables
 
@@ -49,7 +55,7 @@ See `.env.example`. Add the same values in **Vercel → Project → Settings →
 | `NEXT_PUBLIC_FIREBASE_*` | no | Firebase web app config (Auth on the client) |
 | `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY` | **yes** | Firebase Admin (server only) |
 | `ADMIN_EMAILS` | no | Comma-separated emails promoted to admin on first sign-in |
-| `CATALOG_SOURCE` | no | `auto` (default) · `firestore` · `demo` |
+| `CATALOG_SOURCE` | no | `auto` (default) · `demo` |
 | `GEMINI_API_KEY` | **yes** | Gemini, server-side only |
 | `GEMINI_MODEL` | no | Defaults to `gemini-2.5-flash`; change without code edits |
 | `SSLCOMMERZ_STORE_ID`, `SSLCOMMERZ_STORE_PASSWORD` | **yes** | SSLCommerz credentials (server only) |
@@ -63,21 +69,15 @@ See `.env.example`. Add the same values in **Vercel → Project → Settings →
 ## Firebase setup (project: muhurto-app)
 
 1. **Authentication → Sign-in method** → enable *Email/Password* (and *Google* if wanted). Under *Settings → Authorized domains* add `muhurtowebapp.vercel.app` (and any custom domain).
-2. **Firestore Database** → *Create database* → production mode → region `asia-south1` (Mumbai, closest to Dhaka).
-3. **Storage** → *Get started* (default bucket `muhurto-app.firebasestorage.app`).
+2. **Realtime Database** → *Create database* (any location; the default URL is `https://muhurto-app-default-rtdb.asia-southeast1.firebasedatabase.app` — if yours differs, set `NEXT_PUBLIC_FIREBASE_DATABASE_URL` to the URL at the top of its *Data* tab).
+3. Realtime Database → **Rules** → paste the contents of `database.rules.json` → *Publish*.
 4. **Project settings → Service accounts → Generate new private key** (downloads a JSON file — keep it private, never commit it). In **Vercel → Settings → Environment Variables** add **`FIREBASE_SERVICE_ACCOUNT`** with the *entire* file contents as the value (Production), then redeploy. Alternatively add the three separate variables:
    - `FIREBASE_PROJECT_ID` = `muhurto-app`
    - `FIREBASE_CLIENT_EMAIL` = `client_email` from the JSON
    - `FIREBASE_PRIVATE_KEY` = `private_key` from the JSON (the whole value, including `-----BEGIN PRIVATE KEY-----` and the `\n` sequences)
    Then redeploy.
-5. **Realtime Database** → *Create database* → location **Singapore (asia-southeast1)** → *Start in locked mode*. It powers the admin panel's live alerts (new bookings, payments, sign-ups) and the “visitors online” counter. If you pick another location, set `NEXT_PUBLIC_FIREBASE_DATABASE_URL` to the URL shown at the top of its *Data* tab. Paste `database.rules.json` into its *Rules* tab.
-6. Deploy the security rules (they let browsers read only public data; all writes go through the server):
-   ```bash
-   npm i -g firebase-tools && firebase login
-   firebase deploy --only firestore:rules,firestore:indexes,storage,database
-   ```
-   (`.firebaserc` already points at `muhurto-app`.) Or paste `firestore.rules` and `storage.rules` into the console's *Rules* tabs.
-7. Open `/admin` — the bar should read **Connected to Firebase**. Make any save to publish the catalogue to Firestore.
+5. (Optional, CLI) `firebase deploy --only database` deploys the same rules (`.firebaserc` points at `muhurto-app`).
+7. Open `/admin` — the bar should read **Connected to Firebase**. Make any save to publish the catalogue to Realtime Database.
 8. Seed the catalogue (or use **Admin → Services → Import catalogue**):
    ```bash
    npm run seed            # add -- --force to overwrite demo docs
@@ -88,13 +88,13 @@ See `.env.example`. Add the same values in **Vercel → Project → Settings →
    npm run set-role -- agent@example.com agent 01711000000 "Dhaka,Gazipur"
    ```
 
-### Firestore collections
+### Realtime Database paths
 
 `users` · `categories` · `subcategories` · `services` · `vendors` · `bookings` · `payments` · `customizationRequests` · `monitoringAgents` · `monitoringAssignments` · `eventUpdates` · `reviews` · `notifications` · `supportRequests`
 
 Documents reference each other by ID (`booking.customerId`, `service.vendorId`, `payment.bookingId`, `monitoringAssignments/{bookingId}`, `eventUpdates.bookingId`, …). Dates are ISO strings.
 
-**Security model:** every write to bookings, payments, assignments, roles and the catalogue goes through server API routes using the Admin SDK, with server-side validation. `firestore.rules` gives clients read-only, ownership-scoped access and denies all client writes.
+**Security model:** every write to bookings, payments, assignments, roles and the catalogue goes through server API routes using the Admin SDK, with server-side validation. `database.rules.json` lets browsers read only `site/version`, write only their own presence entry, and lets the admin (custom token) read presence and alerts; everything else is server-only.
 
 ---
 
@@ -178,7 +178,7 @@ src/
   lib/                 pricing, search, validation, planner (parse/recommend), firebase (client/admin)
     server/            auth & roles, catalogue repo, bookings, payments, monitoring, agent, admin, gemini
 scripts/               seed, set-role, logic tests
-firestore.rules · firestore.indexes.json · storage.rules · firebase.json
+database.rules.json · firebase.json
 ```
 
 ## Content & demo data

@@ -1,7 +1,7 @@
 import "server-only";
 import { randomUUID } from "node:crypto";
-import { FieldValue } from "firebase-admin/firestore";
-import { adminAuth, adminDb, adminStorage, COL } from "../firebase/admin";
+import { FieldValue } from "../firebase/rtdb-store";
+import { adminAuth, adminDb, COL } from "../firebase/admin";
 import { CATEGORIES, CATEGORY_SLUGS, getCategory } from "../../data/categories";
 import { SERVICES } from "../../data/services";
 import { VENDORS } from "../../data/vendors";
@@ -222,32 +222,18 @@ async function uploadImage(req: Request) {
   const file = form.get("file");
   if (!(file instanceof File)) throw new ValidationError("Choose an image to upload.");
   if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) throw new ValidationError("Images must be JPEG, PNG or WebP.");
-  if (file.size > 4 * 1024 * 1024) throw new ValidationError("Images must be smaller than 4 MB.");
-  const bucket = adminStorage().bucket();
-  if (!bucket.name) throw new ApiError(503, "Firebase Storage bucket is not configured (NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET).");
-  const ext = file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
-  const path = `services/${Date.now()}-${randomUUID().slice(0, 8)}.${ext}`;
-  const token = randomUUID();
-  await bucket.file(path).save(Buffer.from(await file.arrayBuffer()), { contentType: file.type, metadata: { cacheControl: "public, max-age=31536000", metadata: { firebaseStorageDownloadTokens: token } } });
-  return { url: `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(path)}?alt=media&token=${token}` };
+  if (file.size > 900 * 1024) throw new ValidationError("Images must be smaller than 900 KB.");
+  const { saveImage } = await import("./site-store");
+  return { url: await saveImage(Buffer.from(await file.arrayBuffer()), file.type) };
 }
 
-/** Imports the bundled demo catalogue into Firestore (idempotent unless forced). */
+/** Publishes the bundled catalogue to Realtime Database (only if nothing is published yet, unless forced). */
 export async function seedCatalog(force = false) {
-  const db = adminDb();
-  const existing = await db.collection(COL.services).limit(1).get();
-  if (!existing.empty && !force) throw new ApiError(409, "Firestore already has services. Pass force to overwrite demo documents.");
-  const writer = db.bulkWriter();
-  for (const c of CATEGORIES) {
-    writer.set(db.collection(COL.categories).doc(c.slug), { slug: c.slug, name: c.name, nameBn: c.nameBn, tagline: c.tagline, description: c.description, order: CATEGORIES.indexOf(c) }, { merge: true });
-    c.subcategories.forEach((s, i) => writer.set(db.collection(COL.subcategories).doc(`${c.slug}__${s.slug}`), { ...s, categorySlug: c.slug, order: i }, { merge: true }));
-  }
-  VENDORS.forEach((v) => writer.set(db.collection(COL.vendors).doc(v.id), v));
-  SERVICES.forEach((s) => writer.set(db.collection(COL.services).doc(s.id), JSON.parse(JSON.stringify(s))));
-  REVIEWS.forEach((r) => writer.set(db.collection(COL.reviews).doc(r.id), r));
-  await writer.close();
-  invalidateCatalog();
-  return { ok: true, services: SERVICES.length, vendors: VENDORS.length, reviews: REVIEWS.length };
+  const { readSite, seedData, writeAll } = await import("./site-store");
+  const { data } = await readSite();
+  if (data && !force) throw new ApiError(409, "The catalogue is already published. Pass force to overwrite it.");
+  await writeAll(seedData());
+  return { ok: true };
 }
 
 export async function setRole(uid: string, role: Role) {

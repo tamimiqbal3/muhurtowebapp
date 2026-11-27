@@ -5,8 +5,8 @@
  * site settings/content. Every page reads through `useCatalog()` / `getCatalogSnapshot()`.
  *
  * Two modes, chosen automatically:
- *  - Firebase ("cloud"): when the server has Firebase access, data comes from Firestore via
- *    /api/site/catalog and admin edits are saved there (so every visitor sees them). A copy is kept in
+ *  - Firebase ("cloud"): when the server has Firebase access, data comes from Realtime Database via
+ *    /api/site/catalog and admin edits are saved there; /site/version updates every open browser live. A copy is kept in
  *    localStorage only so pages paint instantly on the next visit.
  *  - Local: without Firebase server access, everything lives in this browser's localStorage,
  *    seeded from the files in src/data.
@@ -32,7 +32,7 @@ export interface CatalogData {
 
 export const SEED: CatalogData = { categories: CATEGORIES, services: SERVICES, vendors: VENDORS, locations: LOCATIONS, reviews: REVIEWS, settings: DEFAULT_SETTINGS, updatedAt: null };
 
-/** Storage contract — a Firestore implementation can replace this later. */
+/** Storage contract for the catalogue copy kept in this browser. */
 export interface CatalogRepository {
   load(): Partial<CatalogData> | null;
   save(data: CatalogData): void;
@@ -61,7 +61,7 @@ export const localRepository: CatalogRepository = {
 const CLOUD_KEY = "muhurto.catalog.cloud.v1";
 const MODE_KEY = "muhurto.catalog.mode";
 
-/** Copy of the Firestore catalogue for instant paint (never edited directly). */
+/** Copy of the Firebase catalogue for instant paint (never edited directly). */
 const cloudCache: CatalogRepository = {
   load() {
     try {
@@ -85,12 +85,12 @@ const cloudCache: CatalogRepository = {
 export interface CloudStatus {
   /** "unknown" until the server answers. */
   mode: "unknown" | "local" | "cloud";
-  /** Firestore has no catalogue yet — the bundled data is shown until the first admin save. */
+  /** Firebase has no catalogue yet — the bundled data is shown until the first admin save. */
   empty: boolean;
   saving: number;
   error: string | null;
   lastSavedAt: string | null;
-  /** Live Firestore listeners are connected (changes from any device appear instantly). */
+  /** The Realtime Database live listener is connected (changes from any device appear instantly). */
   live: boolean;
 }
 let cloud: CloudStatus = { mode: "unknown", empty: false, saving: 0, error: null, lastSavedAt: null, live: false };
@@ -158,8 +158,10 @@ function ensureLoaded() {
   try { lastMode = localStorage.getItem(MODE_KEY); } catch { /* ignore */ }
   if (lastMode === "cloud") repo = cloudCache;
   state = hydrate(repo.load());
-  void syncFromServer();
+  // The live listener triggers the first load (with the current version). If it can't connect quickly
+  // (no Firebase, rules not published, offline), load once directly instead.
   void startLive();
+  setTimeout(() => { if (currentVersion < 0 && cloud.mode === "unknown") void syncFromServer(); }, 2500);
   window.addEventListener("storage", (e) => {
     if (e.key !== (repo === cloudCache ? CLOUD_KEY : KEY)) return;
     state = hydrate(repo.load());
@@ -189,34 +191,23 @@ export function useCatalog(): CatalogData {
   return useSyncExternalStore(subscribe, getCatalogSnapshot, () => SEED);
 }
 
-/* ─── Live sync: Firestore listeners keep every open browser up to date ─── */
+/* ─── Live sync: Realtime Database /site/version tells every open browser when to refresh ─── */
 
 let live = false;
-let pendingLive: CatalogData | null | undefined;
-
-function applyLive(d: CatalogData | null) {
-  if (d) {
-    state = d;
-    cloudCache.save({ ...d, mediaVersion: MEDIA_VERSION } as CatalogData);
-    try { localStorage.setItem(MODE_KEY, "cloud"); } catch { /* ignore */ }
-    repo = cloudCache;
-  } else if (repo === cloudCache) {
-    state = SEED; // Firestore not published yet: show the built-in catalogue
-  }
-  listeners.forEach((l) => l());
-}
+let currentVersion = -1;
+let pendingVersion: number | null = null;
 
 async function startLive() {
   try {
-    const { subscribeSite } = await import("@/lib/firebase/realtime");
-    await subscribeSite(
-      (raw) => {
+    const { subscribeVersion } = await import("@/lib/firebase/realtime");
+    await subscribeVersion(
+      (v) => {
         live = true;
-        const d = raw ? hydrate({ ...(raw as unknown as Partial<CatalogData>), mediaVersion: MEDIA_VERSION } as Partial<CatalogData>) : null;
-        setCloud({ live: true, empty: !raw });
-        // Don't overwrite an admin's in-flight edits; apply the newest snapshot once saves settle.
-        if (cloud.saving > 0) { pendingLive = d; return; }
-        applyLive(d);
+        setCloud({ live: true });
+        if (v === currentVersion) return;
+        // Don't overwrite an admin's in-flight edits; refresh once the saves settle.
+        if (cloud.saving > 0) { pendingVersion = v; return; }
+        void syncFromServer(v);
       },
       () => { live = false; setCloud({ live: false }); },
     );
@@ -225,14 +216,20 @@ async function startLive() {
   }
 }
 
-/** Loads the live catalogue from Firestore (when the server has Firebase access). */
-export async function syncFromServer(): Promise<void> {
+/**
+ * Loads the catalogue for a version from the server (Realtime Database behind Vercel's CDN). Without a
+ * version (first load, or live sync unavailable) it asks for the current one.
+ */
+export async function syncFromServer(version?: number): Promise<void> {
   if (typeof window === "undefined") return;
   const admin = window.location.pathname.startsWith("/admin");
+  const qs = new URLSearchParams();
+  if (admin) qs.set("admin", "1");
+  if (version) qs.set("v", String(version));
   try {
-    const res = await fetch(admin ? "/api/site/catalog?admin=1" : "/api/site/catalog", { cache: admin ? "no-store" : "default", credentials: "same-origin" });
+    const res = await fetch(`/api/site/catalog${qs.size ? `?${qs}` : ""}`, { cache: admin ? "no-store" : "default", credentials: "same-origin" });
     if (!res.ok) throw new Error(String(res.status));
-    const body = (await res.json()) as { configured: boolean; data?: Partial<CatalogData> | null };
+    const body = (await res.json()) as { configured: boolean; version?: number; data?: Partial<CatalogData> | null };
     if (!body.configured) {
       if (repo === cloudCache) { repo = localRepository; state = hydrate(repo.load()); listeners.forEach((l) => l()); }
       try { localStorage.setItem(MODE_KEY, "local"); } catch { /* ignore */ }
@@ -241,8 +238,8 @@ export async function syncFromServer(): Promise<void> {
     }
     try { localStorage.setItem(MODE_KEY, "cloud"); } catch { /* ignore */ }
     repo = cloudCache;
-    // Live listeners are the source of truth when running; otherwise use this response.
-    if (cloud.saving === 0 && !live) {
+    if (cloud.saving === 0) {
+      currentVersion = body.version ?? currentVersion;
       state = body.data ? hydrate({ ...body.data, mediaVersion: MEDIA_VERSION } as Partial<CatalogData>) : SEED;
       if (body.data) cloudCache.save({ ...state, mediaVersion: MEDIA_VERSION } as CatalogData);
       listeners.forEach((l) => l());
@@ -250,11 +247,11 @@ export async function syncFromServer(): Promise<void> {
     setCloud({ mode: "cloud", empty: !body.data });
   } catch {
     // Offline or server error: keep what we have.
-    if (cloud.mode === "unknown") setCloud({ mode: repo === cloudCache ? "cloud" : "local" });
+    if (cloud.mode === "unknown") setCloud({ mode: "local", error: null });
   }
 }
 
-/* Saves to Firestore run one after another, in the order they were made. */
+/* Saves to Realtime Database (via the server) run one after another, in the order they were made. */
 let queue: Promise<unknown> = Promise.resolve();
 function send(body: Record<string, unknown>, onDone?: (res: Record<string, unknown>) => void) {
   setCloud({ saving: cloud.saving + 1, error: null });
@@ -270,8 +267,9 @@ function send(body: Record<string, unknown>, onDone?: (res: Record<string, unkno
       void syncFromServer(); // show what is really stored
     }
     if (cloud.saving === 0) {
-      if (live && pendingLive !== undefined) { applyLive(pendingLive); pendingLive = undefined; }
-      else if (!live) void syncFromServer();
+      const v = pendingVersion;
+      pendingVersion = null;
+      void syncFromServer(v ?? undefined);
     }
   });
 }
@@ -309,7 +307,7 @@ export function localEditsBeforeFirebase(): CatalogData | null {
   return d && Array.isArray(d.services) ? hydrate(d) : null;
 }
 
-/** Copies this browser's pre-Firebase catalogue into Firestore. */
+/** Copies this browser's pre-Firebase catalogue into Firebase. */
 export function importLocalEdits() {
   const d = localEditsBeforeFirebase();
   if (!d || !isCloudMode()) return false;

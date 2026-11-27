@@ -1,9 +1,10 @@
 import "server-only";
 import { cert, getApps, initializeApp, type App } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
-import { getFirestore, type Firestore } from "firebase-admin/firestore";
+import type { Firestore } from "firebase-admin/firestore";
 import { getStorage } from "firebase-admin/storage";
-import { getDatabase } from "firebase-admin/database";
+import { getDatabase, ServerValue } from "firebase-admin/database";
+import { RtdbStore } from "./rtdb-store";
 import { firebaseClientConfig } from "../config";
 
 /**
@@ -69,7 +70,7 @@ export function isAdminConfigured(): boolean {
 let app: App | null = null;
 let db: Firestore | null = null;
 
-function getAdminApp(): App {
+export function getAdminApp(): App {
   const { creds, problems } = adminCredentials();
   if (!creds) throw new Error(problems[0] ?? "Firebase Admin is not configured.");
   if (app) return app;
@@ -84,21 +85,21 @@ function getAdminApp(): App {
 
 /** Realtime Database (live admin alerts and visitor presence). */
 export function adminRtdb() {
-  return getDatabase(getAdminApp());
+  return getDatabase(getAdminApp(), firebaseClientConfig.databaseURL);
 }
 
 export function adminAuth() {
   return getAuth(getAdminApp());
 }
 
+/**
+ * The app's database: Firebase Realtime Database, used through a document-store layer (rtdb-store.ts) so
+ * every server module reads and writes /bookings, /payments, /users … in Realtime Database.
+ * (Typed as the Firestore interface the server code was written against; only that subset is used.)
+ */
 export function adminDb(): Firestore {
   if (db) return db;
-  db = getFirestore(getAdminApp());
-  try {
-    db.settings({ ignoreUndefinedProperties: true });
-  } catch {
-    // settings() throws if already applied in a warm lambda — safe to ignore.
-  }
+  db = new RtdbStore(adminRtdb(), ServerValue) as unknown as Firestore;
   return db;
 }
 

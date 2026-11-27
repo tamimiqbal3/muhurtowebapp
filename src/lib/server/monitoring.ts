@@ -1,5 +1,6 @@
 import "server-only";
-import { FieldValue, type Transaction } from "firebase-admin/firestore";
+import type { Transaction } from "firebase-admin/firestore";
+import { FieldValue } from "../firebase/rtdb-store";
 import { adminDb, COL } from "../firebase/admin";
 import type { Booking, Milestone, MonitoringAgent, MonitoringAssignment } from "../types";
 import { writeEventUpdate, writeNotification } from "./notify";

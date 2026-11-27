@@ -19,7 +19,7 @@ export function Presence() {
       try {
         const db = await getRealtimeDb();
         if (!db || cancelled) return;
-        const { ref: dbRef, set, onDisconnect, serverTimestamp } = await import("firebase/database");
+        const { ref: dbRef, set, onDisconnect, onValue, serverTimestamp } = await import("firebase/database");
         let sid = "";
         try { sid = sessionStorage.getItem("mh.sid") ?? ""; } catch { /* ignore */ }
         if (!sid) {
@@ -27,10 +27,16 @@ export function Presence() {
           try { sessionStorage.setItem("mh.sid", sid); } catch { /* ignore */ }
         }
         const me = dbRef(db, `presence/${sid}`);
-        await onDisconnect(me).remove();
         const mobile = window.matchMedia("(max-width: 767px)").matches;
-        ref.current = { set: (p: string) => void set(me, { path: p.slice(0, 180), at: serverTimestamp(), device: mobile ? "mobile" : "desktop" }).catch(() => undefined) };
-        ref.current.set(window.location.pathname);
+        let page = window.location.pathname;
+        const write = () => void set(me, { path: page.slice(0, 180), at: serverTimestamp(), device: mobile ? "mobile" : "desktop" }).catch(() => undefined);
+        ref.current = { set: (p: string) => { page = p; write(); } };
+        // Each time the connection (re)opens — first load, or a background tab coming back — register the
+        // automatic removal and mark this visitor present again.
+        onValue(dbRef(db, ".info/connected"), (snap) => {
+          if (snap.val() !== true) return;
+          void onDisconnect(me).remove().then(write).catch(() => undefined);
+        });
       } catch {
         /* presence is optional */
       }

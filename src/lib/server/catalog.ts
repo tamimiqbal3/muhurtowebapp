@@ -3,7 +3,7 @@ import { CATEGORIES } from "../../data/categories";
 import { REVIEWS } from "../../data/content";
 import { SERVICES } from "../../data/services";
 import { VENDORS } from "../../data/vendors";
-import { adminDb, COL, isAdminConfigured } from "../firebase/admin";
+import { isAdminConfigured } from "../firebase/admin";
 import type { Category, Review, Service, Vendor } from "../types";
 
 export interface Catalog {
@@ -30,21 +30,14 @@ export async function getCatalog(opts: { fresh?: boolean } = {}): Promise<Catalo
   if (mode() === "demo" || !isAdminConfigured()) return DEMO;
   if (!opts.fresh && cache && Date.now() - cache.at < TTL_MS) return cache.data;
   try {
-    const db = adminDb();
-    const [sSnap, vSnap] = await Promise.all([db.collection(COL.services).get(), db.collection(COL.vendors).get()]);
-    if (sSnap.empty && mode() === "auto") {
-      cache = { at: Date.now(), data: DEMO };
-      return DEMO;
-    }
-    const data: Catalog = {
-      services: sSnap.docs.map((d) => ({ ...(d.data() as Service), id: d.id })),
-      vendors: vSnap.docs.map((d) => ({ ...(d.data() as Vendor), id: d.id })),
-      source: "firestore",
-    };
+    // The live catalogue in Realtime Database (what the admin panel edits); bundled data until published.
+    const { readSite } = await import("./site-store");
+    const { data: site } = await readSite();
+    const data: Catalog = site ? { services: site.services, vendors: site.vendors, source: "firestore" } : DEMO;
     cache = { at: Date.now(), data };
     return data;
   } catch (err) {
-    console.error("[catalog] Firestore read failed, using demo data", err);
+    console.error("[catalog] Realtime Database read failed, using bundled data", err);
     return DEMO;
   }
 }
@@ -75,8 +68,9 @@ export async function getCatalogLookups() {
 export async function getReviewsForService(serviceId: string): Promise<Review[]> {
   if (isAdminConfigured() && mode() !== "demo") {
     try {
-      const snap = await adminDb().collection(COL.reviews).where("serviceId", "==", serviceId).limit(30).get();
-      if (!snap.empty) return snap.docs.map((d) => ({ ...(d.data() as Review), id: d.id })).filter((r) => !r.hidden);
+      const { readSite } = await import("./site-store");
+      const { data } = await readSite();
+      if (data) return data.reviews.filter((r) => r.serviceId === serviceId && !r.hidden).slice(0, 30);
     } catch (err) {
       console.error("[catalog] reviews read failed", err);
     }
@@ -84,21 +78,14 @@ export async function getReviewsForService(serviceId: string): Promise<Review[]>
   return REVIEWS.filter((r) => r.serviceId === serviceId);
 }
 
-/** Category copy may be edited by admins; names and subsections are fixed. */
+/** A category as edited in the admin panel (falls back to the bundled one). */
 export async function getCategoryContent(slug: string): Promise<Category | undefined> {
   const base = CATEGORIES.find((c) => c.slug === slug);
-  if (!base || !isAdminConfigured() || mode() === "demo") return base;
+  if (!isAdminConfigured() || mode() === "demo") return base;
   try {
-    const snap = await adminDb().collection(COL.categories).doc(slug).get();
-    if (!snap.exists) return base;
-    const o = snap.data() as Partial<Pick<Category, "tagline" | "description">> & { heroImage?: string; subDescriptions?: Record<string, string> };
-    return {
-      ...base,
-      tagline: o.tagline || base.tagline,
-      description: o.description || base.description,
-      hero: o.heroImage ? { src: o.heroImage, alt: base.hero.alt } : base.hero,
-      subcategories: base.subcategories.map((s) => ({ ...s, description: o.subDescriptions?.[s.slug] || s.description })),
-    };
+    const { readSite } = await import("./site-store");
+    const { data } = await readSite();
+    return data?.categories.find((c) => c.slug === slug) ?? base;
   } catch {
     return base;
   }
