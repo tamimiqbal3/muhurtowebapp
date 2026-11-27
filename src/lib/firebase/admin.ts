@@ -85,7 +85,7 @@ export function getAdminApp(): App {
 
 /** Realtime Database (live admin alerts and visitor presence). */
 export function adminRtdb() {
-  return getDatabase(getAdminApp(), firebaseClientConfig.databaseURL);
+  return getDatabase(getAdminApp()); // the app is initialised with databaseURL
 }
 
 export function adminAuth() {
