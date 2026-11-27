@@ -70,18 +70,19 @@ See `.env.example`. Add the same values in **Vercel → Project → Settings →
    - `FIREBASE_CLIENT_EMAIL` = `client_email` from the JSON
    - `FIREBASE_PRIVATE_KEY` = `private_key` from the JSON (the whole value, including `-----BEGIN PRIVATE KEY-----` and the `\n` sequences)
    Then redeploy.
-5. Deploy the security rules (they let browsers read only public data; all writes go through the server):
+5. **Realtime Database** → *Create database* → location **Singapore (asia-southeast1)** → *Start in locked mode*. It powers the admin panel's live alerts (new bookings, payments, sign-ups) and the “visitors online” counter. If you pick another location, set `NEXT_PUBLIC_FIREBASE_DATABASE_URL` to the URL shown at the top of its *Data* tab. Paste `database.rules.json` into its *Rules* tab.
+6. Deploy the security rules (they let browsers read only public data; all writes go through the server):
    ```bash
    npm i -g firebase-tools && firebase login
-   firebase deploy --only firestore:rules,firestore:indexes,storage
+   firebase deploy --only firestore:rules,firestore:indexes,storage,database
    ```
    (`.firebaserc` already points at `muhurto-app`.) Or paste `firestore.rules` and `storage.rules` into the console's *Rules* tabs.
-6. Open `/admin` — the bar should read **Connected to Firebase**. Make any save to publish the catalogue to Firestore.
-7. Seed the catalogue (or use **Admin → Services → Import catalogue**):
+7. Open `/admin` — the bar should read **Connected to Firebase**. Make any save to publish the catalogue to Firestore.
+8. Seed the catalogue (or use **Admin → Services → Import catalogue**):
    ```bash
    npm run seed            # add -- --force to overwrite demo docs
    ```
-8. Create your admin: put your email in `ADMIN_EMAILS` *or* register and run
+9. Create your admin: put your email in `ADMIN_EMAILS` *or* register and run
    ```bash
    npm run set-role -- you@example.com admin
    npm run set-role -- agent@example.com agent 01711000000 "Dhaka,Gazipur"

@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { logPageView, startAnalytics } from "@/lib/firebase/client";
+import { Presence } from "./Presence";
 
 /** Starts Firebase Analytics after the page is idle and logs each page view. Skips the admin panel. */
 export function FirebaseAnalytics() {
@@ -14,5 +15,6 @@ export function FirebaseAnalytics() {
     if (w.requestIdleCallback) w.requestIdleCallback(run);
     else setTimeout(run, 1500);
   }, [path]);
-  return null;
+  // Visitor presence (Realtime Database) on public pages only.
+  return path?.startsWith("/admin") || path?.startsWith("/invoice") ? null : <Presence />;
 }

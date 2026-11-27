@@ -7,3 +7,8 @@ out
 *.tsbuildinfo
 .vercel
 service-account*.json
+
+# Firebase service-account keys — never commit
+*firebase-adminsdk*.json
+service-account*.json
+serviceAccount*.json

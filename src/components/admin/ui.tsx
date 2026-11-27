@@ -7,6 +7,7 @@ import {
   BarChart3, CalendarRange, CreditCard, FileText, Layers, LayoutTemplate, LogOut, MapPin, Menu, Package, Star, Store, Users, Wallet, X, ExternalLink, Upload,
 } from "lucide-react";
 import { LogoMark, Wordmark } from "../layout/Logo";
+import { LivePanel } from "./LivePanel";
 import { cn } from "@/lib/utils";
 import { getCatalogSnapshot, importLocalEdits, isCloudMode, localEditsBeforeFirebase, useCloudStatus } from "@/lib/store/catalog";
 
@@ -115,6 +116,7 @@ export function AdminFrame({ children }: { children: ReactNode }) {
           </span>
         </Link>
         <div className="ml-auto flex items-center gap-2">
+          <LivePanel />
           <a href="/" target="_blank" rel="noreferrer" className="hidden items-center gap-1.5 rounded-full border border-line px-3 py-2 text-xs font-semibold hover:border-ink sm:inline-flex"><ExternalLink className="h-3.5 w-3.5" /> View website</a>
           <button onClick={logout} className="inline-flex items-center gap-1.5 rounded-full bg-ink px-3 py-2 text-xs font-semibold text-paper hover:bg-ink/90"><LogOut className="h-3.5 w-3.5" /> Sign out</button>
         </div>

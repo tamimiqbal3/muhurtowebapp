@@ -1,0 +1,21 @@
+{
+  "rules": {
+    "presence": {
+      ".read": "auth != null && auth.token.admin === true",
+      ".indexOn": ["at"],
+      "$sid": {
+        ".write": "$sid.length >= 8 && $sid.length <= 40",
+        ".validate": "newData.hasChildren(['path', 'at', 'device']) && newData.child('path').isString() && newData.child('path').val().length <= 200 && newData.child('at').isNumber() && (newData.child('device').val() === 'mobile' || newData.child('device').val() === 'desktop')"
+      }
+    },
+    "adminFeed": {
+      ".read": "auth != null && auth.token.admin === true",
+      ".write": false,
+      ".indexOn": ["at"]
+    },
+    "$other": {
+      ".read": false,
+      ".write": false
+    }
+  }
+}

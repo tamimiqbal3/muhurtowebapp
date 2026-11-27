@@ -7,6 +7,7 @@ import { ApiError, type SessionUser } from "./auth";
 import { createPendingAssignment, autoAssign } from "./monitoring";
 import { writeEventUpdate, writeNotification } from "./notify";
 import { readSettings } from "./site-store";
+import { pushAdminEvent } from "./live";
 
 export function sslcommerzConfig() {
   const storeId = process.env.SSLCOMMERZ_STORE_ID;
@@ -214,6 +215,8 @@ export async function finalizePayment(valId: string, tranId: string): Promise<Fi
     writeNotification(db, { userId: "admins", title: "New paid booking", body: `${booking.code} needs a Monitoring Agent.`, link: "/admin/bookings" }, tx);
     return { ok: true, bookingId: booking.id };
   });
+
+  if (outcome.ok && !outcome.duplicate) await pushAdminEvent({ type: "payment", title: `Payment received · ${payment.bookingCode}`, body: `${(v.card_type || payment.preferredMethod || "Online payment")}`, link: "/admin/payments", amount: payment.amount });
 
   if (outcome.ok && !outcome.duplicate && process.env.AUTO_ASSIGN_MONITORING_AGENT === "true") {
     try {

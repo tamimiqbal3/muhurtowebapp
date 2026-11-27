@@ -17,6 +17,8 @@ const FIREBASE_WEB = {
   messagingSenderId: "338808019453",
   appId: "1:338808019453:web:19d8edd2208cb13d5e2194",
   measurementId: "G-MKLSRVBFWN",
+  // Realtime Database (Singapore, asia-southeast1 — the closest region to Dhaka).
+  databaseURL: "https://muhurto-app-default-rtdb.asia-southeast1.firebasedatabase.app",
 };
 
 export const firebaseClientConfig = {
@@ -27,6 +29,7 @@ export const firebaseClientConfig = {
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID || FIREBASE_WEB.messagingSenderId,
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID || FIREBASE_WEB.appId,
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID || FIREBASE_WEB.measurementId,
+  databaseURL: process.env.NEXT_PUBLIC_FIREBASE_DATABASE_URL || FIREBASE_WEB.databaseURL,
 };
 
 export const isFirebaseClientConfigured = Boolean(

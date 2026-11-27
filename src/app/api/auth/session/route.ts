@@ -4,6 +4,7 @@ import { adminEmails, SESSION_COOKIE, SESSION_MAX_AGE_MS } from "@/lib/server/au
 import { fail, handle, readJson } from "@/lib/server/api";
 import type { Role, UserProfile } from "@/lib/types";
 import { clientIp, rateLimit } from "@/lib/server/rate-limit";
+import { pushAdminEvent } from "@/lib/server/live";
 
 export const dynamic = "force-dynamic";
 
@@ -38,6 +39,7 @@ export const POST = handle(async (req: Request) => {
       updatedAt: now,
     };
     await ref.set(profile);
+    await pushAdminEvent({ type: "signup", title: "New customer account", body: `${profile.name} · ${profile.email}`, link: "/admin/customers" });
   } else if (bootstrapAdmin && (snap.data() as UserProfile).role !== "admin") {
     await ref.update({ role: "admin", updatedAt: now });
   }

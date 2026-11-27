@@ -1,4 +1,5 @@
 import "server-only";
+import { pushAdminEvent } from "./live";
 import { adminDb, COL } from "../firebase/admin";
 import { CATEGORY_SLUGS } from "../../data/categories";
 import { priceItems } from "../pricing";
@@ -72,6 +73,7 @@ export async function createBookingDoc(user: SessionUser, args: { contact: Conta
   };
   await ref.set(booking);
   await writeNotification(db, { userId: user.uid, title: "Booking created", body: `Booking ${booking.code} is awaiting payment.`, link: `/checkout?booking=${ref.id}` });
+  await pushAdminEvent({ type: "booking", title: `New booking ${booking.code}`, body: `${booking.contact.name} · ${booking.event.guests} guests · ${booking.event.date}`, link: "/admin/bookings", amount: booking.pricing.total });
   return booking;
 }
 

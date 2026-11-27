@@ -55,3 +55,33 @@ export async function logPageView(path: string): Promise<void> {
     /* ignore */
   }
 }
+
+/* ─── Realtime Database ─────────────────────────────────────────────── */
+
+/** Realtime Database for the public site (visitor presence). Loaded lazily. */
+export async function getRealtimeDb() {
+  const a = getFirebaseApp();
+  if (!a || !firebaseClientConfig.databaseURL) return null;
+  const { getDatabase } = await import("firebase/database");
+  return getDatabase(a, firebaseClientConfig.databaseURL);
+}
+
+/**
+ * A separate Firebase app instance for the admin panel, signed in with a server-issued admin token.
+ * Kept apart from customer sign-in so the two never interfere.
+ */
+let adminApp: FirebaseApp | null = null;
+export async function getAdminRealtimeDb() {
+  if (!isFirebaseClientConfigured || !firebaseClientConfig.databaseURL) return null;
+  adminApp = adminApp ?? (getApps().find((x) => x.name === "muhurto-admin") ?? initializeApp(firebaseClientConfig, "muhurto-admin"));
+  const auth = getAuth(adminApp);
+  if (!auth.currentUser) {
+    const res = await fetch("/api/site/admin-token", { method: "POST", credentials: "same-origin" });
+    if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error || "Could not connect the admin panel to Firebase.");
+    const { token } = await res.json();
+    const { signInWithCustomToken } = await import("firebase/auth");
+    await signInWithCustomToken(auth, token);
+  }
+  const { getDatabase } = await import("firebase/database");
+  return getDatabase(adminApp, firebaseClientConfig.databaseURL);
+}

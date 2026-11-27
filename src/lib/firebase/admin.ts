@@ -3,6 +3,7 @@ import { cert, getApps, initializeApp, type App } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
 import { getFirestore, type Firestore } from "firebase-admin/firestore";
 import { getStorage } from "firebase-admin/storage";
+import { getDatabase } from "firebase-admin/database";
 import { firebaseClientConfig } from "../config";
 
 /**
@@ -76,8 +77,14 @@ function getAdminApp(): App {
     credential: cert(creds),
     projectId: creds.projectId,
     storageBucket: process.env.FIREBASE_STORAGE_BUCKET || firebaseClientConfig.storageBucket,
+    databaseURL: firebaseClientConfig.databaseURL,
   });
   return app;
+}
+
+/** Realtime Database (live admin alerts and visitor presence). */
+export function adminRtdb() {
+  return getDatabase(getAdminApp());
 }
 
 export function adminAuth() {
