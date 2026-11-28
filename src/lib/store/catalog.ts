@@ -115,7 +115,7 @@ const listeners = new Set<() => void>();
  * all of its admin edits, but any built-in item still showing a stock (Pexels) photo is moved to the
  * current photo, so replaced or broken images never get stuck. Photos an admin uploaded are untouched.
  */
-const MEDIA_VERSION = 4;
+const MEDIA_VERSION = 5;
 const isStock = (src?: string) => !src || src.includes("images.pexels.com");
 
 function refreshMedia(stored: Partial<CatalogData> & { mediaVersion?: number }) {
