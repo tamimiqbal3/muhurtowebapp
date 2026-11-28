@@ -43,6 +43,12 @@ export function ServiceDetail({ id }: { id: string }) {
             <div className="relative aspect-[4/3] overflow-hidden rounded-3xl bg-sand">
               {image && <SafeImage src={image.src} alt={image.alt || service.name} fill priority sizes="(max-width: 1024px) 100vw, 58vw" className="object-cover" />}
             </div>
+            {image?.credit && (
+              <p className="mt-2 text-right text-[0.7rem] text-muted">
+                {t("Photo: {author}", { author: image.credit.author })} ·{" "}
+                <a href={image.credit.source} target="_blank" rel="noopener noreferrer" className="underline-offset-2 hover:underline">{t("Wikimedia Commons (licence)")}</a>
+              </p>
+            )}
             <div className="mt-8">
               <div className="flex flex-wrap items-center gap-2">
                 <Badge tone="sindoor" className="text-[0.7rem]">{category.name}</Badge>
@@ -68,7 +74,7 @@ export function ServiceDetail({ id }: { id: string }) {
                   <div className="min-w-0 flex-1">
                     <p className="eyebrow">{t("Service provider")}</p>
                     <p className="mt-1 inline-flex items-center gap-1.5 text-lg font-semibold">{vendor.name}{vendor.verified && <BadgeCheck className="h-5 w-5 text-success" aria-label={t("Verified vendor")} />}</p>
-                    <p className="text-sm text-ink-soft">{vendor.tagline} · {vendor.address} · {t("since {year}", { year: vendor.since })}</p>
+                    <p className="text-sm text-ink-soft">{vendor.tagline} · {vendor.address}{vendor.since ? ` · ${t("since {year}", { year: vendor.since })}` : ""}</p>
                   </div>
                 </div>
               )}
@@ -95,7 +101,7 @@ export function ServiceDetail({ id }: { id: string }) {
               ))}
             </ul>
           ) : (
-            <p className="mt-6 text-sm text-ink-soft">{t("No written reviews yet. Ratings shown are from {n} ratings.", { n: service.reviewCount })}</p>
+            <p className="mt-6 text-sm text-ink-soft">{service.reviewCount ? t("No written reviews yet. Ratings shown are from {n} ratings.", { n: service.reviewCount }) : t("No reviews yet.")}</p>
           )}
         </section>
 

@@ -1,6 +1,6 @@
 import type { CategorySlug } from "../types";
 
-export const FOOD_SUBS = ["platter", "fuchka", "cha-coffee"] as const;
+export const FOOD_SUBS = ["platter", "bangla", "chinese", "fuchka", "drinks", "cha-coffee"] as const;
 export const EVENT_SUBS = ["decor", "sitting-area", "lighting", "photography-videography", "photo-booths", "sound"] as const;
 
 export const SUB_LABELS: Record<string, string> = {
@@ -11,6 +11,9 @@ export const SUB_LABELS: Record<string, string> = {
   "photo-booths": "Photo Booths",
   sound: "Sound",
   platter: "Platter",
+  bangla: "Traditional Bangla",
+  chinese: "Chinese",
+  drinks: "Juices & Drinks",
   fuchka: "Fuchka",
   "cha-coffee": "CHA / Coffee",
 };
@@ -24,6 +27,9 @@ export const SUB_WEIGHTS: Record<string, number> = {
   lighting: 0.07,
   sound: 0.05,
   "photo-booths": 0.03,
+  bangla: 0.3,
+  chinese: 0.25,
+  drinks: 0.04,
   fuchka: 0.04,
   "cha-coffee": 0.03,
 };
@@ -50,7 +56,7 @@ export const EXTRA_SUBS: Record<CategorySlug, string[]> = {
   birthday: ["lighting", "photo-booths", "sound", "sitting-area"],
   "corporate-events": ["lighting", "photography-videography", "cha-coffee", "photo-booths"],
   "family-events": ["sitting-area", "lighting", "platter", "sound"],
-  "food-culinary": ["cha-coffee", "fuchka"],
+  "food-culinary": ["cha-coffee", "fuchka", "drinks", "chinese"],
 };
 
 export const THEMES = [

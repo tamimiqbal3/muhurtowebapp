@@ -20,6 +20,9 @@ const SERVICE_WORDS: Array<[string, RegExp]> = [
   ["photo-booths", /\b(photo ?booth|booth|360)\b/i],
   ["sound", /\b(sound|dj|music|band|speakers?|mic(rophone)?s?|dhol|shehnai)\b/i],
   ["platter", /\b(platter|catering|food|kacchi|biryani|buffet|mezban|dinner menu|lunch)\b/i],
+  ["bangla", /\b(ilish|hilsa|bhorta|vorta|khichuri|bangali food|bengali food|deshi food)\b|ইলিশ|ভর্তা|খিচুড়ি/i],
+  ["chinese", /\b(chinese|chowmein|chow mein|dim ?sum|fried rice|thai soup|wontons?)\b|চাইনিজ/i],
+  ["drinks", /\b(juices?|lassi|mattha|borhani|lemonade|shorbot|sharbat|daab|coconut water|drinks|beverages?)\b|জুস|লাচ্ছি|বোরহানি|শরবত|ডাব/i],
   ["fuchka", /\b(fuchka|puchka|chotpoti|pani ?puri)\b|ফুচকা/i],
   ["cha-coffee", /\b(cha|chai|tea|coffee|espresso|latte)\b|চা|কফি/i],
 ];

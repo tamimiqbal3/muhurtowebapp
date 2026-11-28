@@ -107,7 +107,18 @@ function parseService(b: Body, existing?: Service): Service {
   const cat = getCategory(categorySlug)!;
   const subcategorySlug = oneOf(b.subcategorySlug ?? existing?.subcategorySlug, "Subsection", cat.subcategories.map((s) => s.slug));
   const name = str(b.name ?? existing?.name, "Name", { max: 120 });
-  const images = Array.isArray(b.images) ? (b.images as Array<{ src?: string; alt?: string }>).filter((i) => typeof i?.src === "string" && /^https:\/\//.test(i.src)).slice(0, 8).map((i) => ({ src: i.src!, alt: (i.alt || name).slice(0, 160) })) : existing?.images ?? [];
+  const images = Array.isArray(b.images)
+    ? (b.images as Array<{ src?: string; alt?: string; credit?: { author?: unknown; source?: unknown } }>)
+        .filter((i) => typeof i?.src === "string" && /^https:\/\//.test(i.src))
+        .slice(0, 8)
+        .map((i) => {
+          const c = i.credit;
+          const credit = c && typeof c.author === "string" && typeof c.source === "string" && /^https:\/\/commons\.wikimedia\.org\//.test(c.source)
+            ? { author: c.author.slice(0, 120), source: c.source.slice(0, 400) }
+            : undefined;
+          return { src: i.src!, alt: (i.alt || name).slice(0, 160), ...(credit ? { credit } : {}) };
+        })
+    : existing?.images ?? [];
   if (!images.length) throw new ValidationError("Add at least one image (https URL).");
   const options = Array.isArray(b.options)
     ? (b.options as Array<{ id?: string; label?: string; priceDelta?: number }>).slice(0, 12).map((o) => ({ id: slugify(o.id || o.label || "") || randomUUID().slice(0, 8), label: str(o.label, "Option label", { max: 80 }), priceDelta: int(Math.round(Number(o.priceDelta)), "Option price", 0, 10_000_000) }))
@@ -159,9 +170,9 @@ function parseVendor(b: Body, existing?: Vendor): Vendor {
   };
 }
 
-async function requireFirestoreCatalog() {
+async function requirePublishedCatalog() {
   const snap = await adminDb().collection(COL.services).limit(1).get();
-  if (snap.empty) throw new ApiError(409, "The catalogue is still using bundled demo data. Import it into Firestore first (Admin → Services → Import catalogue).");
+  if (snap.empty) throw new ApiError(409, "The catalogue is still using bundled demo data. Save once in the admin panel to publish it to Realtime Database.");
 }
 
 /* ─── Create ─────────────────────────────────────────────────────────── */
@@ -172,7 +183,7 @@ export async function createResource(resource: string, body: Body, user: Session
     case "seed":
       return seedCatalog(Boolean(body.force));
     case "services": {
-      await requireFirestoreCatalog();
+      await requirePublishedCatalog();
       const s = parseService(body);
       const v = await db.collection(COL.vendors).doc(s.vendorId).get();
       if (!v.exists) throw new ValidationError("Choose an existing vendor.");
@@ -183,7 +194,7 @@ export async function createResource(resource: string, body: Body, user: Session
       return { service: s };
     }
     case "vendors": {
-      await requireFirestoreCatalog();
+      await requirePublishedCatalog();
       const v = parseVendor(body);
       const ref = db.collection(COL.vendors).doc(v.id);
       if ((await ref.get()).exists) throw new ApiError(409, "A vendor with this ID already exists.");

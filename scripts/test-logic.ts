@@ -29,7 +29,7 @@ test("exact category names and subsections", () => {
   assert.deepEqual(CATEGORIES[0].subcategories.map((s) => s.name), ["Decor", "Sitting Area", "Lighting", "Photography and Videography", "Photo Booths", "Sound"]);
   assert.deepEqual(CATEGORIES[1].subcategories.map((s) => s.name), ["Decor", "Sitting Area", "Lighting", "Photo and Videography", "Photo Booths", "Sound"]);
   for (const i of [2, 3]) assert.deepEqual(CATEGORIES[i].subcategories.map((s) => s.name), ["Decor", "Sitting Area", "Lighting", "Photography and Videography", "Photo Booths", "Sound"]);
-  assert.deepEqual(CATEGORIES[4].subcategories.map((s) => s.name), ["Platter", "Fuchka", "CHA / Coffee"]);
+  assert.deepEqual(CATEGORIES[4].subcategories.map((s) => s.name), ["Platter", "Traditional Bangla", "Chinese", "Fuchka", "Juices & Drinks", "CHA / Coffee"]);
 });
 test("≥10 services per category and every subsection populated", () => {
   for (const c of CATEGORIES) {
@@ -43,7 +43,13 @@ test("≥10 distinct images per category, valid Pexels URLs", () => {
     const imgs = new Set(SERVICES.filter((s) => s.categorySlug === c.slug).flatMap((s) => s.images.map((i) => i.src)));
     assert.ok(imgs.size >= 10, `${c.slug} has ${imgs.size} distinct images`);
   }
-  for (const s of SERVICES) for (const i of s.images) assert.match(i.src, /^https:\/\/images\.pexels\.com\/photos\/(\d+)\/pexels-photo-\1\.jpeg$/);
+  for (const s of SERVICES) for (const i of s.images) {
+    if (i.src.startsWith("https://upload.wikimedia.org/")) {
+      // Commons photos: valid upload path, and a credit linking to the file's licence page.
+      assert.match(i.src, /^https:\/\/upload\.wikimedia\.org\/wikipedia\/commons\/(thumb\/)?([0-9a-f])\/\2[0-9a-f]\/[^/]+(\/960px-[^/]+)?$/);
+      assert.ok(i.credit?.author && /^https:\/\/commons\.wikimedia\.org\/wiki\/File:/.test(i.credit.source), `credit for ${s.id}`);
+    } else assert.match(i.src, /^https:\/\/images\.pexels\.com\/photos\/(\d+)\/pexels-photo-\1\.jpeg$/);
+  }
 });
 test("unique ids, valid vendors, valid options, sane prices", () => {
   assert.equal(new Set(SERVICES.map((s) => s.id)).size, SERVICES.length);
@@ -51,7 +57,7 @@ test("unique ids, valid vendors, valid options, sane prices", () => {
     assert.ok(getVendor(s.vendorId), `vendor ${s.vendorId}`);
     assert.ok(s.startingPrice > 0 && s.minQuantity >= 1);
     assert.equal(new Set(s.options.map((o) => o.id)).size, s.options.length, `dup option in ${s.id}`);
-    assert.ok(s.rating >= 1 && s.rating <= 5);
+    assert.ok((s.rating >= 1 && s.rating <= 5) || (s.rating === 0 && s.reviewCount === 0));
   }
   for (const r of REVIEWS) assert.ok(svc(r.serviceId), `review for unknown ${r.serviceId}`);
   assert.equal(new Set(VENDORS.map((v) => v.id)).size, VENDORS.length);

@@ -23,7 +23,7 @@ interface PlanLine { serviceId: string; quantity: number }
 
 const ORDER: Step[] = ["occasion", "guests", "budget", "date", "area", "venue", "services", "food", "notes", "plan"];
 const BUDGETS: Array<[string, number | null]> = [["Under ৳1 lakh", 100000], ["৳1–3 lakh", 300000], ["৳3–5 lakh", 500000], ["৳5–10 lakh", 1000000], ["Above ৳10 lakh", 1500000], ["No fixed budget", null]];
-const FOOD_CHOICES: Array<[string, string]> = [["Platter / full meal", "platter"], ["Fuchka & chotpoti", "fuchka"], ["Cha & coffee", "cha-coffee"]];
+const FOOD_CHOICES: Array<[string, string]> = [["Platter / full meal", "platter"], ["Traditional Bangla", "bangla"], ["Chinese", "chinese"], ["Juices & drinks", "drinks"], ["Fuchka & chotpoti", "fuchka"], ["Cha & coffee", "cha-coffee"]];
 
 let nextId = 1;
 

@@ -115,11 +115,50 @@ const listeners = new Set<() => void>();
  * all of its admin edits, but any built-in item still showing a stock (Pexels) photo is moved to the
  * current photo, so replaced or broken images never get stuck. Photos an admin uploaded are untouched.
  */
-const MEDIA_VERSION = 5;
-const isStock = (src?: string) => !src || src.includes("images.pexels.com");
+const MEDIA_VERSION = 9;
+const isStock = (src?: string) => !src || src.includes("images.pexels.com") || src.includes("upload.wikimedia.org");
 
-function refreshMedia(stored: Partial<CatalogData> & { mediaVersion?: number }) {
-  if (stored.mediaVersion === MEDIA_VERSION) return stored;
+/** Catalogue items added or moved in a release: copied into catalogues saved before that release. */
+const ADDED_IN: Array<{ version: number; services: string[]; vendors: string[] }> = [
+  {
+    version: 7,
+    services: ["food-bangla-ilish", "food-bangla-bhorta", "food-bangla-khichuri", "food-bangla-kacchi", "food-bangla-roast", "food-platter-chinese", "food-chinese-banquet", "food-chinese-chowmein", "food-chinese-dimsum", "food-chinese-wonton"],
+    vendors: ["fakhruddin-biryani", "hotel-kasturi", "iqbal-catering", "chows", "xinxian", "bamboo-shoot", "jing-ling"],
+  },
+  {
+    version: 8,
+    services: ["food-bangla-satkora", "food-bangla-kalabhuna", "food-bangla-chuijhal", "food-bangla-kalai", "food-bangla-mishti", "food-bangla-kabab", "food-bangla-nehari", "food-bangla-jilapi", "food-drinks-borhani", "food-drinks-lassi", "food-drinks-mango", "food-drinks-malta", "food-drinks-daab", "food-drinks-fruit"],
+    vendors: ["deshi-rannaghor", "rosh-juice-bar"],
+  },
+  {
+    // Exact dish photos; satkora beef replaced by chicken akhni; two dishes renamed to match their photos.
+    version: 9,
+    services: ["food-platter-kacchi", "food-platter-polao", "food-platter-tehari", "food-platter-mezban", "food-platter-kebab", "food-bangla-ilish", "food-bangla-bhorta", "food-bangla-khichuri", "food-bangla-roast", "food-bangla-kacchi", "food-bangla-satkora", "food-bangla-akhni", "food-bangla-kalabhuna", "food-bangla-chuijhal", "food-bangla-kalai", "food-bangla-mishti", "food-bangla-kabab", "food-bangla-nehari", "food-bangla-jilapi", "food-drinks-borhani", "food-drinks-mango", "food-drinks-fruit", "food-platter-chinese", "food-chinese-chowmein", "food-chinese-banquet", "food-chinese-wonton", "food-fuchka-classic", "food-fuchka-chotpoti", "food-fuchka-combo", "food-fuchka-jhalmuri", "food-cha-milk", "food-cha-seven", "food-cha-masala"],
+    vendors: [],
+  },
+];
+
+function addNewItems(stored: Partial<CatalogData> & { mediaVersion?: number }) {
+  const from = stored.mediaVersion ?? 0;
+  let services = stored.services;
+  let vendors = stored.vendors;
+  for (const rel of ADDED_IN) {
+    if (from >= rel.version) continue;
+    if (services) {
+      const ids = new Set(rel.services);
+      services = [...services.filter((x) => !ids.has(x.id)), ...SEED.services.filter((x) => ids.has(x.id))];
+    }
+    if (vendors) {
+      const have = new Set(vendors.map((x) => x.id));
+      vendors = [...vendors, ...SEED.vendors.filter((x) => rel.vendors.includes(x.id) && !have.has(x.id))];
+    }
+  }
+  return { ...stored, services, vendors };
+}
+
+function refreshMedia(raw: Partial<CatalogData> & { mediaVersion?: number }) {
+  if (raw.mediaVersion === MEDIA_VERSION) return raw;
+  const stored = addNewItems(raw);
   const cats = new Map(SEED.categories.map((c) => [c.slug, c]));
   const svcs = new Map(SEED.services.map((x) => [x.id, x]));
   return {

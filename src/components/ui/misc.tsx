@@ -26,10 +26,10 @@ export function DemoTag(_props: { className?: string }) {
 export function Rating({ value, count, className, light }: { value: number; count?: number; className?: string; light?: boolean }) {
   const t = useT();
   return (
-    <span className={cn("inline-flex items-center gap-1 text-xs font-semibold", light ? "text-paper" : "text-ink", className)} aria-label={t("Rated {v} out of 5", { v: value })}>
+    <span className={cn("inline-flex items-center gap-1 text-xs font-semibold", light ? "text-paper" : "text-ink", className)} aria-label={value > 0 ? t("Rated {v} out of 5", { v: value }) : t("New")}>
       <Star className="h-3.5 w-3.5 fill-gold text-gold" aria-hidden />
-      {value.toFixed(1)}
-      {count != null && <span className={cn("font-normal", light ? "text-paper/70" : "text-muted")}>({count})</span>}
+      {value > 0 ? value.toFixed(1) : t("New")}
+      {count ? <span className={cn("font-normal", light ? "text-paper/70" : "text-muted")}>({count})</span> : null}
     </span>
   );
 }

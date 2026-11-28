@@ -6,6 +6,8 @@ export type Role = "customer" | "admin" | "agent";
 export interface ImageRef {
   src: string;
   alt: string;
+  /** Photographer credit and source page, for freely licensed photos that require attribution. */
+  credit?: { author: string; source: string };
 }
 
 export interface Subcategory {

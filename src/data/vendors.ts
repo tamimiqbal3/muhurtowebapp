@@ -6,7 +6,25 @@ const v = (id: string, name: string, tagline: string, area: string, since: numbe
   phone, email: `${id}@muhurto.app`, isDemo: false, active: true,
 });
 
+/**
+ * Real Dhaka restaurants and caterers named on the food counter. They are NOT marked verified and carry no
+ * phone or email until a partnership is signed: add their details in Admin → Vendors once confirmed.
+ */
+const restaurant = (id: string, name: string, tagline: string, area: string, since: number): Vendor => ({
+  id, name, tagline, city: "Dhaka", address: `${area}, Dhaka`, since, verified: false, specialties: ["food-culinary"],
+  phone: "", email: "", isDemo: false, active: true,
+});
+
 export const VENDORS: Vendor[] = [
+  v("deshi-rannaghor", "Deshi Rannaghor", "Home-style dishes from across Bangladesh", "Mohammadpur", 0, ["food-culinary"], ""),
+  v("rosh-juice-bar", "Rosh Juice Bar", "Fresh juices, lassi and borhani for events", "Dhanmondi", 0, ["food-culinary"], ""),
+  restaurant("fakhruddin-biryani", "Fakhruddin Biryani", "Kacchi biryani, a Dhaka wedding favourite", "Moghbazar", 0),
+  restaurant("hotel-kasturi", "Hotel Kasturi", "Traditional Bangladeshi cuisine", "Old Paltan", 1980),
+  restaurant("iqbal-catering", "Iqbal Catering", "Wedding and event catering", "Mohammadpur", 1987),
+  restaurant("chows", "Chows", "Cantonese and Asian fusion", "Gulshan", 0),
+  restaurant("xinxian", "Xinxian Restaurant", "Bangla-Chinese family dining", "Dhanmondi", 0),
+  restaurant("bamboo-shoot", "Bamboo Shoot", "Authentic Chinese cuisine", "Gulshan", 0),
+  restaurant("jing-ling", "Jing Ling Chinese Restaurant", "Wontons and Thai soup", "Dhanmondi", 0),
   v("shapla-events", "Shapla Events Studio", "Bridal stages with a Bengali soul", "Banani", 2012, ["wedding", "family-events"], "+880 1711-204512"),
   v("nakshi-decor", "Nakshi Decor House", "Jamdani-inspired styling for every occasion", "Dhanmondi", 2015, ["wedding", "family-events", "birthday"], "+880 1819-336741"),
   v("rangdhanu-decor", "Rangdhanu Decor", "Colourful decor for family celebrations", "Mirpur", 2014, ["birthday", "family-events"], "+880 1912-448203"),
