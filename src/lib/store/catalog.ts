@@ -17,6 +17,7 @@ import { SERVICES } from "@/data/services";
 import { VENDORS } from "@/data/vendors";
 import { LOCATIONS } from "@/data/locations";
 import { REVIEWS } from "@/data/content";
+import { applyReleases } from "@/data/releases";
 import { DEFAULT_SETTINGS, normalizeSettings, type SiteSettings } from "@/lib/site-settings";
 import type { Category, Location, Review, Service, Vendor } from "@/lib/types";
 
@@ -118,42 +119,8 @@ const listeners = new Set<() => void>();
 const MEDIA_VERSION = 9;
 const isStock = (src?: string) => !src || src.includes("images.pexels.com") || src.includes("upload.wikimedia.org");
 
-/** Catalogue items added or moved in a release: copied into catalogues saved before that release. */
-const ADDED_IN: Array<{ version: number; services: string[]; vendors: string[] }> = [
-  {
-    version: 7,
-    services: ["food-bangla-ilish", "food-bangla-bhorta", "food-bangla-khichuri", "food-bangla-kacchi", "food-bangla-roast", "food-platter-chinese", "food-chinese-banquet", "food-chinese-chowmein", "food-chinese-dimsum", "food-chinese-wonton"],
-    vendors: ["fakhruddin-biryani", "hotel-kasturi", "iqbal-catering", "chows", "xinxian", "bamboo-shoot", "jing-ling"],
-  },
-  {
-    version: 8,
-    services: ["food-bangla-satkora", "food-bangla-kalabhuna", "food-bangla-chuijhal", "food-bangla-kalai", "food-bangla-mishti", "food-bangla-kabab", "food-bangla-nehari", "food-bangla-jilapi", "food-drinks-borhani", "food-drinks-lassi", "food-drinks-mango", "food-drinks-malta", "food-drinks-daab", "food-drinks-fruit"],
-    vendors: ["deshi-rannaghor", "rosh-juice-bar"],
-  },
-  {
-    // Exact dish photos; satkora beef replaced by chicken akhni; two dishes renamed to match their photos.
-    version: 9,
-    services: ["food-platter-kacchi", "food-platter-polao", "food-platter-tehari", "food-platter-mezban", "food-platter-kebab", "food-bangla-ilish", "food-bangla-bhorta", "food-bangla-khichuri", "food-bangla-roast", "food-bangla-kacchi", "food-bangla-satkora", "food-bangla-akhni", "food-bangla-kalabhuna", "food-bangla-chuijhal", "food-bangla-kalai", "food-bangla-mishti", "food-bangla-kabab", "food-bangla-nehari", "food-bangla-jilapi", "food-drinks-borhani", "food-drinks-mango", "food-drinks-fruit", "food-platter-chinese", "food-chinese-chowmein", "food-chinese-banquet", "food-chinese-wonton", "food-fuchka-classic", "food-fuchka-chotpoti", "food-fuchka-combo", "food-fuchka-jhalmuri", "food-cha-milk", "food-cha-seven", "food-cha-masala"],
-    vendors: [],
-  },
-];
-
 function addNewItems(stored: Partial<CatalogData> & { mediaVersion?: number }) {
-  const from = stored.mediaVersion ?? 0;
-  let services = stored.services;
-  let vendors = stored.vendors;
-  for (const rel of ADDED_IN) {
-    if (from >= rel.version) continue;
-    if (services) {
-      const ids = new Set(rel.services);
-      services = [...services.filter((x) => !ids.has(x.id)), ...SEED.services.filter((x) => ids.has(x.id))];
-    }
-    if (vendors) {
-      const have = new Set(vendors.map((x) => x.id));
-      vendors = [...vendors, ...SEED.vendors.filter((x) => rel.vendors.includes(x.id) && !have.has(x.id))];
-    }
-  }
-  return { ...stored, services, vendors };
+  return applyReleases(stored, stored.mediaVersion ?? 0, SEED);
 }
 
 function refreshMedia(raw: Partial<CatalogData> & { mediaVersion?: number }) {

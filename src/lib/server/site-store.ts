@@ -1,4 +1,5 @@
 import "server-only";
+import { applyReleases, CATALOG_RELEASE } from "../../data/releases";
 import { randomUUID } from "node:crypto";
 import { ServerValue, type DataSnapshot } from "firebase-admin/database";
 import { CATEGORIES } from "../../data/categories";
@@ -69,7 +70,7 @@ function toList<T>(node: unknown): T[] {
 }
 
 /** The full catalogue, or null if it has never been published (the bundled seed is used). */
-export async function readSite(): Promise<{ version: number; data: SiteData | null }> {
+export async function readSite(migrated = false): Promise<{ version: number; data: SiteData | null }> {
   const version = await siteVersion();
   if (cache && cache.version === version) return cache;
   if (!version) {
@@ -81,7 +82,7 @@ export async function readSite(): Promise<{ version: number; data: SiteData | nu
     cache = { version, data: null };
     return cache;
   }
-  const data: SiteData = {
+  let data: SiteData = {
     categories: toList<Category>(raw.categories),
     services: toList<Service>(raw.services),
     vendors: toList<Vendor>(raw.vendors),
@@ -90,6 +91,17 @@ export async function readSite(): Promise<{ version: number; data: SiteData | nu
     settings: normalizeSettings(raw.settings ?? {}),
     updatedAt: ((raw.meta as Record<string, unknown> | undefined)?.updatedAt as string) ?? null,
   };
+  // A catalogue published before the latest release gets the new dishes and sections once, for everyone.
+  const release = Number((raw.meta as Record<string, unknown> | undefined)?.release ?? 0);
+  if (release < CATALOG_RELEASE && !migrated) {
+    data = applyReleases(data, release, SEED);
+    try {
+      await writeAll(data);
+      return readSite(true);
+    } catch (err) {
+      console.error("[site] catalogue release update failed; serving the merged catalogue without saving", err);
+    }
+  }
   cache = { version, data };
   return cache;
 }
@@ -142,7 +154,8 @@ async function externalize<T>(value: T): Promise<T> {
 /* ─── writing ─────────────────────────────────────────────────────── */
 
 function stamp(updates: Record<string, unknown>) {
-  updates["catalog/meta"] = { seeded: true, updatedAt: new Date().toISOString() };
+  updates["catalog/meta/seeded"] = true;
+  updates["catalog/meta/updatedAt"] = new Date().toISOString();
   updates["site/version"] = ServerValue.TIMESTAMP; // every open browser refreshes from this
   return updates;
 }
@@ -166,6 +179,7 @@ export async function writeAll(input: SiteData) {
     );
   }
   node.settings = encode(normalizeSettings(data.settings));
+  node.meta = { release: CATALOG_RELEASE };
   await commit({ catalog: node });
 }
 
